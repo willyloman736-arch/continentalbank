@@ -31,25 +31,25 @@ type Props = {
  */
 export function TopPill({ fullName, email, accountNumber, locale, variant = "client" }: Props) {
   return (
-    <div className="px-4 lg:px-10 pt-4 lg:pt-6 z-30 sticky top-0">
-      <div className="mx-auto max-w-7xl flex items-center gap-3">
+    <div className="px-3 lg:px-10 pt-3 lg:pt-6 z-30 sticky top-0">
+      <div className="mx-auto max-w-7xl flex items-center gap-2 sm:gap-3">
         {/* Tools pill (left) */}
-        <div className="glass-pill flex items-center gap-1 px-1.5 py-1">
+        <div className="glass-pill flex items-center gap-1 px-1.5 py-1 shrink-0">
           <PillButton aria-label="Search">
             <Search className="h-4 w-4" />
           </PillButton>
           <PillButton aria-label="Views" data-active>
             <LayoutGrid className="h-4 w-4" />
           </PillButton>
-          <PillButton aria-label="Calendar">
+          <PillButton aria-label="Calendar" className="hidden sm:inline-flex">
             <Calendar className="h-4 w-4" />
           </PillButton>
           <PillButton aria-label="Notifications">
             <Bell className="h-4 w-4" />
             <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-champagne-500" />
           </PillButton>
-          <div className="mx-1 h-5 w-px bg-foreground/10" />
-          <div className="px-1">
+          <div className="mx-1 h-5 w-px bg-foreground/10 hidden sm:block" />
+          <div className="px-1 hidden sm:block">
             <LanguageSwitcher currentLocale={locale} />
           </div>
         </div>
@@ -58,7 +58,7 @@ export function TopPill({ fullName, email, accountNumber, locale, variant = "cli
         <div className="ml-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="glass-pill flex items-center gap-3 pl-1.5 pr-3.5 py-1.5 focus-ring hover:bg-card/70 transition-colors">
+              <button className="glass-pill flex items-center gap-2 sm:gap-3 pl-1.5 pr-2 sm:pr-3.5 py-1.5 focus-ring hover:bg-card/70 transition-colors">
                 <Avatar className="h-7 w-7">
                   <AvatarFallback>{initials(fullName)}</AvatarFallback>
                 </Avatar>

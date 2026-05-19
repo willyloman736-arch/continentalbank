@@ -43,8 +43,10 @@ export async function Hero() {
         </Stagger>
 
         {/* ---- VAULT ---- */}
-        <div className="relative mt-14 lg:mt-16 flex items-center justify-center">
-          <Vault size={520} />
+        <div className="relative mt-12 lg:mt-16 flex items-center justify-center">
+          <div className="w-[min(520px,82vw)] aspect-square">
+            <Vault />
+          </div>
         </div>
 
         {/* ---- CTAs ---- */}

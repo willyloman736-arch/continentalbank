@@ -48,8 +48,8 @@ export function BottomPill({ variant = "client" }: { variant?: "client" | "admin
   const items = variant === "admin" ? adminItems : clientItems;
 
   return (
-    <div className="pointer-events-none fixed bottom-5 left-0 right-0 z-30 px-3">
-      <div className="pointer-events-auto mx-auto max-w-fit glass-pill flex items-center gap-0.5 p-1.5">
+    <div className="pointer-events-none fixed bottom-4 left-0 right-0 z-30 px-3">
+      <div className="pointer-events-auto mx-auto w-fit max-w-[calc(100vw-1.5rem)] overflow-x-auto glass-pill flex items-center gap-0.5 p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {items.map((item) => {
           const Icon = item.icon as LucideIcon;
           const active =
@@ -62,7 +62,7 @@ export function BottomPill({ variant = "client" }: { variant?: "client" | "admin
               key={item.href}
               href={item.href}
               className={cn(
-                "relative inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12.5px] font-medium",
+                "relative inline-flex items-center gap-2 rounded-full px-2.5 sm:px-3.5 py-2 text-[12.5px] font-medium shrink-0",
                 "transition-colors duration-200",
                 active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
               )}

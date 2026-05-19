@@ -26,21 +26,28 @@ const BOLT_OUTER_R = 252;  // bolt position when extended (locked)
 const easeOut = [0.16, 1, 0.3, 1] as [number, number, number, number];
 const easeInOut = [0.65, 0, 0.35, 1] as [number, number, number, number];
 
-export function Vault({ size = 480 }: { size?: number }) {
+type VaultProps = {
+  /** Optional pixel size. If omitted, the vault fills 100% of its parent. */
+  size?: number;
+};
+
+export function Vault({ size }: VaultProps = {}) {
   const reduce = useReducedMotion();
 
   // Timing — all numbers in seconds.
   const tEnter = 0.7;
   const tWheelDelay = 0.7;
-  const tWheel = 1.5;                          // 1.5s to spin 405° — visible
-  const tBoltsDelay = tWheelDelay + 0.95;      // bolts engage during last third
+  const tWheel = 1.5;
+  const tBoltsDelay = tWheelDelay + 0.95;
   const tBolt = 0.5;
   const tIndicatorDelay = tWheelDelay + tWheel + 0.1;
+
+  const sizeStyle = size ? { width: size, height: size } : { width: "100%", height: "100%" };
 
   return (
     <div
       className="relative"
-      style={{ width: size, height: size }}
+      style={sizeStyle}
       aria-label="Continental Bank vault — sealed"
       role="img"
     >
@@ -207,6 +214,40 @@ export function Vault({ size = 480 }: { size?: number }) {
           stroke="url(#v-bevel)"
           strokeWidth="2"
         />
+
+        {/* Idle ambient — a soft champagne sheen orbiting the bevel
+            after the lock sequence. Sub-pixel feel, kicks in once the
+            vault is sealed. */}
+        {!reduce && (
+          <motion.g
+            initial={{ rotate: 0, opacity: 0 }}
+            animate={{ rotate: 360, opacity: [0, 0.6, 0.6, 0] }}
+            transition={{
+              rotate: {
+                duration: 14,
+                ease: "linear",
+                repeat: Infinity,
+                delay: tIndicatorDelay + 0.5,
+              },
+              opacity: {
+                duration: 14,
+                ease: "easeInOut",
+                repeat: Infinity,
+                times: [0, 0.15, 0.85, 1],
+                delay: tIndicatorDelay + 0.5,
+              },
+            }}
+            style={{ transformOrigin: `${C}px ${C}px` }}
+          >
+            <circle
+              cx={C}
+              cy={C - 258}
+              r="36"
+              fill="rgba(229,206,148,0.16)"
+              style={{ filter: "blur(20px)" }}
+            />
+          </motion.g>
+        )}
 
         {/* Decorative concentric rings */}
         <circle cx={C} cy={C} r="220" fill="none" stroke="rgba(200,169,106,0.10)" strokeWidth="1" />

@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         locale={locale}
         variant="admin"
       />
-      <main className="px-4 lg:px-10 pt-8 lg:pt-12 pb-36">
+      <main className="px-3 sm:px-6 lg:px-10 pt-6 sm:pt-8 lg:pt-12 pb-28 sm:pb-32 lg:pb-36">
         <div className="mx-auto max-w-7xl">
           <PageTransition>{children}</PageTransition>
         </div>

@@ -6,28 +6,28 @@ const columns = [
   {
     title: "Continental",
     links: [
-      { label: "Our standard", href: "#private-clients" },
-      { label: "Global desks", href: "#global" },
-      { label: "Private client office", href: "#contact" },
-      { label: "Press & affairs", href: "#" },
+      { label: "Our standard", href: "/about" },
+      { label: "Global desks", href: "/#global" },
+      { label: "Frequently asked", href: "/faq" },
+      { label: "Private client office", href: "/#contact" },
     ],
   },
   {
     title: "Services",
     links: [
-      { label: "Multi-currency portfolios", href: "#services" },
-      { label: "Discreet withdrawals", href: "#services" },
-      { label: "Custody & oversight", href: "#services" },
-      { label: "Family office support", href: "#services" },
+      { label: "Multi-currency portfolios", href: "/#services" },
+      { label: "Discreet withdrawals", href: "/#services" },
+      { label: "Custody & oversight", href: "/#services" },
+      { label: "Family office support", href: "/#services" },
     ],
   },
   {
     title: "Governance",
     links: [
-      { label: "Privacy policy", href: "#" },
-      { label: "Confidentiality charter", href: "#" },
-      { label: "Compliance & disclosures", href: "#" },
-      { label: "Terms of engagement", href: "#" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Engagement", href: "/terms" },
+      { label: "About the House", href: "/about" },
+      { label: "Confidentiality charter", href: "/privacy" },
     ],
   },
 ];
@@ -35,13 +35,14 @@ const columns = [
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-background">
-      <div className="container py-16">
+      <div className="container py-14 lg:py-16">
         <div className="grid gap-12 lg:grid-cols-[1.2fr_2fr] lg:gap-20">
           <div>
             <BrandMark />
-            <p className="mt-6 max-w-sm text-[13px] leading-relaxed text-muted-foreground">
+            <p className="mt-6 max-w-sm text-[13px] leading-relaxed text-muted-foreground text-pretty">
               Continental Bank is a private institution serving principals and family offices
-              across {38} jurisdictions. Discreet by tradition, exacting by mandate.
+              across 38 jurisdictions. Discreet by tradition, exacting by mandate. Established
+              Geneva 1972.
             </p>
             <p className="mt-6 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
               Member · International Private Banking Council
@@ -57,7 +58,7 @@ export function SiteFooter() {
                     <li key={l.label}>
                       <Link
                         href={l.href}
-                        className="text-muted-foreground transition-colors hover:text-foreground"
+                        className="text-muted-foreground transition-colors duration-200 hover:text-foreground"
                       >
                         {l.label}
                       </Link>
@@ -69,12 +70,50 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-16 border-t border-border pt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        {/* Regulatory disclosure block */}
+        <div className="mt-12 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:gap-16 border-t border-border pt-10">
+          <div className="text-[12px] leading-relaxed text-muted-foreground text-pretty max-w-3xl">
+            <p>
+              Continental Bank is a private banking institution operating under the prudential
+              supervision of the Swiss Financial Market Supervisory Authority (FINMA). Banking
+              services in the United Kingdom are conducted through the London Branch,
+              authorised and regulated by the Prudential Regulation Authority and the Financial
+              Conduct Authority. EU services are conducted through Continental Bank S.A.,
+              Luxembourg, supervised by the Commission de Surveillance du Secteur Financier
+              (CSSF). All other jurisdictions are served through co-ordinated representative
+              offices under the head office&rsquo;s prudential supervision.
+            </p>
+            <p className="mt-4">
+              The contents of this site do not constitute an offer, invitation, recommendation, or
+              solicitation to buy or sell any financial instrument, nor an offer to enter into a
+              banking relationship in any jurisdiction in which such offer would be unlawful.
+            </p>
+          </div>
+
+          <div className="space-y-4 text-[12px]">
+            <div>
+              <div className="eyebrow text-muted-foreground mb-1.5">Head office</div>
+              <p className="text-foreground tabular-figures leading-relaxed">
+                Place de la Concorde 12<br />
+                CH-1204 Geneva · Switzerland
+              </p>
+            </div>
+            <div>
+              <div className="eyebrow text-muted-foreground mb-1.5">Identifiers</div>
+              <p className="text-foreground tabular-figures leading-relaxed">
+                Reg. CH-660.1.000.000<br />
+                BIC CONTCHGGXXX
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-10 border-t border-border pt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
           <div>
             © {new Date().getFullYear()} {SITE.name}. Geneva · London · Luxembourg · Singapore ·
             Dubai · New York.
           </div>
-          <div className="tabular-figures">Reg. CH-660.1.000.000 · BIC CONTCHGGXXX</div>
+          <div className="tabular-figures">All rights reserved</div>
         </div>
       </div>
     </footer>
