@@ -31,9 +31,9 @@ export function Vault({ size = 480 }: { size?: number }) {
 
   // Timing — all numbers in seconds.
   const tEnter = 0.7;
-  const tWheelDelay = 0.9;
-  const tWheel = 1.0;
-  const tBoltsDelay = tWheelDelay + 0.6;
+  const tWheelDelay = 0.7;
+  const tWheel = 1.5;                          // 1.5s to spin 405° — visible
+  const tBoltsDelay = tWheelDelay + 0.95;      // bolts engage during last third
   const tBolt = 0.5;
   const tIndicatorDelay = tWheelDelay + tWheel + 0.1;
 
@@ -295,58 +295,50 @@ export function Vault({ size = 480 }: { size?: number }) {
           CONTINENTAL · BANK · GENEVA
         </text>
 
-        {/* The rotating spoke wheel */}
-        <motion.g
-          initial={reduce ? false : { rotate: 0 }}
-          animate={{ rotate: 270 }}
-          transition={{ duration: tWheel, delay: tWheelDelay, ease: easeInOut }}
-          style={{ transformOrigin: `${C}px ${C}px`, transformBox: "fill-box" }}
-        >
-          {/* Outer wheel ring */}
-          <circle
-            cx={C}
-            cy={C}
-            r="86"
-            fill="url(#v-body)"
-            stroke="url(#v-gold)"
-            strokeWidth="1.5"
-          />
+        {/* The rotating spoke wheel
+             Wrapped in a static <g translate(C,C)> so the wheel's local
+             coordinate origin is (0,0). The motion.g rotates around its
+             own (0,0) — bulletproof across browsers, no transform-box
+             fill-box ambiguity. */}
+        <g transform={`translate(${C} ${C})`}>
+          <motion.g
+            initial={reduce ? false : { rotate: 0 }}
+            animate={{ rotate: 405 }}
+            transition={{ duration: tWheel, delay: tWheelDelay, ease: easeInOut }}
+            style={{ transformOrigin: "0px 0px" }}
+          >
+            {/* Outer wheel ring */}
+            <circle cx="0" cy="0" r="86" fill="url(#v-body)" stroke="url(#v-gold)" strokeWidth="1.5" />
 
-          {/* Four spokes */}
-          {[0, 45, 90, 135].map((deg) => (
-            <g key={deg} transform={`rotate(${deg} ${C} ${C})`}>
-              <rect
-                x={C - 3}
-                y={C - 86}
-                width="6"
-                height="172"
-                rx="2"
-                fill="url(#v-gold)"
-              />
-              <rect
-                x={C - 2}
-                y={C - 86}
-                width="2"
-                height="172"
-                fill="rgba(255,255,255,0.18)"
-              />
+            {/* Indicator notch on the rim — makes rotation visible */}
+            <g>
+              <rect x="-2.5" y="-94" width="5" height="12" rx="1.5" fill="url(#v-gold)" />
+              <rect x="-1.5" y="-93" width="3" height="6" fill="rgba(255,235,180,0.55)" />
             </g>
-          ))}
 
-          {/* Outer wheel grip knobs */}
-          {[0, 90, 180, 270].map((deg) => (
-            <g key={deg} transform={`rotate(${deg} ${C} ${C})`}>
-              <circle cx={C} cy={C - 86} r="7" fill="url(#v-bolt)" />
-              <circle cx={C - 2} cy={C - 88} r="2" fill="rgba(255,235,180,0.5)" />
-            </g>
-          ))}
+            {/* Four spokes (drawn vertically, then rotated) */}
+            {[0, 45, 90, 135].map((deg) => (
+              <g key={deg} transform={`rotate(${deg})`}>
+                <rect x="-3" y="-86" width="6" height="172" rx="2" fill="url(#v-gold)" />
+                <rect x="-2" y="-86" width="2" height="172" fill="rgba(255,255,255,0.18)" />
+              </g>
+            ))}
 
-          {/* Centre hub */}
-          <circle cx={C} cy={C} r="28" fill="url(#v-hub)" />
-          <circle cx={C} cy={C} r="28" fill="none" stroke="rgba(0,0,0,0.4)" strokeWidth="1" />
-          <circle cx={C} cy={C} r="14" fill="#07111F" />
-          <circle cx={C - 3} cy={C - 3} r="4" fill="rgba(255,235,180,0.35)" />
-        </motion.g>
+            {/* Outer wheel grip knobs at N/E/S/W */}
+            {[0, 90, 180, 270].map((deg) => (
+              <g key={deg} transform={`rotate(${deg})`}>
+                <circle cx="0" cy="-86" r="7" fill="url(#v-bolt)" />
+                <circle cx="-2" cy="-88" r="2" fill="rgba(255,235,180,0.55)" />
+              </g>
+            ))}
+
+            {/* Centre hub */}
+            <circle cx="0" cy="0" r="28" fill="url(#v-hub)" />
+            <circle cx="0" cy="0" r="28" fill="none" stroke="rgba(0,0,0,0.4)" strokeWidth="1" />
+            <circle cx="0" cy="0" r="14" fill="#07111F" />
+            <circle cx="-3" cy="-3" r="4" fill="rgba(255,235,180,0.35)" />
+          </motion.g>
+        </g>
 
         {/* ============ LOCK STATUS INDICATOR ============ */}
         {/* Small champagne lamp at the 6-o'clock of the inner ring */}
