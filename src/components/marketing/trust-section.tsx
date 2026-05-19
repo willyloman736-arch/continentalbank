@@ -1,5 +1,6 @@
 import { ScrollText, Landmark, Compass, Crown } from "lucide-react";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/primitives";
+import { MarketingBackdrop } from "./marketing-backdrop";
 
 const pillars = [
   {
@@ -26,8 +27,9 @@ const pillars = [
 
 export function TrustSection() {
   return (
-    <section className="border-y border-border bg-background">
-      <div className="container py-24 lg:py-32">
+    <section className="relative border-y border-border bg-background overflow-hidden">
+      <MarketingBackdrop />
+      <div className="container relative py-24 lg:py-32">
         <div className="grid gap-14 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
           <Reveal>
             <div className="eyebrow flex items-center gap-3 mb-6">
@@ -51,13 +53,9 @@ export function TrustSection() {
             </dl>
           </Reveal>
 
-          <Stagger
-            as="ul"
-            className="grid gap-px overflow-hidden rounded-md border border-border bg-border/70 sm:grid-cols-2"
-            step={0.07}
-          >
+          <Stagger as="ul" className="grid gap-4 sm:grid-cols-2" step={0.07}>
             {pillars.map((p) => (
-              <StaggerItem as="li" key={p.title} className="bg-background p-7 lg:p-9">
+              <StaggerItem as="li" key={p.title} className="glass-light p-7 lg:p-9">
                 <p.icon className="h-5 w-5 text-champagne-600" strokeWidth={1.5} />
                 <h3 className="mt-5 font-display text-lg font-semibold text-foreground">
                   {p.title}

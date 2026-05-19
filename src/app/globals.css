@@ -199,6 +199,39 @@
     backdrop-filter: blur(20px) saturate(120%);
   }
 
+  /* Light-mode glass — for ivory marketing surfaces.
+     High-key white wash + hairline + champagne-tinted bottom edge. */
+  .glass-light {
+    position: relative;
+    background: rgba(255, 255, 255, 0.55);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    backdrop-filter: blur(22px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 1rem;
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.7),
+      inset 0 -1px 0 0 rgba(200, 169, 106, 0.14),
+      0 24px 56px -28px rgba(7, 17, 31, 0.14),
+      0 8px 20px -16px rgba(7, 17, 31, 0.08);
+  }
+  .glass-light::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.45) 0%,
+      transparent 30%,
+      transparent 75%,
+      rgba(200, 169, 106, 0.05) 100%
+    );
+    pointer-events: none;
+  }
+  .glass-light > * {
+    position: relative;
+  }
+
   /* A subtle inner stroke at the bottom — adds depth on small surfaces */
   .glass-edge {
     box-shadow:

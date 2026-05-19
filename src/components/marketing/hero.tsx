@@ -5,6 +5,7 @@ import { getT } from "@/lib/i18n/dictionaries";
 import { detectLocale } from "@/lib/i18n/detect";
 import { SITE } from "@/lib/constants";
 import { HeroBackdrop } from "./hero-backdrop";
+import { MarketingBackdrop } from "./marketing-backdrop";
 import { Stagger, StaggerItem } from "@/components/motion/primitives";
 
 export async function Hero() {
@@ -13,6 +14,7 @@ export async function Hero() {
   return (
     <section className="relative overflow-hidden bg-paper">
       <div className="absolute inset-0 bg-noise pointer-events-none" aria-hidden />
+      <MarketingBackdrop />
       <div className="container relative pt-24 pb-28 lg:pt-32 lg:pb-36">
         <div className="grid gap-16 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <Stagger className="max-w-2xl" variant="hero" step={0.07}>
@@ -52,8 +54,18 @@ export async function Hero() {
           </Stagger>
 
           <Stagger className="relative" step={0.08} amount={0.15}>
-            <StaggerItem className="relative aspect-[4/5] w-full max-w-md ml-auto rounded-md border border-border bg-card shadow-soft-xl overflow-hidden">
+            <StaggerItem className="relative aspect-[4/5] w-full max-w-md ml-auto rounded-[20px] border border-navy-900/10 bg-navy-900 shadow-[0_40px_80px_-30px_rgba(7,17,31,0.45),0_16px_32px_-16px_rgba(7,17,31,0.28)] overflow-hidden">
               <HeroBackdrop />
+              {/* Inner highlight — fakes the reflected light at the top edge */}
+              <div className="pointer-events-none absolute inset-0 rounded-[20px] [box-shadow:inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-1px_0_rgba(0,0,0,0.2)]" />
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 h-[40%] opacity-50"
+                style={{
+                  background:
+                    "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 100%)",
+                }}
+                aria-hidden
+              />
               <div className="absolute inset-0 flex flex-col justify-between p-8 text-ivory-100">
                 <div>
                   <div className="eyebrow text-champagne-400 mb-3">Statement · Private Client</div>

@@ -1,5 +1,6 @@
 import { Globe2, ArrowDownLeft, KeyRound, Layers } from "lucide-react";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/primitives";
+import { MarketingBackdrop } from "./marketing-backdrop";
 
 const features = [
   {
@@ -30,8 +31,9 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section id="services" className="bg-background">
-      <div className="container py-24 lg:py-32">
+    <section id="services" className="relative bg-background overflow-hidden">
+      <MarketingBackdrop />
+      <div className="container relative py-24 lg:py-32">
         <Reveal className="mb-16 max-w-2xl">
           <div className="eyebrow flex items-center gap-3 mb-6">
             <span className="inline-block h-px w-8 bg-champagne-500/70" />
@@ -42,13 +44,9 @@ export function FeaturesSection() {
           </h2>
         </Reveal>
 
-        <Stagger
-          as="ul"
-          className="grid gap-px overflow-hidden rounded-md border border-border bg-border/70 md:grid-cols-2"
-          step={0.07}
-        >
+        <Stagger as="ul" className="grid gap-4 md:grid-cols-2" step={0.07}>
           {features.map((f) => (
-            <StaggerItem as="li" key={f.title} className="bg-background p-8 lg:p-10">
+            <StaggerItem as="li" key={f.title} className="glass-light p-8 lg:p-10">
               <div className="flex items-start justify-between gap-6">
                 <div>
                   <div className="eyebrow text-champagne-700 dark:text-champagne-400">
