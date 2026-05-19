@@ -6,38 +6,17 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { MotionCard } from "@/components/motion/motion-card";
 import { MotionList, MotionRow } from "@/components/motion/motion-list";
 import { requireAdmin } from "@/lib/auth";
-import { createServiceClient } from "@/lib/supabase/server";
+import { adminCounts, adminRecentActivity, adminRecentWithdrawals } from "@/lib/demo/queries";
 import { formatCurrency, formatDateTime, maskAccountNumber } from "@/lib/utils";
 
 export const metadata = { title: "Operations" };
 
 export default async function AdminOverviewPage() {
   const admin = await requireAdmin();
-  const service = createServiceClient();
-
-  const [
-    { count: pendingClients },
-    { count: pendingWithdrawals },
-    { count: openTickets },
-    { count: totalClients },
-    { data: recentRequests },
-    { data: recentActivity },
-  ] = await Promise.all([
-    service.from("profiles").select("id", { count: "exact", head: true }).eq("account_status", "pending"),
-    service.from("withdrawal_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
-    service.from("support_tickets").select("id", { count: "exact", head: true }).in("status", ["open", "in_progress"]),
-    service.from("profiles").select("id", { count: "exact", head: true }).eq("role", "client"),
-    service
-      .from("withdrawal_requests")
-      .select("id, amount, currency, method, status, created_at, user_id, profiles:profiles!withdrawal_requests_user_id_fkey(full_name, account_number)")
-      .eq("status", "pending")
-      .order("created_at", { ascending: false })
-      .limit(5),
-    service
-      .from("audit_logs")
-      .select("id, action_type, created_at, admin_id, profiles:profiles!audit_logs_admin_id_fkey(full_name)")
-      .order("created_at", { ascending: false })
-      .limit(8),
+  const [counts, recentRequests, recentActivity] = await Promise.all([
+    adminCounts(),
+    adminRecentWithdrawals(),
+    adminRecentActivity(),
   ]);
 
   return (
@@ -53,31 +32,31 @@ export default async function AdminOverviewPage() {
           index={0}
           icon={Users}
           label="Pending applications"
-          value={String(pendingClients ?? 0)}
-          href="/admin/users"
-          accent={(pendingClients ?? 0) > 0}
+          value={String(counts.pendingClients)}
+          href="/admin/users?status=pending"
+          accent={counts.pendingClients > 0}
         />
         <StatCard
           index={1}
           icon={ArrowDownLeft}
           label="Withdrawals to review"
-          value={String(pendingWithdrawals ?? 0)}
-          href="/admin/withdrawals"
-          accent={(pendingWithdrawals ?? 0) > 0}
+          value={String(counts.pendingWithdrawals)}
+          href="/admin/withdrawals?status=pending"
+          accent={counts.pendingWithdrawals > 0}
         />
         <StatCard
           index={2}
           icon={LifeBuoy}
           label="Open tickets"
-          value={String(openTickets ?? 0)}
+          value={String(counts.openTickets)}
           href="/admin/support"
-          accent={(openTickets ?? 0) > 0}
+          accent={counts.openTickets > 0}
         />
         <StatCard
           index={3}
           icon={Users}
           label="Total clients"
-          value={String(totalClients ?? 0)}
+          value={String(counts.totalClients)}
           href="/admin/users"
         />
       </section>

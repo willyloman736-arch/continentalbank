@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { CreateUserDialog } from "@/components/admin/create-user-dialog";
 import { requireAdmin } from "@/lib/auth";
-import { createServiceClient } from "@/lib/supabase/server";
+import { adminClientRoster } from "@/lib/demo/queries";
 import { formatDate, maskAccountNumber } from "@/lib/utils";
 import { ROLE_LABELS, type Role } from "@/lib/constants";
 import type { Profile } from "@/lib/types/database";
@@ -19,14 +19,7 @@ export default async function AdminUsersPage({
 }) {
   const admin = await requireAdmin();
   const { status, q } = await searchParams;
-  const service = createServiceClient();
-
-  let query = service.from("profiles").select("*").order("created_at", { ascending: false });
-  if (status && status !== "all") query = query.eq("account_status", status);
-  if (q && q.trim()) query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,account_number.ilike.%${q}%`);
-
-  const { data } = await query.limit(200);
-  const profiles = (data ?? []) as Profile[];
+  const profiles = (await adminClientRoster(status, q)) as Profile[];
 
   return (
     <div className="space-y-10">

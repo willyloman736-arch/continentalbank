@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { MotionCard } from "@/components/motion/motion-card";
 import { requireApprovedClient } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { clientWallets } from "@/lib/demo/queries";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { Wallet } from "@/lib/types/database";
 
@@ -13,10 +13,7 @@ export const metadata = { title: "Currency Accounts" };
 
 export default async function WalletsPage() {
   const user = await requireApprovedClient();
-  const supabase = await createClient();
-
-  const { data } = await supabase.from("wallets").select("*").eq("user_id", user.id).order("currency");
-  const wallets = (data ?? []) as Wallet[];
+  const wallets = (await clientWallets(user.id)) as Wallet[];
 
   return (
     <div className="space-y-10">

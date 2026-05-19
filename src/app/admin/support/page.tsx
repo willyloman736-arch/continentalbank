@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { TicketReplyForm } from "@/components/admin/ticket-reply-form";
 import { requireAdmin } from "@/lib/auth";
-import { createServiceClient } from "@/lib/supabase/server";
+import { adminTickets } from "@/lib/demo/queries";
 import { formatDateTime } from "@/lib/utils";
 
 export const metadata = { title: "Support — Admin" };
@@ -15,15 +15,7 @@ export default async function AdminSupportPage({
 }) {
   await requireAdmin();
   const { status } = await searchParams;
-  const service = createServiceClient();
-
-  let q = service
-    .from("support_tickets")
-    .select("*, profiles:profiles!support_tickets_user_id_fkey(id, full_name, account_number, email)")
-    .order("created_at", { ascending: false });
-  if (status && status !== "all") q = q.eq("status", status);
-  const { data } = await q.limit(100);
-  const rows = (data ?? []) as any[];
+  const rows = (await adminTickets(status)) as any[];
 
   return (
     <div className="space-y-10">

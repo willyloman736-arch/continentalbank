@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getDemoAuthedUser, getDemoRole, supabaseConfigured } from "@/lib/demo";
 import type { Profile } from "@/lib/types/database";
 
 export type AuthedUser = {
@@ -11,6 +12,13 @@ export type AuthedUser = {
 const ADMIN_ROLES = ["super_admin", "finance_admin", "support_admin"] as const;
 
 export async function getAuthedUser(): Promise<AuthedUser | null> {
+  // 1. Demo cookie present? — return a seeded user.
+  const demoRole = await getDemoRole();
+  if (demoRole) return getDemoAuthedUser(demoRole);
+
+  // 2. Supabase not configured? — anonymous.
+  if (!supabaseConfigured()) return null;
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -24,7 +32,7 @@ export async function getAuthedUser(): Promise<AuthedUser | null> {
     .maybeSingle();
   if (!profile) return null;
 
-  return { id: user.id, email: user.email ?? null, profile };
+  return { id: user.id, email: user.email ?? null, profile: profile as Profile };
 }
 
 export async function requireUser(): Promise<AuthedUser> {

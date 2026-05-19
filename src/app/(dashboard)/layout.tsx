@@ -2,6 +2,7 @@ import { requireApprovedClient } from "@/lib/auth";
 import { detectLocale } from "@/lib/i18n/detect";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardTopbar } from "@/components/dashboard/topbar";
+import { DemoBanner } from "@/components/shared/demo-banner";
 import { PageTransition } from "@/components/motion/page-transition";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -12,6 +13,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="min-h-screen bg-background lg:flex">
       <DashboardSidebar />
       <div className="flex flex-1 min-w-0 flex-col">
+        <DemoBanner />
         <DashboardTopbar
           fullName={user.profile.full_name}
           email={user.email ?? ""}

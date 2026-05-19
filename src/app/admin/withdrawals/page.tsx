@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { WithdrawalDecisionActions } from "@/components/admin/withdrawal-decision-actions";
 import { requireAdmin } from "@/lib/auth";
-import { createServiceClient } from "@/lib/supabase/server";
+import { adminWithdrawalQueue } from "@/lib/demo/queries";
 import { formatCurrency, formatDateTime, maskAccountNumber } from "@/lib/utils";
 
 export const metadata = { title: "Withdrawals — Admin" };
@@ -15,17 +15,7 @@ export default async function AdminWithdrawalsPage({
 }) {
   const admin = await requireAdmin();
   const { status } = await searchParams;
-  const service = createServiceClient();
-
-  let q = service
-    .from("withdrawal_requests")
-    .select("*, profiles:profiles!withdrawal_requests_user_id_fkey(id, full_name, email, account_number, country)")
-    .order("created_at", { ascending: false });
-  if (status && status !== "all") q = q.eq("status", status);
-
-  const { data } = await q.limit(200);
-  const rows = (data ?? []) as any[];
-
+  const rows = (await adminWithdrawalQueue(status)) as any[];
   const canProcess = admin.profile.role !== "support_admin";
 
   return (
@@ -100,7 +90,7 @@ export default async function AdminWithdrawalsPage({
                     </div>
                     {r.notes && (
                       <p className="mt-2 text-[12.5px] text-muted-foreground italic border-l-2 border-champagne-500/30 pl-3 max-w-2xl">
-                        "{r.notes}"
+                        &quot;{r.notes}&quot;
                       </p>
                     )}
                   </div>

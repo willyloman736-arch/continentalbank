@@ -2,14 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { z } from "zod";
 import { requireApprovedClient, requireAdmin } from "@/lib/auth";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { isDemoMode } from "@/lib/demo";
 import { WithdrawalRequestSchema, WithdrawalDecisionSchema } from "@/lib/validation";
 
 export type ActionResult =
   | { ok: true; message?: string }
   | { ok: false; error: string };
+
+const DEMO_MSG = "Demo mode — your changes are simulated, nothing is saved.";
 
 /**
  * CLIENT — submit a new withdrawal request.
@@ -22,8 +24,12 @@ export async function submitWithdrawal(input: unknown): Promise<ActionResult> {
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid request" };
   }
-  const { currency, amount, method, paymentDetails, notes } = parsed.data;
 
+  if (await isDemoMode()) {
+    return { ok: true, message: DEMO_MSG };
+  }
+
+  const { currency, amount, method, paymentDetails, notes } = parsed.data;
   const service = createServiceClient();
 
   // Lock the wallet by re-reading it via the service client.
@@ -105,8 +111,12 @@ export async function processWithdrawal(input: unknown): Promise<ActionResult> {
 
   const parsed = WithdrawalDecisionSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Invalid decision" };
-  const { id, decision, adminNote } = parsed.data;
 
+  if (await isDemoMode()) {
+    return { ok: true, message: DEMO_MSG };
+  }
+
+  const { id, decision, adminNote } = parsed.data;
   const service = createServiceClient();
 
   const { data: req, error: rErr } = await service

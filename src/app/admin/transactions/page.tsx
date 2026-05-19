@@ -3,22 +3,14 @@ import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { requireAdmin } from "@/lib/auth";
-import { createServiceClient } from "@/lib/supabase/server";
+import { adminAllTransactions } from "@/lib/demo/queries";
 import { formatCurrency, formatDateTime, maskAccountNumber } from "@/lib/utils";
 
 export const metadata = { title: "Ledger — Admin" };
 
 export default async function AdminTransactionsPage() {
   await requireAdmin();
-  const service = createServiceClient();
-
-  const { data } = await service
-    .from("transactions")
-    .select("*, profiles:profiles!transactions_user_id_fkey(id, full_name, account_number)")
-    .order("created_at", { ascending: false })
-    .limit(200);
-
-  const rows = (data ?? []) as any[];
+  const rows = (await adminAllTransactions()) as any[];
 
   return (
     <div className="space-y-10">

@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PasswordChangeForm } from "@/components/dashboard/password-change-form";
 import { requireApprovedClient } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { clientLoginHistory } from "@/lib/demo/queries";
 import { formatDateTime } from "@/lib/utils";
 import type { LoginHistoryEntry } from "@/lib/types/database";
 
@@ -11,15 +11,7 @@ export const metadata = { title: "Security" };
 
 export default async function SecurityPage() {
   const user = await requireApprovedClient();
-  const supabase = await createClient();
-
-  const { data } = await supabase
-    .from("login_history")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("login_time", { ascending: false })
-    .limit(15);
-  const history = (data ?? []) as LoginHistoryEntry[];
+  const history = (await clientLoginHistory(user.id)) as LoginHistoryEntry[];
 
   return (
     <div className="space-y-10">

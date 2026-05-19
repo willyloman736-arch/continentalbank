@@ -3,8 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { isDemoMode } from "@/lib/demo";
 import { PasswordChangeSchema, ProfileUpdateSchema } from "@/lib/validation";
 import type { ActionResult } from "./withdrawals";
+
+const DEMO_MSG = "Demo mode — your changes are simulated, nothing is saved.";
 
 export async function updateProfile(input: unknown): Promise<ActionResult> {
   const user = await requireUser();
@@ -12,6 +15,8 @@ export async function updateProfile(input: unknown): Promise<ActionResult> {
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
+
+  if (await isDemoMode()) return { ok: true, message: DEMO_MSG };
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -37,6 +42,8 @@ export async function changePassword(input: unknown): Promise<ActionResult> {
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
+
+  if (await isDemoMode()) return { ok: true, message: DEMO_MSG };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password: parsed.data.newPassword });

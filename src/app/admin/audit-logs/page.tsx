@@ -2,24 +2,14 @@ import { ScrollText } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Badge } from "@/components/ui/badge";
 import { requireAdmin } from "@/lib/auth";
-import { createServiceClient } from "@/lib/supabase/server";
+import { adminAuditLogs } from "@/lib/demo/queries";
 import { formatDateTime } from "@/lib/utils";
 
 export const metadata = { title: "Audit logs" };
 
 export default async function AdminAuditLogsPage() {
   await requireAdmin();
-  const service = createServiceClient();
-
-  const { data } = await service
-    .from("audit_logs")
-    .select(
-      "*, admin:profiles!audit_logs_admin_id_fkey(full_name), client:profiles!audit_logs_user_id_fkey(full_name)",
-    )
-    .order("created_at", { ascending: false })
-    .limit(300);
-
-  const rows = (data ?? []) as any[];
+  const rows = (await adminAuditLogs()) as any[];
 
   return (
     <div className="space-y-10">
@@ -63,7 +53,7 @@ export default async function AdminAuditLogsPage() {
                   </div>
                 )}
                 {a.note && (
-                  <p className="mt-2 text-[12.5px] italic text-muted-foreground">"{a.note}"</p>
+                  <p className="mt-2 text-[12.5px] italic text-muted-foreground">&quot;{a.note}&quot;</p>
                 )}
               </div>
             </li>

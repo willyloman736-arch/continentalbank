@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminTopbar } from "@/components/admin/topbar";
+import { DemoBanner } from "@/components/shared/demo-banner";
 import { PageTransition } from "@/components/motion/page-transition";
 import type { Role } from "@/lib/constants";
 
@@ -10,6 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="min-h-screen bg-background lg:flex">
       <AdminSidebar />
       <div className="flex flex-1 min-w-0 flex-col">
+        <DemoBanner />
         <AdminTopbar
           fullName={user.profile.full_name}
           email={user.email ?? ""}

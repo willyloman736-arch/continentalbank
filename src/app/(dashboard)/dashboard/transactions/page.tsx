@@ -2,7 +2,7 @@ import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { requireApprovedClient } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { clientTransactions } from "@/lib/demo/queries";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import type { Transaction } from "@/lib/types/database";
 
@@ -10,15 +10,7 @@ export const metadata = { title: "Transactions" };
 
 export default async function TransactionsPage() {
   const user = await requireApprovedClient();
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("transactions")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(200);
-
-  const txs = (data ?? []) as Transaction[];
+  const txs = (await clientTransactions(user.id, 200)) as Transaction[];
 
   return (
     <div className="space-y-10">

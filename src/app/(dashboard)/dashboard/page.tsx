@@ -6,36 +6,26 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { MotionCard } from "@/components/motion/motion-card";
 import { MotionList, MotionRow } from "@/components/motion/motion-list";
 import { requireApprovedClient } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
 import { formatAccountNumber, formatCurrency, formatDate, maskAccountNumber } from "@/lib/utils";
 import { ACCOUNT_STATUS, type Currency } from "@/lib/constants";
-import type { Wallet, Transaction, WithdrawalRequest } from "@/lib/types/database";
+import {
+  clientPendingWithdrawals,
+  clientTransactions,
+  clientWallets,
+} from "@/lib/demo/queries";
+import type { Transaction, Wallet, WithdrawalRequest } from "@/lib/types/database";
 
 export default async function DashboardOverviewPage() {
   const user = await requireApprovedClient();
-  const supabase = await createClient();
+  const [wallets, transactions, pending] = await Promise.all([
+    clientWallets(user.id),
+    clientTransactions(user.id, 6),
+    clientPendingWithdrawals(user.id),
+  ]);
 
-  const [{ data: wallets }, { data: transactions }, { data: pendingWithdrawals }] =
-    await Promise.all([
-      supabase.from("wallets").select("*").eq("user_id", user.id).order("currency"),
-      supabase
-        .from("transactions")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(6),
-      supabase
-        .from("withdrawal_requests")
-        .select("*")
-        .eq("user_id", user.id)
-        .in("status", ["pending", "approved"])
-        .order("created_at", { ascending: false })
-        .limit(4),
-    ]);
-
-  const ws = (wallets ?? []) as Wallet[];
-  const txs = (transactions ?? []) as Transaction[];
-  const wds = (pendingWithdrawals ?? []) as WithdrawalRequest[];
+  const ws = wallets as Wallet[];
+  const txs = transactions as Transaction[];
+  const wds = pending as WithdrawalRequest[];
 
   const preferredCurrency = user.profile.preferred_currency as Currency;
   const primaryWallet = ws.find((w) => w.currency === preferredCurrency) ?? ws[0];
@@ -61,7 +51,6 @@ export default async function DashboardOverviewPage() {
         }
       />
 
-      {/* Primary statement card */}
       <section className="grid gap-6 lg:grid-cols-3">
         <MotionCard
           index={0}
@@ -122,11 +111,7 @@ export default async function DashboardOverviewPage() {
           </div>
           <div className="space-y-4 flex-1">
             {ws.map((w) => (
-              <Link
-                key={w.id}
-                href="/dashboard/wallets"
-                className="block group"
-              >
+              <Link key={w.id} href="/dashboard/wallets" className="block group">
                 <div className="flex items-baseline justify-between gap-2">
                   <div className="text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
                     {w.currency} Portfolio
@@ -149,7 +134,6 @@ export default async function DashboardOverviewPage() {
         </MotionCard>
       </section>
 
-      {/* Recent activity + pending */}
       <section className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <MotionCard index={2} className="rounded-md border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">

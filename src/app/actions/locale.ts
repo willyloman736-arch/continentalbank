@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { SUPPORTED_LOCALES, type Locale } from "@/lib/i18n/dictionaries";
 import { LOCALE_COOKIE } from "@/lib/i18n/detect";
 import { createClient } from "@/lib/supabase/server";
+import { supabaseConfigured } from "@/lib/demo";
 
 export async function setLocale(locale: Locale) {
   if (!SUPPORTED_LOCALES.includes(locale)) return { ok: false };
@@ -17,13 +18,19 @@ export async function setLocale(locale: Locale) {
     maxAge: 60 * 60 * 24 * 365,
   });
 
-  // Persist on the profile for signed-in users.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (user) {
-    await supabase.from("profiles").update({ preferred_language: locale }).eq("id", user.id);
+  // Persist on the profile for signed-in users (only when Supabase is wired up).
+  if (supabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("profiles").update({ preferred_language: locale }).eq("id", user.id);
+      }
+    } catch {
+      // Cookie was set successfully — Supabase persistence is best-effort.
+    }
   }
 
   revalidatePath("/", "layout");

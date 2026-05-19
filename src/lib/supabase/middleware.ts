@@ -4,31 +4,55 @@ import { NextResponse, type NextRequest } from "next/server";
 type CookiePair = { name: string; value: string; options?: CookieOptions };
 
 // Pages that do NOT require an authenticated session.
-// /pending is intentionally not listed — the page calls requireUser() itself
-// and forwards approved users to /dashboard and admins to /admin.
 const PUBLIC_PATHS = ["/", "/login", "/register", "/auth/callback"];
 const ADMIN_ROLES = ["super_admin", "finance_admin", "support_admin"] as const;
+const DEMO_COOKIE = "cb_demo";
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  const response = NextResponse.next({ request });
+  const { pathname } = request.nextUrl;
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  // If Supabase isn't configured (preview / first-boot), let everything pass
-  // through so the public marketing pages still render.
-  if (!url || !key || url.includes("placeholder")) {
+  // --- Demo mode short-circuit ---------------------------------------
+  // If the visitor has opted into demo mode, route them as if they were
+  // authenticated. Officers → /admin, clients → /dashboard.
+  const demoRole = request.cookies.get(DEMO_COOKIE)?.value;
+  if (demoRole === "client" || demoRole === "officer") {
+    if (pathname === "/login" || pathname === "/register") {
+      const url = request.nextUrl.clone();
+      url.pathname = demoRole === "officer" ? "/admin" : "/dashboard";
+      return NextResponse.redirect(url);
+    }
+    if (pathname.startsWith("/admin") && demoRole !== "officer") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
     return response;
   }
 
+  // --- Supabase not configured? let everything pass through ---------
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key || url.includes("placeholder")) {
+    // Only protect /admin and /dashboard so visitors land on /login first.
+    if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard")) {
+      const u = request.nextUrl.clone();
+      u.pathname = "/login";
+      return NextResponse.redirect(u);
+    }
+    return response;
+  }
+
+  // --- Real Supabase session check ----------------------------------
+  let responseRef = response;
   const supabase = createServerClient(url, key, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (cookiesToSet: CookiePair[]) => {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
+        responseRef = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options),
+          responseRef.cookies.set(name, value, options),
         );
       },
     },
@@ -39,10 +63,8 @@ export async function updateSession(request: NextRequest) {
     const { data } = await supabase.auth.getUser();
     user = data.user;
   } catch {
-    return response;
+    return responseRef;
   }
-
-  const { pathname } = request.nextUrl;
 
   const isPublic =
     PUBLIC_PATHS.includes(pathname) ||
@@ -50,15 +72,13 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/api/health");
 
-  // 1. Unauthenticated user trying to access a protected area
   if (!user && !isPublic) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+    const u = request.nextUrl.clone();
+    u.pathname = "/login";
+    u.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(u);
   }
 
-  // 2. Authenticated user — check role + status for protected areas
   if (user && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -67,27 +87,28 @@ export async function updateSession(request: NextRequest) {
       .maybeSingle();
 
     if (!profile) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      return NextResponse.redirect(url);
+      const u = request.nextUrl.clone();
+      u.pathname = "/login";
+      return NextResponse.redirect(u);
     }
+    const role = (profile as { role: string }).role;
+    const status = (profile as { account_status: string }).account_status;
 
     if (pathname.startsWith("/admin")) {
-      if (!ADMIN_ROLES.includes(profile.role as (typeof ADMIN_ROLES)[number])) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/dashboard";
-        return NextResponse.redirect(url);
+      if (!ADMIN_ROLES.includes(role as (typeof ADMIN_ROLES)[number])) {
+        const u = request.nextUrl.clone();
+        u.pathname = "/dashboard";
+        return NextResponse.redirect(u);
       }
     } else if (pathname.startsWith("/dashboard")) {
-      if (profile.account_status !== "approved") {
-        const url = request.nextUrl.clone();
-        url.pathname = "/pending";
-        return NextResponse.redirect(url);
+      if (status !== "approved") {
+        const u = request.nextUrl.clone();
+        u.pathname = "/pending";
+        return NextResponse.redirect(u);
       }
     }
   }
 
-  // 3. Authenticated user landing on auth pages → forward into the app
   if (user && (pathname === "/login" || pathname === "/register")) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -95,16 +116,18 @@ export async function updateSession(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
 
-    const url = request.nextUrl.clone();
-    if (profile && ADMIN_ROLES.includes(profile.role as (typeof ADMIN_ROLES)[number])) {
-      url.pathname = "/admin";
-    } else if (profile?.account_status === "approved") {
-      url.pathname = "/dashboard";
+    const u = request.nextUrl.clone();
+    const role = (profile as { role?: string } | null)?.role;
+    const status = (profile as { account_status?: string } | null)?.account_status;
+    if (role && ADMIN_ROLES.includes(role as (typeof ADMIN_ROLES)[number])) {
+      u.pathname = "/admin";
+    } else if (status === "approved") {
+      u.pathname = "/dashboard";
     } else {
-      url.pathname = "/pending";
+      u.pathname = "/pending";
     }
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(u);
   }
 
-  return response;
+  return responseRef;
 }

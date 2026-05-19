@@ -1,9 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { supabaseConfigured } from "@/lib/demo";
 import { CURRENCIES, SUPPORTED_LOCALES_VALUES } from "@/lib/validation";
 
 const SignUpSchema = z.object({
@@ -44,6 +45,14 @@ export async function signUpAction(formData: FormData): Promise<SignUpResult> {
     return { ok: false, error: "Please review the highlighted fields.", fieldErrors };
   }
 
+  if (!supabaseConfigured()) {
+    return {
+      ok: false,
+      error:
+        "Sign-up is unavailable in preview. Use the demo entry buttons below to explore the portal.",
+    };
+  }
+
   const supabase = await createClient();
   const h = await headers();
   const origin = h.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? "";
@@ -77,6 +86,14 @@ export async function signInAction(formData: FormData): Promise<SignInResult> {
     password: formData.get("password"),
   });
   if (!parsed.success) return { ok: false, error: "Enter your email and password." };
+
+  if (!supabaseConfigured()) {
+    return {
+      ok: false,
+      error:
+        "Sign-in is unavailable in preview. Use the demo entry buttons below to explore the portal.",
+    };
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -120,7 +137,35 @@ export async function signInAction(formData: FormData): Promise<SignInResult> {
 }
 
 export async function signOutAction() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  // Clear demo session if present
+  const cookieStore = await cookies();
+  cookieStore.delete("cb_demo");
+
+  // Real session (best effort — fine if Supabase isn't configured)
+  if (supabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // ignore
+    }
+  }
   redirect("/login");
+}
+
+/**
+ * Demo entry — sets a cookie that puts the app into either "client" or
+ * "officer" demo mode. Used when Supabase isn't yet configured so the
+ * visitor can still explore the portal.
+ */
+export async function enterDemoAction(role: "client" | "officer") {
+  const c = await cookies();
+  c.set("cb_demo", role, {
+    httpOnly: false,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24, // 24h
+  });
+  redirect(role === "officer" ? "/admin" : "/dashboard");
 }

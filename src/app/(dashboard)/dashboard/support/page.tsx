@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { Badge } from "@/components/ui/badge";
 import { SupportForm } from "@/components/dashboard/support-form";
 import { requireApprovedClient } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { clientTickets } from "@/lib/demo/queries";
 import { formatDateTime } from "@/lib/utils";
 import type { SupportTicket } from "@/lib/types/database";
 
@@ -10,14 +10,7 @@ export const metadata = { title: "Support" };
 
 export default async function SupportPage() {
   const user = await requireApprovedClient();
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("support_tickets")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(50);
-  const tickets = (data ?? []) as SupportTicket[];
+  const tickets = (await clientTickets(user.id)) as SupportTicket[];
 
   return (
     <div className="space-y-10">

@@ -7,45 +7,24 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { UserDecisionActions } from "@/components/admin/user-decision-actions";
 import { BalanceAdjustForm } from "@/components/admin/balance-adjust-form";
 import { requireAdmin } from "@/lib/auth";
-import { createServiceClient } from "@/lib/supabase/server";
+import { adminClientDetail } from "@/lib/demo/queries";
 import { formatCurrency, formatDateTime, maskAccountNumber } from "@/lib/utils";
 import { ROLE_LABELS, type Role } from "@/lib/constants";
-import type { Profile, Wallet, LedgerEntry, WithdrawalRequest } from "@/lib/types/database";
+import type { LedgerEntry, Profile, Wallet, WithdrawalRequest } from "@/lib/types/database";
 
 export const metadata = { title: "Client detail" };
 
 export default async function AdminUserDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const admin = await requireAdmin();
   const { id } = await params;
-  const service = createServiceClient();
 
-  const [
-    { data: profile },
-    { data: wallets },
-    { data: ledger },
-    { data: withdrawals },
-  ] = await Promise.all([
-    service.from("profiles").select("*").eq("id", id).maybeSingle(),
-    service.from("wallets").select("*").eq("user_id", id).order("currency"),
-    service
-      .from("ledger_entries")
-      .select("*")
-      .eq("user_id", id)
-      .order("created_at", { ascending: false })
-      .limit(30),
-    service
-      .from("withdrawal_requests")
-      .select("*")
-      .eq("user_id", id)
-      .order("created_at", { ascending: false })
-      .limit(10),
-  ]);
-
+  const { profile, wallets, ledger, withdrawals } = await adminClientDetail(id);
   if (!profile) return notFound();
+
   const p = profile as Profile;
-  const ws = (wallets ?? []) as Wallet[];
-  const ledgerRows = (ledger ?? []) as LedgerEntry[];
-  const wds = (withdrawals ?? []) as WithdrawalRequest[];
+  const ws = wallets as Wallet[];
+  const ledgerRows = ledger as LedgerEntry[];
+  const wds = withdrawals as WithdrawalRequest[];
 
   const canModifyBalance =
     admin.profile.role === "super_admin" || admin.profile.role === "finance_admin";
@@ -154,7 +133,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                       </div>
                       {l.note && (
                         <div className="text-[12.5px] text-muted-foreground mt-1.5 italic">
-                          "{l.note}"
+                          &quot;{l.note}&quot;
                         </div>
                       )}
                     </div>
