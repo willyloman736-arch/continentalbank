@@ -62,7 +62,8 @@ export interface Database {
           id?: string;
           created_at?: string;
         };
-        Update: never; // immutable
+        // Immutability is enforced by a DB trigger, not the TS layer
+        Update: Partial<Database["public"]["Tables"]["ledger_entries"]["Row"]>;
       };
       transactions: {
         Row: {
@@ -144,7 +145,7 @@ export interface Database {
           id?: string;
           created_at?: string;
         };
-        Update: never;
+        Update: Partial<Database["public"]["Tables"]["audit_logs"]["Row"]>;
       };
       admin_notes: {
         Row: {
@@ -174,7 +175,7 @@ export interface Database {
           id?: string;
           login_time?: string;
         };
-        Update: never;
+        Update: Partial<Database["public"]["Tables"]["login_history"]["Row"]>;
       };
     };
     Functions: Record<string, never>;

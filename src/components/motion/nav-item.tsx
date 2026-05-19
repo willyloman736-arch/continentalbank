@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { easings } from "./primitives";
 
 type NavItemProps = {
   href: string;
   active: boolean;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
   label: string;
   /** layoutId namespace — pass a different value per sidebar instance. */
   groupId: string;

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -21,7 +23,19 @@ export default function LoginPage() {
         </p>
       </header>
 
-      <LoginForm />
+      <Suspense fallback={<LoginFormSkeleton />}>
+        <LoginForm />
+      </Suspense>
+    </div>
+  );
+}
+
+function LoginFormSkeleton() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-11 w-full" />
+      <Skeleton className="h-11 w-full" />
+      <Skeleton className="h-12 w-full" />
     </div>
   );
 }

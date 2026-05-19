@@ -63,13 +63,11 @@ export default async function PendingPage() {
             <dd className="mt-1.5">
               <Badge
                 variant={
-                  status === "approved"
-                    ? "success"
-                    : status === "rejected"
-                      ? "destructive"
-                      : status === "suspended"
-                        ? "warning"
-                        : "gold"
+                  status === "rejected"
+                    ? "destructive"
+                    : status === "suspended"
+                      ? "warning"
+                      : "gold"
                 }
               >
                 {status}
