@@ -70,11 +70,11 @@ export async function Hero() {
         </div>
 
         {/* ---- Stats strip ---- */}
-        <div className="mx-auto mt-16 lg:mt-20 max-w-4xl">
-          <div className="grid grid-cols-3 gap-px overflow-hidden rounded-md border border-border bg-border/50">
+        <div className="mx-auto mt-16 lg:mt-20 max-w-3xl">
+          <div className="glass-light grid grid-cols-3">
             <Stat label="Established" value={String(SITE.estd)} />
-            <Stat label="Jurisdictions" value="38" />
-            <Stat label="Currencies" value="USD · EUR · GBP" small />
+            <Stat label="Jurisdictions" value="38" hasDivider />
+            <Stat label="Currencies" value="USD · EUR · GBP" small hasDivider />
           </div>
         </div>
       </div>
@@ -82,9 +82,24 @@ export async function Hero() {
   );
 }
 
-function Stat({ label, value, small }: { label: string; value: string; small?: boolean }) {
+function Stat({
+  label,
+  value,
+  small,
+  hasDivider,
+}: {
+  label: string;
+  value: string;
+  small?: boolean;
+  hasDivider?: boolean;
+}) {
   return (
-    <div className="bg-background p-6 text-center">
+    <div
+      className={
+        "relative p-6 text-center " +
+        (hasDivider ? "before:absolute before:left-0 before:top-3 before:bottom-3 before:w-px before:bg-foreground/10" : "")
+      }
+    >
       <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{label}</div>
       <div
         className={

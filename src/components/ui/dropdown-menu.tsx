@@ -48,16 +48,24 @@ DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayNam
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 6, ...props }, ref) => (
+>(({ className, sideOffset = 8, ...props }, ref) => (
   <DropdownMenuPrimitive.Portal>
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
         "z-50 min-w-[10rem] overflow-hidden glass-card p-1 text-popover-foreground",
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+        // Apple contextual-menu motion: scale + fade from the trigger origin
+        "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-[0.96]",
+        "data-[state=open]:slide-in-from-top-1",
+        "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-[0.97]",
+        "data-[state=open]:duration-[220ms] data-[state=closed]:duration-150",
         className,
       )}
+      style={{
+        transformOrigin: "var(--radix-dropdown-menu-content-transform-origin)",
+        animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+      }}
       {...props}
     />
   </DropdownMenuPrimitive.Portal>

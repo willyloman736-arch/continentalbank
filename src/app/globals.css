@@ -116,120 +116,99 @@
 
 @layer components {
   /* ----------------------------------------------------------- *
-   *  Glass system
-   *  Restrained, institutional. Heavy blur, low-opacity fill,
-   *  hairline border + a 1px top inner highlight that fakes the
-   *  reflected light of a real glass pane.
+   *  Liquid Glass system
+   *
+   *  Modeled on Apple iOS 18 Liquid Glass. Each surface is built
+   *  from four optical layers:
+   *
+   *    1. backdrop-filter        — refracts the ambient backdrop
+   *    2. ultra-light fill       — 6-10% white so light passes through
+   *    3. layered inset shadows  — top rim (bright), bottom rim (dim),
+   *                                inner specular near the top edge
+   *    4. drop shadow            — soft elevation
+   *
+   *  No ::before/::after overlays — they fight the backdrop blur.
+   *  Pure box-shadow + background trickery means the backdrop stays
+   *  fully refracted.
    * ----------------------------------------------------------- */
+
+  /* Standard glass surface — dark backdrop (navy dashboard / admin) */
   .glass-card {
-    position: relative;
-    background: hsl(var(--card) / 0.55);
-    -webkit-backdrop-filter: blur(28px) saturate(140%);
-    backdrop-filter: blur(28px) saturate(140%);
-    border: 1px solid hsl(var(--foreground) / 0.08);
-    border-radius: 0.875rem; /* 14px — institutional, not playful */
-    box-shadow:
-      0 1px 0 0 hsl(var(--foreground) / 0.04) inset,
-      0 24px 56px -28px rgba(7, 17, 31, 0.55),
-      0 8px 24px -16px rgba(7, 17, 31, 0.3);
-  }
-  .glass-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(
-      180deg,
-      hsl(var(--foreground) / 0.06) 0%,
-      transparent 25%,
-      transparent 75%,
-      hsl(var(--foreground) / 0.025) 100%
-    );
-    pointer-events: none;
-  }
-  .glass-card > * {
-    position: relative;
-  }
-
-  /* Heavier glass for hero / statement / pill surfaces */
-  .glass-strong {
-    position: relative;
-    background: hsl(var(--card) / 0.62);
-    -webkit-backdrop-filter: blur(36px) saturate(150%);
-    backdrop-filter: blur(36px) saturate(150%);
-    border: 1px solid hsl(var(--foreground) / 0.1);
+    background: rgba(255, 255, 255, 0.06);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
     border-radius: 1.125rem; /* 18px */
+    color: hsl(var(--foreground));
     box-shadow:
-      0 1px 0 0 hsl(var(--foreground) / 0.06) inset,
-      0 30px 72px -28px rgba(7, 17, 31, 0.6),
-      0 12px 32px -20px rgba(7, 17, 31, 0.35);
-  }
-  .glass-strong::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(
-      180deg,
-      hsl(var(--foreground) / 0.08) 0%,
-      transparent 30%,
-      transparent 70%,
-      hsl(var(--foreground) / 0.03) 100%
-    );
-    pointer-events: none;
+      /* Outer hairline rim */
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+      /* Bright top rim (the lit edge) */
+      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.35),
+      /* Inner specular near the top — fakes a curved glass surface */
+      inset 0 10px 26px -10px rgba(255, 255, 255, 0.18),
+      /* Soft dim at the bottom — depth */
+      inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+      inset 0 -8px 22px -10px rgba(0, 0, 0, 0.18),
+      /* Elevation */
+      0 22px 50px -20px rgba(0, 0, 0, 0.55),
+      0 6px 18px -8px rgba(0, 0, 0, 0.32);
   }
 
-  /* Floating pill — used for top + bottom toolbars */
+  /* Heavier glass — hero / statement / dialog surfaces */
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: blur(36px) saturate(190%);
+    backdrop-filter: blur(36px) saturate(190%);
+    border-radius: 1.375rem; /* 22px */
+    color: hsl(var(--foreground));
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.42),
+      inset 0 14px 32px -14px rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+      inset 0 -10px 28px -12px rgba(0, 0, 0, 0.2),
+      0 30px 70px -24px rgba(0, 0, 0, 0.6),
+      0 12px 30px -14px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Floating pill — toolbars */
   .glass-pill {
-    background: hsl(var(--card) / 0.55);
-    -webkit-backdrop-filter: blur(28px) saturate(150%);
-    backdrop-filter: blur(28px) saturate(150%);
-    border: 1px solid hsl(var(--foreground) / 0.1);
+    background: rgba(255, 255, 255, 0.07);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
     border-radius: 999px;
+    color: hsl(var(--foreground));
     box-shadow:
-      0 1px 0 0 hsl(var(--foreground) / 0.06) inset,
-      0 16px 48px -20px rgba(7, 17, 31, 0.5),
-      0 6px 20px -12px rgba(7, 17, 31, 0.25);
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.38),
+      inset 0 6px 14px -6px rgba(255, 255, 255, 0.15),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+      0 14px 36px -12px rgba(0, 0, 0, 0.45),
+      0 4px 14px -6px rgba(0, 0, 0, 0.25);
   }
 
-  /* Frosted overlay for dialogs / drawers */
+  /* Dialog backdrop overlay */
   .glass-overlay {
-    background: hsla(218, 51%, 4%, 0.4);
-    -webkit-backdrop-filter: blur(20px) saturate(120%);
-    backdrop-filter: blur(20px) saturate(120%);
+    background: hsla(218, 51%, 4%, 0.38);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
   }
 
-  /* Light-mode glass — for ivory marketing surfaces.
-     High-key white wash + hairline + champagne-tinted bottom edge. */
+  /* Light glass — for ivory marketing surfaces */
   .glass-light {
-    position: relative;
-    background: rgba(255, 255, 255, 0.55);
-    -webkit-backdrop-filter: blur(22px) saturate(160%);
-    backdrop-filter: blur(22px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.42);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    backdrop-filter: blur(22px) saturate(180%);
+    border-radius: 1.125rem;
+    color: hsl(var(--foreground));
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.7),
-      inset 0 -1px 0 0 rgba(200, 169, 106, 0.14),
-      0 24px 56px -28px rgba(7, 17, 31, 0.14),
-      0 8px 20px -16px rgba(7, 17, 31, 0.08);
-  }
-  .glass-light::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.45) 0%,
-      transparent 30%,
-      transparent 75%,
-      rgba(200, 169, 106, 0.05) 100%
-    );
-    pointer-events: none;
-  }
-  .glass-light > * {
-    position: relative;
+      inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.85),
+      inset 0 10px 26px -10px rgba(255, 255, 255, 0.6),
+      inset 0 -1px 0 rgba(200, 169, 106, 0.16),
+      inset 0 -8px 22px -10px rgba(7, 17, 31, 0.05),
+      0 22px 50px -20px rgba(7, 17, 31, 0.16),
+      0 6px 18px -8px rgba(7, 17, 31, 0.08);
   }
 
   /* A subtle inner stroke at the bottom — adds depth on small surfaces */

@@ -4,31 +4,34 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  // Base — premium transition envelope
-  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm font-medium tracking-tight " +
-    "transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-out " +
+  // Base — premium transition envelope, refined cubic
+  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium tracking-tight " +
+    "transition-[transform,box-shadow,background-color,border-color,color,opacity] duration-[220ms] " +
+    "[transition-timing-function:cubic-bezier(0.16,1,0.3,1)] " +
     "focus-ring disabled:pointer-events-none disabled:opacity-50 " +
     "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 " +
     "[&_svg]:transition-transform [&_svg]:duration-200 [&_svg]:ease-out " +
-    "active:translate-y-px",
+    "active:translate-y-px active:scale-[0.99]",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-soft-sm " +
-          "hover:bg-primary/95 hover:shadow-soft hover:-translate-y-[1px] " +
+          "bg-primary text-primary-foreground shadow-[0_8px_24px_-12px_rgba(7,17,31,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] " +
+          "hover:bg-primary/95 hover:-translate-y-[1px] hover:shadow-[0_14px_28px_-12px_rgba(7,17,31,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] " +
           "hover:[&_svg]:translate-x-0.5",
         gold:
-          "bg-champagne-500 text-navy-900 shadow-soft-sm " +
-          "hover:bg-champagne-400 hover:shadow-soft hover:-translate-y-[1px] " +
+          "bg-champagne-500 text-navy-900 shadow-[0_8px_24px_-12px_rgba(200,169,106,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] " +
+          "hover:bg-champagne-400 hover:-translate-y-[1px] hover:shadow-[0_14px_28px_-12px_rgba(200,169,106,0.55),inset_0_1px_0_rgba(255,255,255,0.4)] " +
           "hover:[&_svg]:translate-x-0.5",
         outline:
-          "border border-border bg-transparent text-foreground " +
-          "hover:bg-muted/60 hover:border-foreground/20",
-        ghost: "text-foreground hover:bg-muted/60",
+          "border border-foreground/15 bg-foreground/[0.03] text-foreground backdrop-blur-xl " +
+          "shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_4px_12px_-4px_rgba(0,0,0,0.18)] " +
+          "hover:bg-foreground/[0.06] hover:border-foreground/25 hover:-translate-y-[1px]",
+        ghost:
+          "text-foreground hover:bg-foreground/[0.06]",
         destructive:
-          "bg-destructive text-destructive-foreground " +
-          "hover:bg-destructive/90 hover:-translate-y-[1px] hover:shadow-soft",
+          "bg-destructive text-destructive-foreground shadow-[0_8px_24px_-12px_rgba(150,36,36,0.45)] " +
+          "hover:bg-destructive/90 hover:-translate-y-[1px]",
         link: "text-foreground underline-offset-4 hover:underline",
         subtle: "bg-muted/70 text-foreground hover:bg-muted",
       },
