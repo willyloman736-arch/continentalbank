@@ -1,0 +1,241 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { UserDecisionActions } from "@/components/admin/user-decision-actions";
+import { BalanceAdjustForm } from "@/components/admin/balance-adjust-form";
+import { requireAdmin } from "@/lib/auth";
+import { createServiceClient } from "@/lib/supabase/server";
+import { formatCurrency, formatDateTime, maskAccountNumber } from "@/lib/utils";
+import { ROLE_LABELS, type Role } from "@/lib/constants";
+import type { Profile, Wallet, LedgerEntry, WithdrawalRequest } from "@/lib/types/database";
+
+export const metadata = { title: "Client detail" };
+
+export default async function AdminUserDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const admin = await requireAdmin();
+  const { id } = await params;
+  const service = createServiceClient();
+
+  const [
+    { data: profile },
+    { data: wallets },
+    { data: ledger },
+    { data: withdrawals },
+  ] = await Promise.all([
+    service.from("profiles").select("*").eq("id", id).maybeSingle(),
+    service.from("wallets").select("*").eq("user_id", id).order("currency"),
+    service
+      .from("ledger_entries")
+      .select("*")
+      .eq("user_id", id)
+      .order("created_at", { ascending: false })
+      .limit(30),
+    service
+      .from("withdrawal_requests")
+      .select("*")
+      .eq("user_id", id)
+      .order("created_at", { ascending: false })
+      .limit(10),
+  ]);
+
+  if (!profile) return notFound();
+  const p = profile as Profile;
+  const ws = (wallets ?? []) as Wallet[];
+  const ledgerRows = (ledger ?? []) as LedgerEntry[];
+  const wds = (withdrawals ?? []) as WithdrawalRequest[];
+
+  const canModifyBalance =
+    admin.profile.role === "super_admin" || admin.profile.role === "finance_admin";
+
+  return (
+    <div className="space-y-10">
+      <div>
+        <Button variant="ghost" size="sm" asChild className="mb-3">
+          <Link href="/admin/users">
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to clients
+          </Link>
+        </Button>
+        <PageHeader
+          eyebrow="Client profile"
+          title={p.full_name}
+          description={`${p.email} · ${ROLE_LABELS[p.role as Role]}`}
+          actions={<UserDecisionActions userId={p.id} status={p.account_status} />}
+        />
+      </div>
+
+      <section className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
+        <div className="rounded-md border border-border bg-card p-6 space-y-5 h-fit">
+          <div className="eyebrow text-champagne-700 dark:text-champagne-400">Identity</div>
+          <Row label="Account number" value={maskAccountNumber(p.account_number)} />
+          <Row label="Status">
+            <Badge
+              variant={
+                p.account_status === "approved"
+                  ? "success"
+                  : p.account_status === "rejected"
+                    ? "destructive"
+                    : p.account_status === "suspended"
+                      ? "muted"
+                      : "warning"
+              }
+              className="capitalize"
+            >
+              {p.account_status}
+            </Badge>
+          </Row>
+          <Row label="Country" value={p.country ?? "—"} />
+          <Row label="Phone" value={p.phone ?? "—"} />
+          <Row label="Reporting" value={p.preferred_currency} />
+          <Row label="Language" value={p.preferred_language?.toUpperCase()} />
+          <Row label="Registered" value={formatDateTime(p.created_at)} />
+        </div>
+
+        <div className="rounded-md border border-border bg-card p-6 lg:p-7">
+          <div className="eyebrow text-champagne-700 dark:text-champagne-400 mb-4">
+            Currency accounts
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {ws.map((w) => (
+              <div key={w.id} className="rounded-sm border border-border bg-background p-4">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {w.currency} Portfolio
+                </div>
+                <div className="mt-2 font-display text-xl font-semibold tabular-figures text-foreground">
+                  {formatCurrency(w.available_balance, w.currency)}
+                </div>
+                <div className="mt-1 text-[11.5px] text-muted-foreground tabular-figures">
+                  Pending {formatCurrency(w.pending_balance, w.currency)}
+                </div>
+                <div className="text-[11.5px] text-muted-foreground tabular-figures">
+                  Withdrawn {formatCurrency(w.total_withdrawn, w.currency)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {canModifyBalance && (
+            <>
+              <div className="hairline my-7" />
+              <div className="eyebrow text-champagne-700 dark:text-champagne-400 mb-4">
+                Post adjustment
+              </div>
+              <BalanceAdjustForm userId={p.id} />
+            </>
+          )}
+        </div>
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-md border border-border bg-card">
+          <div className="border-b border-border px-6 py-4 flex items-center justify-between">
+            <div>
+              <div className="eyebrow text-champagne-700 dark:text-champagne-400">Ledger</div>
+              <h3 className="mt-1 font-display text-lg font-semibold">Immutable record</h3>
+            </div>
+          </div>
+          {ledgerRows.length === 0 ? (
+            <div className="px-6 py-12 text-center text-[13px] text-muted-foreground">
+              No ledger entries yet.
+            </div>
+          ) : (
+            <ul className="divide-y divide-border max-h-[520px] overflow-y-auto">
+              {ledgerRows.map((l) => (
+                <li key={l.id} className="px-6 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-[13.5px] font-medium text-foreground capitalize">
+                        {l.action_type.replace(/_/g, " ")}
+                      </div>
+                      <div className="text-[11.5px] text-muted-foreground mt-0.5 tabular-figures">
+                        {formatDateTime(l.created_at)} · {l.currency}
+                      </div>
+                      {l.note && (
+                        <div className="text-[12.5px] text-muted-foreground mt-1.5 italic">
+                          "{l.note}"
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <div className="tabular-figures text-[14px] font-medium text-foreground">
+                        {Number(l.amount) >= 0 ? "+" : ""}
+                        {formatCurrency(l.amount, l.currency)}
+                      </div>
+                      <div className="text-[11px] tabular-figures text-muted-foreground mt-0.5">
+                        {formatCurrency(l.balance_before, l.currency)} →{" "}
+                        {formatCurrency(l.balance_after, l.currency)}
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="rounded-md border border-border bg-card">
+          <div className="border-b border-border px-6 py-4">
+            <div className="eyebrow text-champagne-700 dark:text-champagne-400">Withdrawals</div>
+            <h3 className="mt-1 font-display text-lg font-semibold">Recent requests</h3>
+          </div>
+          {wds.length === 0 ? (
+            <div className="px-6 py-12 text-center text-[13px] text-muted-foreground">
+              No requests on file.
+            </div>
+          ) : (
+            <ul className="divide-y divide-border max-h-[520px] overflow-y-auto">
+              {wds.map((w) => (
+                <li key={w.id} className="px-6 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="tabular-figures text-[14px] font-medium text-foreground">
+                        {formatCurrency(w.amount, w.currency)}
+                      </div>
+                      <div className="text-[11.5px] text-muted-foreground capitalize">
+                        {w.method.replace(/_/g, " ")} · {formatDateTime(w.created_at)}
+                      </div>
+                    </div>
+                    <Badge
+                      variant={
+                        w.status === "completed"
+                          ? "success"
+                          : w.status === "approved"
+                            ? "gold"
+                            : w.status === "rejected"
+                              ? "destructive"
+                              : "warning"
+                      }
+                    >
+                      {w.status}
+                    </Badge>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  children,
+}: {
+  label: string;
+  value?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-3">
+      <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{label}</span>
+      <span className="text-[13.5px] font-medium text-foreground text-right tabular-figures">
+        {children ?? value}
+      </span>
+    </div>
+  );
+}

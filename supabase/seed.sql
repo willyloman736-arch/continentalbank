@@ -1,0 +1,14 @@
+-- =============================================================================
+-- Continental Bank — Seed instructions
+-- =============================================================================
+-- This file is intentionally minimal. To bootstrap a Super Admin:
+--
+--   1. Register a normal user from the app UI (or via Supabase Auth).
+--   2. Run the snippet below in the SQL editor, replacing the email:
+--
+--        update public.profiles
+--        set role = 'super_admin', account_status = 'approved'
+--        where email = 'you@example.com';
+--
+-- After that, the user can sign in and reach /admin.
+-- =============================================================================

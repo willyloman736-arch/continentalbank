@@ -1,0 +1,28 @@
+import type { Metadata } from "next";
+import { RegisterForm } from "@/components/auth/register-form";
+
+export const metadata: Metadata = {
+  title: "Open a private account",
+  description: "Submit a private client application to Continental Bank.",
+};
+
+export default function RegisterPage() {
+  return (
+    <div className="space-y-8">
+      <header>
+        <div className="eyebrow text-champagne-700 dark:text-champagne-400 mb-4">
+          Private Client Office
+        </div>
+        <h1 className="font-display text-display-md text-foreground text-balance">
+          Open a private account.
+        </h1>
+        <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
+          Submit your details. A relationship manager will review your application and contact you
+          discreetly.
+        </p>
+      </header>
+
+      <RegisterForm />
+    </div>
+  );
+}

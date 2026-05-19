@@ -1,0 +1,245 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Continental Bank — Ivory (light) surface for marketing/public */
+    --background: 38 38% 95%;            /* ivory #F6F1E8 */
+    --foreground: 218 51% 7%;            /* navy #07111F */
+
+    --card: 0 0% 100%;
+    --card-foreground: 218 51% 7%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 218 51% 7%;
+
+    --primary: 218 51% 7%;               /* navy */
+    --primary-foreground: 38 38% 95%;
+
+    --secondary: 38 22% 88%;
+    --secondary-foreground: 218 51% 7%;
+
+    --muted: 38 20% 91%;
+    --muted-foreground: 215 9% 45%;
+
+    --accent: 40 47% 60%;                /* champagne */
+    --accent-foreground: 218 51% 7%;
+
+    --destructive: 0 65% 38%;
+    --destructive-foreground: 38 38% 95%;
+
+    --success: 152 35% 32%;
+    --success-foreground: 38 38% 95%;
+
+    --warning: 38 65% 45%;
+    --warning-foreground: 218 51% 7%;
+
+    --border: 38 18% 84%;
+    --input: 38 18% 84%;
+    --ring: 40 47% 60%;
+
+    --radius: 0.375rem;
+  }
+
+  .dark {
+    /* Continental Bank — Navy (dashboard / admin) */
+    --background: 218 51% 7%;            /* #07111F */
+    --foreground: 38 38% 95%;            /* ivory */
+
+    --card: 215 27% 11%;                 /* #131A26 */
+    --card-foreground: 38 38% 95%;
+
+    --popover: 215 30% 9%;
+    --popover-foreground: 38 38% 95%;
+
+    --primary: 40 47% 60%;               /* champagne */
+    --primary-foreground: 218 51% 7%;
+
+    --secondary: 215 22% 14%;
+    --secondary-foreground: 38 38% 95%;
+
+    --muted: 215 18% 16%;
+    --muted-foreground: 215 12% 64%;
+
+    --accent: 40 47% 60%;
+    --accent-foreground: 218 51% 7%;
+
+    --destructive: 0 55% 48%;
+    --destructive-foreground: 38 38% 95%;
+
+    --success: 152 40% 45%;
+    --success-foreground: 218 51% 7%;
+
+    --warning: 38 75% 60%;
+    --warning-foreground: 218 51% 7%;
+
+    --border: 215 20% 18%;
+    --input: 215 20% 18%;
+    --ring: 40 47% 60%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01", "ss03", "cv01", "cv11";
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01", "cv01";
+  }
+
+  ::selection {
+    background: rgba(200, 169, 106, 0.35);
+    color: inherit;
+  }
+
+  /* Numeric tabular alignment for financial figures */
+  .tabular-figures {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply text-eyebrow uppercase font-medium text-champagne-700 dark:text-champagne-400;
+    letter-spacing: 0.18em;
+  }
+
+  .gold-rule {
+    @apply h-px w-full bg-gold-line;
+  }
+
+  .surface-card {
+    @apply rounded-md border border-border bg-card text-card-foreground shadow-soft-sm;
+  }
+
+  .surface-glass {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0) 100%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Subtle gold underline used in hero / section titles */
+  .gold-underline {
+    position: relative;
+    display: inline-block;
+  }
+  .gold-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.4em;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(200, 169, 106, 0.7) 20%,
+      rgba(200, 169, 106, 0.7) 80%,
+      transparent 100%
+    );
+  }
+
+  /* Premium muted hairline divider */
+  .hairline {
+    @apply h-px w-full bg-border;
+  }
+
+  /* Hover surface for sidebar / list rows */
+  .row-hover {
+    @apply transition-colors hover:bg-muted/60;
+  }
+
+  /* Refined focus ring for inputs/buttons */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+}
+
+@keyframes shimmer-gold {
+  0% {
+    transform: translateX(-150%) skewX(-12deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(250%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Subtle paper/grain pattern for premium marketing surfaces */
+  .bg-paper {
+    background-color: hsl(var(--background));
+    background-image: radial-gradient(rgba(7, 17, 31, 0.025) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 0;
+  }
+
+  .bg-noise {
+    background-image:
+      radial-gradient(circle at 25% 30%, rgba(200, 169, 106, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 75% 70%, rgba(7, 17, 31, 0.05) 0%, transparent 50%);
+  }
+
+  /* Skeleton shimmer — a slow champagne sweep across a muted base */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: hsl(var(--muted) / 0.65);
+    @apply rounded-sm;
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 0%,
+      rgba(200, 169, 106, 0.0) 25%,
+      rgba(200, 169, 106, 0.18) 50%,
+      rgba(200, 169, 106, 0.0) 75%,
+      transparent 100%
+    );
+    transform: translateX(-150%) skewX(-12deg);
+    animation: shimmer-gold 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    will-change: transform, opacity;
+  }
+  .dark .skeleton {
+    background-color: hsl(var(--muted) / 0.6);
+  }
+}

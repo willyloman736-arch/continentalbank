@@ -1,0 +1,114 @@
+import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { requireApprovedClient } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
+import type { Transaction } from "@/lib/types/database";
+
+export const metadata = { title: "Transactions" };
+
+export default async function TransactionsPage() {
+  const user = await requireApprovedClient();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("transactions")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  const txs = (data ?? []) as Transaction[];
+
+  return (
+    <div className="space-y-10">
+      <PageHeader
+        eyebrow="Transactions"
+        title="A complete ledger of your movements."
+        description="Every credit, debit, and adjustment is recorded with a timestamp and the responsible officer."
+      />
+
+      <div className="rounded-md border border-border bg-card overflow-hidden">
+        <div className="hidden md:grid grid-cols-[1.5fr_1fr_0.8fr_1fr_0.6fr] gap-4 border-b border-border bg-background/50 px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+          <span>Description</span>
+          <span>Type</span>
+          <span>Currency</span>
+          <span className="text-right">Amount</span>
+          <span className="text-right">Status</span>
+        </div>
+        {txs.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <ul className="divide-y divide-border">
+            {txs.map((t) => (
+              <li
+                key={t.id}
+                className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[1.5fr_1fr_0.8fr_1fr_0.6fr] items-center gap-4 px-6 py-4"
+              >
+                <span
+                  className={
+                    "md:hidden inline-flex h-9 w-9 items-center justify-center rounded-sm border " +
+                    (t.amount >= 0
+                      ? "border-success/20 bg-success/10 text-success"
+                      : "border-border bg-muted text-muted-foreground")
+                  }
+                >
+                  {t.amount >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
+                </span>
+                <div className="min-w-0">
+                  <div className="truncate text-[14px] font-medium text-foreground capitalize">
+                    {t.description ?? t.type}
+                  </div>
+                  <div className="text-[11.5px] text-muted-foreground">
+                    {formatDateTime(t.created_at)}
+                  </div>
+                </div>
+                <div className="hidden md:block">
+                  <Badge variant="muted" className="capitalize">
+                    {t.type}
+                  </Badge>
+                </div>
+                <div className="hidden md:block text-[13px] tabular-figures text-foreground">
+                  {t.currency}
+                </div>
+                <div className="text-right md:col-span-1">
+                  <div className="tabular-figures text-[14px] font-medium text-foreground">
+                    {t.amount >= 0 ? "+" : ""}
+                    {formatCurrency(t.amount, t.currency)}
+                  </div>
+                </div>
+                <div className="hidden md:flex justify-end">
+                  <Badge
+                    variant={
+                      t.status === "completed"
+                        ? "success"
+                        : t.status === "rejected"
+                          ? "destructive"
+                          : "warning"
+                    }
+                  >
+                    {t.status}
+                  </Badge>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="px-6 py-16 text-center">
+      <div className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border">
+        <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <p className="text-[14px] font-medium text-foreground">No movements yet</p>
+      <p className="mt-1 text-[13px] text-muted-foreground">
+        Transactions posted by your banker will appear here.
+      </p>
+    </div>
+  );
+}

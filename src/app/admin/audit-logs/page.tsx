@@ -1,0 +1,94 @@
+import { ScrollText } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { Badge } from "@/components/ui/badge";
+import { requireAdmin } from "@/lib/auth";
+import { createServiceClient } from "@/lib/supabase/server";
+import { formatDateTime } from "@/lib/utils";
+
+export const metadata = { title: "Audit logs" };
+
+export default async function AdminAuditLogsPage() {
+  await requireAdmin();
+  const service = createServiceClient();
+
+  const { data } = await service
+    .from("audit_logs")
+    .select(
+      "*, admin:profiles!audit_logs_admin_id_fkey(full_name), client:profiles!audit_logs_user_id_fkey(full_name)",
+    )
+    .order("created_at", { ascending: false })
+    .limit(300);
+
+  const rows = (data ?? []) as any[];
+
+  return (
+    <div className="space-y-10">
+      <PageHeader
+        eyebrow="Audit"
+        title="Immutable audit log."
+        description="Every officer action against the platform is recorded here with timestamp, actor, and change context."
+      />
+
+      {rows.length === 0 ? (
+        <div className="rounded-md border border-border bg-card px-6 py-16 text-center text-[13px] text-muted-foreground">
+          The audit log is empty.
+        </div>
+      ) : (
+        <ol className="space-y-3">
+          {rows.map((a) => (
+            <li
+              key={a.id}
+              className="rounded-md border border-border bg-card p-4 flex items-start gap-4"
+            >
+              <ScrollText className="h-4 w-4 mt-0.5 text-champagne-600" strokeWidth={1.6} />
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[13.5px] font-medium text-foreground capitalize">
+                    {a.action_type.replace(/_/g, " ")}
+                  </span>
+                  {a.currency && <Badge variant="muted">{a.currency}</Badge>}
+                  <span className="text-[11.5px] text-muted-foreground tabular-figures">
+                    {formatDateTime(a.created_at)}
+                  </span>
+                </div>
+                <div className="text-[12.5px] text-muted-foreground mt-0.5">
+                  {a.admin?.full_name ?? "Officer"}
+                  {a.client?.full_name ? ` → ${a.client.full_name}` : ""}
+                  {a.ip_address ? ` · ${a.ip_address}` : ""}
+                </div>
+                {(a.old_value || a.new_value) && (
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-[12px]">
+                    <CodeBlock label="Old" value={a.old_value} />
+                    <CodeBlock label="New" value={a.new_value} />
+                  </div>
+                )}
+                {a.note && (
+                  <p className="mt-2 text-[12.5px] italic text-muted-foreground">"{a.note}"</p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+function CodeBlock({ label, value }: { label: string; value: unknown }) {
+  if (value === null || value === undefined) {
+    return (
+      <div>
+        <div className="eyebrow text-muted-foreground mb-1">{label}</div>
+        <div className="rounded-sm bg-muted/50 px-2 py-1 text-muted-foreground">—</div>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <div className="eyebrow text-muted-foreground mb-1">{label}</div>
+      <pre className="rounded-sm bg-muted/50 px-2 py-1 font-mono text-[11.5px] text-foreground whitespace-pre-wrap break-words">
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </div>
+  );
+}

@@ -1,0 +1,140 @@
+import Link from "next/link";
+import { ArrowRight, Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { CreateUserDialog } from "@/components/admin/create-user-dialog";
+import { requireAdmin } from "@/lib/auth";
+import { createServiceClient } from "@/lib/supabase/server";
+import { formatDate, maskAccountNumber } from "@/lib/utils";
+import { ROLE_LABELS, type Role } from "@/lib/constants";
+import type { Profile } from "@/lib/types/database";
+
+export const metadata = { title: "Clients" };
+
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string; q?: string }>;
+}) {
+  const admin = await requireAdmin();
+  const { status, q } = await searchParams;
+  const service = createServiceClient();
+
+  let query = service.from("profiles").select("*").order("created_at", { ascending: false });
+  if (status && status !== "all") query = query.eq("account_status", status);
+  if (q && q.trim()) query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,account_number.ilike.%${q}%`);
+
+  const { data } = await query.limit(200);
+  const profiles = (data ?? []) as Profile[];
+
+  return (
+    <div className="space-y-10">
+      <PageHeader
+        eyebrow="Clients"
+        title="Client roster."
+        description="Review applications, manage active accounts, and onboard new clients."
+        actions={
+          admin.profile.role === "super_admin" ? (
+            <CreateUserDialog trigger={
+              <Button>
+                <Plus className="h-4 w-4" /> New client
+              </Button>
+            } />
+          ) : null
+        }
+      />
+
+      <div className="flex flex-wrap items-center gap-2">
+        {(["all", "pending", "approved", "rejected", "suspended"] as const).map((s) => (
+          <Link
+            key={s}
+            href={`/admin/users${s === "all" ? "" : `?status=${s}`}`}
+            className={
+              "rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.14em] transition-colors " +
+              ((status ?? "all") === s
+                ? "border-champagne-500/40 bg-champagne-500/10 text-champagne-700 dark:text-champagne-300"
+                : "border-border text-muted-foreground hover:text-foreground")
+            }
+          >
+            {s}
+          </Link>
+        ))}
+      </div>
+
+      <div className="rounded-md border border-border bg-card overflow-hidden">
+        <div className="hidden md:grid grid-cols-[1.4fr_1.2fr_1fr_0.9fr_0.8fr_auto] gap-4 border-b border-border bg-background/40 px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+          <span>Client</span>
+          <span>Account</span>
+          <span>Country</span>
+          <span>Role</span>
+          <span>Status</span>
+          <span className="text-right">Joined</span>
+        </div>
+        {profiles.length === 0 ? (
+          <div className="px-6 py-16 text-center text-[13px] text-muted-foreground">
+            No clients matching this filter.
+          </div>
+        ) : (
+          <ul className="divide-y divide-border">
+            {profiles.map((p) => (
+              <li
+                key={p.id}
+                className="grid grid-cols-[1fr_auto] md:grid-cols-[1.4fr_1.2fr_1fr_0.9fr_0.8fr_auto] items-center gap-4 px-6 py-4"
+              >
+                <div className="min-w-0">
+                  <Link
+                    href={`/admin/users/${p.id}`}
+                    className="text-[14px] font-medium text-foreground hover:underline underline-offset-4"
+                  >
+                    {p.full_name}
+                  </Link>
+                  <div className="text-[12px] text-muted-foreground truncate">{p.email}</div>
+                </div>
+                <div className="hidden md:block text-[12.5px] tabular-figures text-foreground">
+                  {maskAccountNumber(p.account_number)}
+                </div>
+                <div className="hidden md:block text-[12.5px] text-muted-foreground">
+                  {p.country ?? "—"}
+                </div>
+                <div className="hidden md:block text-[12.5px] text-muted-foreground">
+                  {ROLE_LABELS[p.role as Role]}
+                </div>
+                <div className="hidden md:block">
+                  <StatusBadge status={p.account_status} />
+                </div>
+                <div className="md:hidden flex items-center gap-2 justify-self-end">
+                  <StatusBadge status={p.account_status} />
+                </div>
+                <div className="hidden md:flex justify-end items-center gap-2">
+                  <span className="text-[12px] text-muted-foreground">
+                    {formatDate(p.created_at)}
+                  </span>
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link href={`/admin/users/${p.id}`} aria-label="Open">
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: Profile["account_status"] }) {
+  const map = {
+    pending: "warning",
+    approved: "success",
+    rejected: "destructive",
+    suspended: "muted",
+  } as const;
+  return (
+    <Badge variant={map[status]} className="capitalize">
+      {status}
+    </Badge>
+  );
+}
