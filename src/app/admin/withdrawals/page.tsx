@@ -43,13 +43,13 @@ export default async function AdminWithdrawalsPage({
         ))}
       </div>
 
-      <div className="rounded-md border border-border bg-card overflow-hidden">
+      <div className="glass-card overflow-hidden">
         {rows.length === 0 ? (
           <div className="px-6 py-16 text-center text-[13px] text-muted-foreground">
             No withdrawals match this filter.
           </div>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-foreground/[0.05]">
             {rows.map((r) => (
               <li key={r.id} className="px-6 py-5">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">

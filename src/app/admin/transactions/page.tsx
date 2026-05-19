@@ -20,8 +20,8 @@ export default async function AdminTransactionsPage() {
         description="Consolidated view of every client-visible transaction posted on the platform."
       />
 
-      <div className="rounded-md border border-border bg-card overflow-hidden">
-        <div className="hidden md:grid grid-cols-[auto_1.4fr_1fr_0.8fr_0.8fr_0.8fr_auto] gap-4 border-b border-border bg-background/40 px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+      <div className="glass-card overflow-hidden">
+        <div className="hidden md:grid grid-cols-[auto_1.4fr_1fr_0.8fr_0.8fr_0.8fr_auto] gap-4 border-b border-foreground/[0.06] bg-foreground/[0.02] px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
           <span></span>
           <span>Client</span>
           <span>Type / Description</span>
@@ -35,7 +35,7 @@ export default async function AdminTransactionsPage() {
             No transactions on file.
           </div>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-foreground/[0.05]">
             {rows.map((t) => (
               <li
                 key={t.id}

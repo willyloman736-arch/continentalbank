@@ -20,7 +20,7 @@ export default async function AdminAuditLogsPage() {
       />
 
       {rows.length === 0 ? (
-        <div className="rounded-md border border-border bg-card px-6 py-16 text-center text-[13px] text-muted-foreground">
+        <div className="glass-card px-6 py-16 text-center text-[13px] text-muted-foreground">
           The audit log is empty.
         </div>
       ) : (
@@ -28,7 +28,7 @@ export default async function AdminAuditLogsPage() {
           {rows.map((a) => (
             <li
               key={a.id}
-              className="rounded-md border border-border bg-card p-4 flex items-start gap-4"
+              className="glass-card p-4 flex items-start gap-4"
             >
               <ScrollText className="h-4 w-4 mt-0.5 text-champagne-600" strokeWidth={1.6} />
               <div className="flex-1 min-w-0">

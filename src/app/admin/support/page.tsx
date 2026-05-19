@@ -43,13 +43,13 @@ export default async function AdminSupportPage({
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-md border border-border bg-card px-6 py-16 text-center text-[13px] text-muted-foreground">
+        <div className="glass-card px-6 py-16 text-center text-[13px] text-muted-foreground">
           No tickets in this view.
         </div>
       ) : (
         <ul className="space-y-4">
           {rows.map((t) => (
-            <li key={t.id} className="rounded-md border border-border bg-card p-6">
+            <li key={t.id} className="glass-card p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <div className="flex items-center gap-2">

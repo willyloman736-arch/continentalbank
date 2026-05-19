@@ -15,7 +15,7 @@ export default async function ProfilePage() {
         description="Update the information your relationship manager uses to reach you and to format your reporting."
       />
 
-      <div className="rounded-md border border-border bg-card p-6 lg:p-8 max-w-3xl">
+      <div className="glass-card p-6 lg:p-8 max-w-3xl">
         <ProfileForm
           initial={{
             fullName: user.profile.full_name,

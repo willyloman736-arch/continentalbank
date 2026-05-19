@@ -1,26 +1,31 @@
 import { requireAdmin } from "@/lib/auth";
-import { AdminSidebar } from "@/components/admin/sidebar";
-import { AdminTopbar } from "@/components/admin/topbar";
+import { detectLocale } from "@/lib/i18n/detect";
+import { AmbientBackdrop } from "@/components/shared/ambient-backdrop";
+import { TopPill } from "@/components/dashboard/top-pill";
+import { BottomPill } from "@/components/dashboard/bottom-pill";
 import { DemoBanner } from "@/components/shared/demo-banner";
 import { PageTransition } from "@/components/motion/page-transition";
-import type { Role } from "@/lib/constants";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireAdmin();
+  const locale = await detectLocale();
   return (
-    <div className="min-h-screen bg-background lg:flex">
-      <AdminSidebar />
-      <div className="flex flex-1 min-w-0 flex-col">
-        <DemoBanner />
-        <AdminTopbar
-          fullName={user.profile.full_name}
-          email={user.email ?? ""}
-          role={user.profile.role as Role}
-        />
-        <main className="flex-1 px-4 py-8 lg:px-10 lg:py-12">
+    <div className="relative min-h-screen text-foreground dark">
+      <AmbientBackdrop variant="navy" />
+      <DemoBanner />
+      <TopPill
+        fullName={user.profile.full_name}
+        email={user.email ?? ""}
+        accountNumber={null}
+        locale={locale}
+        variant="admin"
+      />
+      <main className="px-4 lg:px-10 pt-8 lg:pt-12 pb-36">
+        <div className="mx-auto max-w-7xl">
           <PageTransition>{children}</PageTransition>
-        </main>
-      </div>
+        </div>
+      </main>
+      <BottomPill variant="admin" />
     </div>
   );
 }

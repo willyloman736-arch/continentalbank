@@ -22,14 +22,14 @@ export default async function SecurityPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-        <div className="rounded-md border border-border bg-card p-6 lg:p-8 h-fit">
+        <div className="glass-card p-6 lg:p-8 h-fit">
           <div className="eyebrow text-champagne-700 dark:text-champagne-400 mb-2">Password</div>
           <h3 className="font-display text-xl font-semibold mb-4">Change your password</h3>
           <PasswordChangeForm />
         </div>
 
-        <div className="rounded-md border border-border bg-card">
-          <div className="border-b border-border px-6 py-4">
+        <div className="glass-card">
+          <div className="border-b border-foreground/[0.06] px-6 py-4">
             <div className="eyebrow text-champagne-700 dark:text-champagne-400">Login history</div>
             <h3 className="mt-1 font-display text-lg font-semibold">Recent sessions</h3>
           </div>
@@ -38,7 +38,7 @@ export default async function SecurityPage() {
               No sessions recorded yet.
             </div>
           ) : (
-            <ul className="divide-y divide-border max-h-[520px] overflow-y-auto">
+            <ul className="divide-y divide-foreground/[0.05] max-h-[520px] overflow-y-auto">
               {history.map((h, i) => (
                 <li key={h.id} className="px-6 py-4 flex items-start justify-between gap-3">
                   <div>

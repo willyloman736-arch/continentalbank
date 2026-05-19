@@ -115,6 +115,97 @@
 }
 
 @layer components {
+  /* ----------------------------------------------------------- *
+   *  Glass system
+   *  Restrained, institutional. Heavy blur, low-opacity fill,
+   *  hairline border + a 1px top inner highlight that fakes the
+   *  reflected light of a real glass pane.
+   * ----------------------------------------------------------- */
+  .glass-card {
+    position: relative;
+    background: hsl(var(--card) / 0.55);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+    backdrop-filter: blur(28px) saturate(140%);
+    border: 1px solid hsl(var(--foreground) / 0.08);
+    border-radius: 0.875rem; /* 14px — institutional, not playful */
+    box-shadow:
+      0 1px 0 0 hsl(var(--foreground) / 0.04) inset,
+      0 24px 56px -28px rgba(7, 17, 31, 0.55),
+      0 8px 24px -16px rgba(7, 17, 31, 0.3);
+  }
+  .glass-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--foreground) / 0.06) 0%,
+      transparent 25%,
+      transparent 75%,
+      hsl(var(--foreground) / 0.025) 100%
+    );
+    pointer-events: none;
+  }
+  .glass-card > * {
+    position: relative;
+  }
+
+  /* Heavier glass for hero / statement / pill surfaces */
+  .glass-strong {
+    position: relative;
+    background: hsl(var(--card) / 0.62);
+    -webkit-backdrop-filter: blur(36px) saturate(150%);
+    backdrop-filter: blur(36px) saturate(150%);
+    border: 1px solid hsl(var(--foreground) / 0.1);
+    border-radius: 1.125rem; /* 18px */
+    box-shadow:
+      0 1px 0 0 hsl(var(--foreground) / 0.06) inset,
+      0 30px 72px -28px rgba(7, 17, 31, 0.6),
+      0 12px 32px -20px rgba(7, 17, 31, 0.35);
+  }
+  .glass-strong::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--foreground) / 0.08) 0%,
+      transparent 30%,
+      transparent 70%,
+      hsl(var(--foreground) / 0.03) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Floating pill — used for top + bottom toolbars */
+  .glass-pill {
+    background: hsl(var(--card) / 0.55);
+    -webkit-backdrop-filter: blur(28px) saturate(150%);
+    backdrop-filter: blur(28px) saturate(150%);
+    border: 1px solid hsl(var(--foreground) / 0.1);
+    border-radius: 999px;
+    box-shadow:
+      0 1px 0 0 hsl(var(--foreground) / 0.06) inset,
+      0 16px 48px -20px rgba(7, 17, 31, 0.5),
+      0 6px 20px -12px rgba(7, 17, 31, 0.25);
+  }
+
+  /* Frosted overlay for dialogs / drawers */
+  .glass-overlay {
+    background: hsla(218, 51%, 4%, 0.4);
+    -webkit-backdrop-filter: blur(20px) saturate(120%);
+    backdrop-filter: blur(20px) saturate(120%);
+  }
+
+  /* A subtle inner stroke at the bottom — adds depth on small surfaces */
+  .glass-edge {
+    box-shadow:
+      0 -1px 0 0 hsl(var(--foreground) / 0.05) inset,
+      0 1px 0 0 hsl(var(--foreground) / 0.08) inset;
+  }
+
   .eyebrow {
     @apply text-eyebrow uppercase font-medium text-champagne-700 dark:text-champagne-400;
     letter-spacing: 0.18em;

@@ -42,7 +42,7 @@ export default async function PendingPage() {
         </p>
       </header>
 
-      <div className="rounded-md border border-border bg-card p-6">
+      <div className="glass-card p-6">
         <dl className="grid grid-cols-2 gap-x-6 gap-y-5 text-[13px]">
           <div>
             <dt className="eyebrow text-muted-foreground">Account holder</dt>

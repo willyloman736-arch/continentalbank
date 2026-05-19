@@ -20,8 +20,8 @@ export default async function TransactionsPage() {
         description="Every credit, debit, and adjustment is recorded with a timestamp and the responsible officer."
       />
 
-      <div className="rounded-md border border-border bg-card overflow-hidden">
-        <div className="hidden md:grid grid-cols-[1.5fr_1fr_0.8fr_1fr_0.6fr] gap-4 border-b border-border bg-background/50 px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+      <div className="glass-card overflow-hidden">
+        <div className="hidden md:grid grid-cols-[1.5fr_1fr_0.8fr_1fr_0.6fr] gap-4 border-b border-foreground/[0.06] bg-foreground/[0.02] px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
           <span>Description</span>
           <span>Type</span>
           <span>Currency</span>
@@ -31,7 +31,7 @@ export default async function TransactionsPage() {
         {txs.length === 0 ? (
           <EmptyState />
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-foreground/[0.05]">
             {txs.map((t) => (
               <li
                 key={t.id}

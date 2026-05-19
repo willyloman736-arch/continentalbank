@@ -55,8 +55,8 @@ export default async function AdminUsersPage({
         ))}
       </div>
 
-      <div className="rounded-md border border-border bg-card overflow-hidden">
-        <div className="hidden md:grid grid-cols-[1.4fr_1.2fr_1fr_0.9fr_0.8fr_auto] gap-4 border-b border-border bg-background/40 px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+      <div className="glass-card overflow-hidden">
+        <div className="hidden md:grid grid-cols-[1.4fr_1.2fr_1fr_0.9fr_0.8fr_auto] gap-4 border-b border-foreground/[0.06] bg-foreground/[0.02] px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
           <span>Client</span>
           <span>Account</span>
           <span>Country</span>
@@ -69,7 +69,7 @@ export default async function AdminUsersPage({
             No clients matching this filter.
           </div>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-foreground/[0.05]">
             {profiles.map((p) => (
               <li
                 key={p.id}

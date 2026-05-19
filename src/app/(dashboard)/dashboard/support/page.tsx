@@ -21,12 +21,12 @@ export default async function SupportPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
-        <div className="rounded-md border border-border bg-card p-6 lg:p-8 h-fit">
+        <div className="glass-card p-6 lg:p-8 h-fit">
           <SupportForm />
         </div>
 
-        <div className="rounded-md border border-border bg-card">
-          <div className="border-b border-border px-6 py-4">
+        <div className="glass-card">
+          <div className="border-b border-foreground/[0.06] px-6 py-4">
             <div className="eyebrow text-champagne-700 dark:text-champagne-400">Conversation</div>
             <h3 className="mt-1 font-display text-lg font-semibold">Your tickets</h3>
           </div>
@@ -35,7 +35,7 @@ export default async function SupportPage() {
               You have no open tickets.
             </div>
           ) : (
-            <ul className="divide-y divide-border max-h-[640px] overflow-y-auto">
+            <ul className="divide-y divide-foreground/[0.05] max-h-[640px] overflow-y-auto">
               {tickets.map((t) => (
                 <li key={t.id} className="px-6 py-5">
                   <div className="flex items-start justify-between gap-3">

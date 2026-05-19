@@ -32,7 +32,7 @@ export default async function WithdrawalsPage({
       />
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr] xl:grid-cols-[1.2fr_1fr]">
-        <div className="rounded-md border border-border bg-card p-6 lg:p-8">
+        <div className="glass-card p-6 lg:p-8">
           <WithdrawalForm
             country={user.profile.country ?? "US"}
             wallets={ws.map((w) => ({
@@ -43,8 +43,8 @@ export default async function WithdrawalsPage({
           />
         </div>
 
-        <div className="rounded-md border border-border bg-card">
-          <div className="border-b border-border px-6 py-4">
+        <div className="glass-card">
+          <div className="border-b border-foreground/[0.06] px-6 py-4">
             <div className="eyebrow text-champagne-700 dark:text-champagne-400">History</div>
             <h3 className="mt-1 font-display text-lg font-semibold">Recent instructions</h3>
           </div>
@@ -53,7 +53,7 @@ export default async function WithdrawalsPage({
               No withdrawal requests yet.
             </div>
           ) : (
-            <ul className="divide-y divide-border max-h-[640px] overflow-y-auto">
+            <ul className="divide-y divide-foreground/[0.05] max-h-[640px] overflow-y-auto">
               {reqs.map((r) => (
                 <li key={r.id} className="px-6 py-5">
                   <div className="flex items-start justify-between gap-3">

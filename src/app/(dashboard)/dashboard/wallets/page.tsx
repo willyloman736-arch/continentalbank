@@ -36,7 +36,7 @@ export default async function WalletsPage() {
             index={i}
             hover
             key={w.id}
-            className="rounded-md border border-border bg-card p-6 shadow-soft-sm flex flex-col"
+            className="glass-card p-6 shadow-soft-sm flex flex-col"
           >
             <div className="flex items-center justify-between">
               <div>

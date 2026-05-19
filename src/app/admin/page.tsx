@@ -62,8 +62,8 @@ export default async function AdminOverviewPage() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <MotionCard index={4} className="rounded-md border border-border bg-card">
-          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <MotionCard index={4} className="glass-card">
+          <div className="flex items-center justify-between border-b border-foreground/[0.06] px-6 py-4">
             <div>
               <div className="eyebrow text-champagne-700 dark:text-champagne-400">Queue</div>
               <h3 className="mt-1 font-display text-lg font-semibold">Pending withdrawals</h3>
@@ -79,7 +79,7 @@ export default async function AdminOverviewPage() {
               No requests awaiting review.
             </div>
           ) : (
-            <MotionList className="divide-y divide-border">
+            <MotionList className="divide-y divide-foreground/[0.05]">
               {(recentRequests ?? []).map((r: any) => (
                 <MotionRow
                   key={r.id}
@@ -104,8 +104,8 @@ export default async function AdminOverviewPage() {
           )}
         </MotionCard>
 
-        <MotionCard index={5} className="rounded-md border border-border bg-card">
-          <div className="border-b border-border px-6 py-4">
+        <MotionCard index={5} className="glass-card">
+          <div className="border-b border-foreground/[0.06] px-6 py-4">
             <div className="eyebrow text-champagne-700 dark:text-champagne-400">Audit</div>
             <h3 className="mt-1 font-display text-lg font-semibold">Recent officer activity</h3>
           </div>
@@ -114,7 +114,7 @@ export default async function AdminOverviewPage() {
               No officer activity yet.
             </div>
           ) : (
-            <MotionList className="divide-y divide-border max-h-[420px] overflow-y-auto">
+            <MotionList className="divide-y divide-foreground/[0.05] max-h-[420px] overflow-y-auto">
               {(recentActivity ?? []).map((a: any) => (
                 <MotionRow key={a.id} className="px-6 py-3.5 flex items-start gap-3 transition-colors duration-200 hover:bg-muted/40">
                   <ScrollText className="h-4 w-4 mt-0.5 text-champagne-600" strokeWidth={1.6} />
@@ -155,7 +155,7 @@ function StatCard({
     <MotionCard
       index={index}
       hover
-      className="group rounded-md border border-border bg-card transition-colors hover:bg-muted/30"
+      className="group glass-card transition-colors hover:bg-muted/30"
     >
       <Link href={href} className="block p-5">
         <div className="flex items-start justify-between">

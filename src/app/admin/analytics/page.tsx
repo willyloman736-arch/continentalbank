@@ -29,7 +29,7 @@ export default async function AnalyticsPage() {
 
       <section className="grid gap-4 md:grid-cols-3">
         {(["USD", "EUR", "GBP"] as const).map((c) => (
-          <article key={c} className="rounded-md border border-border bg-card p-6">
+          <article key={c} className="glass-card p-6">
             <div className="eyebrow text-champagne-700 dark:text-champagne-400 mb-2">
               {c} Custody
             </div>
@@ -46,7 +46,7 @@ export default async function AnalyticsPage() {
         ))}
       </section>
 
-      <section className="rounded-md border border-border bg-card p-6">
+      <section className="glass-card p-6">
         <div className="eyebrow text-champagne-700 dark:text-champagne-400 mb-3">Withdrawals by status</div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {Object.entries(a.withdrawalsByStatus).map(([s, count]) => (
@@ -67,7 +67,7 @@ export default async function AnalyticsPage() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <article className="rounded-md border border-border bg-card p-5">
+    <article className="glass-card p-5">
       <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
       <div className="mt-3 font-display text-3xl font-semibold text-foreground tabular-figures">
         {value}

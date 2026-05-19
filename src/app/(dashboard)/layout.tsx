@@ -1,7 +1,8 @@
 import { requireApprovedClient } from "@/lib/auth";
 import { detectLocale } from "@/lib/i18n/detect";
-import { DashboardSidebar } from "@/components/dashboard/sidebar";
-import { DashboardTopbar } from "@/components/dashboard/topbar";
+import { AmbientBackdrop } from "@/components/shared/ambient-backdrop";
+import { TopPill } from "@/components/dashboard/top-pill";
+import { BottomPill } from "@/components/dashboard/bottom-pill";
 import { DemoBanner } from "@/components/shared/demo-banner";
 import { PageTransition } from "@/components/motion/page-transition";
 
@@ -10,20 +11,22 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const locale = await detectLocale();
 
   return (
-    <div className="min-h-screen bg-background lg:flex">
-      <DashboardSidebar />
-      <div className="flex flex-1 min-w-0 flex-col">
-        <DemoBanner />
-        <DashboardTopbar
-          fullName={user.profile.full_name}
-          email={user.email ?? ""}
-          accountNumber={user.profile.account_number}
-          locale={locale}
-        />
-        <main className="flex-1 px-4 py-8 lg:px-10 lg:py-12">
+    <div className="relative min-h-screen text-foreground dark">
+      <AmbientBackdrop variant="navy" />
+      <DemoBanner />
+      <TopPill
+        fullName={user.profile.full_name}
+        email={user.email ?? ""}
+        accountNumber={user.profile.account_number}
+        locale={locale}
+        variant="client"
+      />
+      <main className="px-4 lg:px-10 pt-8 lg:pt-12 pb-36">
+        <div className="mx-auto max-w-7xl">
           <PageTransition>{children}</PageTransition>
-        </main>
-      </div>
+        </div>
+      </main>
+      <BottomPill variant="client" />
     </div>
   );
 }

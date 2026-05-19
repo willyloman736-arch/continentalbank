@@ -46,7 +46,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
       </div>
 
       <section className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
-        <div className="rounded-md border border-border bg-card p-6 space-y-5 h-fit">
+        <div className="glass-card p-6 space-y-5 h-fit">
           <div className="eyebrow text-champagne-700 dark:text-champagne-400">Identity</div>
           <Row label="Account number" value={maskAccountNumber(p.account_number)} />
           <Row label="Status">
@@ -72,7 +72,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
           <Row label="Registered" value={formatDateTime(p.created_at)} />
         </div>
 
-        <div className="rounded-md border border-border bg-card p-6 lg:p-7">
+        <div className="glass-card p-6 lg:p-7">
           <div className="eyebrow text-champagne-700 dark:text-champagne-400 mb-4">
             Currency accounts
           </div>
@@ -108,8 +108,8 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-md border border-border bg-card">
-          <div className="border-b border-border px-6 py-4 flex items-center justify-between">
+        <div className="glass-card">
+          <div className="border-b border-foreground/[0.06] px-6 py-4 flex items-center justify-between">
             <div>
               <div className="eyebrow text-champagne-700 dark:text-champagne-400">Ledger</div>
               <h3 className="mt-1 font-display text-lg font-semibold">Immutable record</h3>
@@ -120,7 +120,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
               No ledger entries yet.
             </div>
           ) : (
-            <ul className="divide-y divide-border max-h-[520px] overflow-y-auto">
+            <ul className="divide-y divide-foreground/[0.05] max-h-[520px] overflow-y-auto">
               {ledgerRows.map((l) => (
                 <li key={l.id} className="px-6 py-4">
                   <div className="flex items-start justify-between gap-3">
@@ -154,8 +154,8 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
           )}
         </div>
 
-        <div className="rounded-md border border-border bg-card">
-          <div className="border-b border-border px-6 py-4">
+        <div className="glass-card">
+          <div className="border-b border-foreground/[0.06] px-6 py-4">
             <div className="eyebrow text-champagne-700 dark:text-champagne-400">Withdrawals</div>
             <h3 className="mt-1 font-display text-lg font-semibold">Recent requests</h3>
           </div>
@@ -164,7 +164,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
               No requests on file.
             </div>
           ) : (
-            <ul className="divide-y divide-border max-h-[520px] overflow-y-auto">
+            <ul className="divide-y divide-foreground/[0.05] max-h-[520px] overflow-y-auto">
               {wds.map((w) => (
                 <li key={w.id} className="px-6 py-4">
                   <div className="flex items-start justify-between gap-3">
