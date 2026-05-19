@@ -60,17 +60,14 @@ Then open <http://localhost:3000>.
 
 ## Supabase setup
 
-1. Create a new project on [supabase.com](https://supabase.com).
-2. Copy your `Project URL`, `anon` key, and `service_role` key into `.env.local`.
-3. Run the schema:
+**👉 [Full step-by-step walkthrough: SUPABASE_SETUP.md](SUPABASE_SETUP.md)**
 
-   - **Option A — Supabase Dashboard:** open the SQL editor and paste the
-     contents of [`supabase/migrations/0001_initial_schema.sql`](supabase/migrations/0001_initial_schema.sql).
-   - **Option B — Supabase CLI:**
-     ```bash
-     supabase link --project-ref <your-ref>
-     supabase db push
-     ```
+Quick version:
+
+1. Create a project on [supabase.com](https://supabase.com), copy URL + anon + service_role keys.
+2. Paste them into `.env.local` (local) and Vercel env vars (production).
+3. Run [`supabase/migrations/0001_initial_schema.sql`](supabase/migrations/0001_initial_schema.sql) in the Supabase SQL editor.
+4. Add `https://your-domain/auth/callback` to Supabase → Authentication → URL Configuration.
 
 The migration installs:
 
