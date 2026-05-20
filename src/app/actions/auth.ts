@@ -49,7 +49,7 @@ export async function signUpAction(formData: FormData): Promise<SignUpResult> {
     return {
       ok: false,
       error:
-        "Sign-up is unavailable in preview. Use the demo entry buttons below to explore the portal.",
+        "Account registration is not yet available. The bank's onboarding system is being provisioned — please try again shortly.",
     };
   }
 
@@ -91,7 +91,7 @@ export async function signInAction(formData: FormData): Promise<SignInResult> {
     return {
       ok: false,
       error:
-        "Sign-in is unavailable in preview. Use the demo entry buttons below to explore the portal.",
+        "Authentication is not yet available. The bank's identity system is being provisioned — please try again shortly.",
     };
   }
 

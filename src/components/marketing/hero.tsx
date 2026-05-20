@@ -16,13 +16,26 @@ export async function Hero() {
       <div className="absolute inset-0 bg-noise pointer-events-none" aria-hidden />
       <MarketingBackdrop />
 
-      <div className="container relative pt-20 pb-20 lg:pt-28 lg:pb-28">
-        {/* ---- Two-column layout: text left, vault right (stacks on mobile) ---- */}
-        <div className="grid gap-12 lg:gap-16 lg:grid-cols-[1.05fr_1fr] lg:items-center">
-          {/* ---- LEFT: text + CTAs ---- */}
-          <Stagger className="max-w-2xl" variant="hero" step={0.07}>
+      <div className="container relative pt-16 sm:pt-20 pb-20 lg:pt-28 lg:pb-28">
+        {/*
+          Layout
+            Mobile : text-top → vault → CTAs   (single column, semantic order)
+            Desktop: text + CTAs left | vault spans both rows right
+
+          Implementation: a 3-child grid that's single-column on mobile.
+          On desktop, the vault is the second child but gets row-span-2 +
+          col-start-2, so it sits in the right column spanning both rows
+          while the two text blocks stack in the left column.
+        */}
+        <div className="grid gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
+          {/* ---- TOP TEXT (eyebrow + headline + subtitle) ---- */}
+          <Stagger
+            className="max-w-2xl lg:col-start-1 lg:row-start-1"
+            variant="hero"
+            step={0.07}
+          >
             <StaggerItem>
-              <div className="eyebrow inline-flex items-center gap-3 mb-6">
+              <div className="eyebrow inline-flex items-center gap-3 mb-5">
                 <span className="inline-block h-px w-8 bg-champagne-500/70" />
                 <span>{t("hero.eyebrow")}</span>
               </div>
@@ -38,12 +51,27 @@ export async function Hero() {
 
             <StaggerItem
               as="p"
-              className="mt-7 max-w-xl text-[15px] leading-relaxed text-muted-foreground text-pretty"
+              className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground text-pretty"
             >
               {t("hero.subtitle")}
             </StaggerItem>
+          </Stagger>
 
-            <StaggerItem className="mt-9 flex flex-col sm:flex-row gap-3">
+          {/* ---- VAULT (between text and CTAs on mobile,
+                   right column spanning both rows on desktop) ---- */}
+          <div className="relative flex items-center justify-center lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:justify-end">
+            <div className="w-[min(340px,78vw)] sm:w-[min(420px,80vw)] lg:w-[min(520px,100%)] aspect-square">
+              <Vault />
+            </div>
+          </div>
+
+          {/* ---- CTAs + trust pills (below vault on mobile, below text on desktop) ---- */}
+          <Stagger
+            className="max-w-2xl lg:col-start-1 lg:row-start-2"
+            variant="hero"
+            step={0.07}
+          >
+            <StaggerItem className="flex flex-col sm:flex-row gap-3">
               <Button size="lg" variant="default" asChild>
                 <Link href="/register">
                   {t("hero.cta_primary")}
@@ -55,23 +83,16 @@ export async function Hero() {
               </Button>
             </StaggerItem>
 
-            <StaggerItem className="mt-7 flex flex-wrap items-center gap-2.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            <StaggerItem className="mt-5 flex flex-wrap items-center gap-2.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
               <Pill icon={<ShieldCheck className="h-3 w-3" />}>Encrypted at rest</Pill>
               <Pill icon={<Scale className="h-3 w-3" />}>Audited ledger</Pill>
               <Pill icon={<Lock className="h-3 w-3" />}>Approved access only</Pill>
             </StaggerItem>
           </Stagger>
-
-          {/* ---- RIGHT: the vault ---- */}
-          <div className="relative flex items-center justify-center lg:justify-end">
-            <div className="w-[min(460px,86vw)] lg:w-[min(520px,100%)] aspect-square">
-              <Vault />
-            </div>
-          </div>
         </div>
 
-        {/* ---- Stats strip (full-width, below both columns) ---- */}
-        <div className="mx-auto mt-16 lg:mt-20 max-w-3xl">
+        {/* ---- Stats strip (full-width, below everything) ---- */}
+        <div className="mx-auto mt-14 lg:mt-20 max-w-3xl">
           <div className="glass-light grid grid-cols-3">
             <Stat label="Established" value={String(SITE.estd)} />
             <Stat label="Jurisdictions" value="38" hasDivider />
