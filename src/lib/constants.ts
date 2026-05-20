@@ -103,6 +103,26 @@ export const TRANSACTION_TYPES = {
 
 export type TransactionType = keyof typeof TRANSACTION_TYPES;
 
+export const REFUND_STATUS = {
+  pending: "Pending Review",
+  under_review: "Under Review",
+  approved: "Approved",
+  rejected: "Rejected",
+  completed: "Completed",
+} as const;
+
+export type RefundStatus = keyof typeof REFUND_STATUS;
+
+export const REFUND_REASONS = [
+  { id: "duplicate_charge", label: "Duplicate charge" },
+  { id: "incorrect_amount", label: "Incorrect amount" },
+  { id: "unauthorised_transaction", label: "Unauthorised transaction" },
+  { id: "failed_settlement", label: "Failed / returned settlement" },
+  { id: "fee_dispute", label: "Disputed fee" },
+  { id: "service_not_rendered", label: "Service not rendered" },
+  { id: "other", label: "Other (describe below)" },
+] as const;
+
 export const ADMIN_ROLES = ["super_admin", "finance_admin", "support_admin", "client"] as const;
 export type Role = (typeof ADMIN_ROLES)[number];
 

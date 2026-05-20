@@ -1,20 +1,26 @@
 import Link from "next/link";
-import { ArrowRight, Users, ArrowDownLeft, LifeBuoy, ScrollText } from "lucide-react";
+import { ArrowRight, Users, ArrowDownLeft, LifeBuoy, ScrollText, Undo2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { MotionCard } from "@/components/motion/motion-card";
 import { MotionList, MotionRow } from "@/components/motion/motion-list";
 import { requireAdmin } from "@/lib/auth";
-import { adminCounts, adminRecentActivity, adminRecentWithdrawals } from "@/lib/demo/queries";
+import {
+  adminCounts,
+  adminPendingRefundCount,
+  adminRecentActivity,
+  adminRecentWithdrawals,
+} from "@/lib/demo/queries";
 import { formatCurrency, formatDateTime, maskAccountNumber } from "@/lib/utils";
 
 export const metadata = { title: "Operations" };
 
 export default async function AdminOverviewPage() {
   const admin = await requireAdmin();
-  const [counts, recentRequests, recentActivity] = await Promise.all([
+  const [counts, refundCount, recentRequests, recentActivity] = await Promise.all([
     adminCounts(),
+    adminPendingRefundCount(),
     adminRecentWithdrawals(),
     adminRecentActivity(),
   ]);
@@ -27,7 +33,7 @@ export default async function AdminOverviewPage() {
         description="A summary of items requiring your attention this morning."
       />
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <StatCard
           index={0}
           icon={Users}
@@ -46,6 +52,14 @@ export default async function AdminOverviewPage() {
         />
         <StatCard
           index={2}
+          icon={Undo2}
+          label="Refund claims open"
+          value={String(refundCount)}
+          href="/admin/refunds?status=pending"
+          accent={refundCount > 0}
+        />
+        <StatCard
+          index={3}
           icon={LifeBuoy}
           label="Open tickets"
           value={String(counts.openTickets)}
@@ -53,7 +67,7 @@ export default async function AdminOverviewPage() {
           accent={counts.openTickets > 0}
         />
         <StatCard
-          index={3}
+          index={4}
           icon={Users}
           label="Total clients"
           value={String(counts.totalClients)}

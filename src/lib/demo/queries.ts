@@ -9,12 +9,14 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isDemoMode, supabaseConfigured } from "./index";
 import {
   demoAdminRecentLedger,
+  demoAdminRefundQueue,
   demoAdminTicketQueue,
   demoAdminWithdrawalQueue,
   demoAnalytics,
   demoAuditLog,
   demoClientLoginHistory,
   demoClientProfile,
+  demoClientRefundClaims,
   demoClientRoster,
   demoClientTickets,
   demoClientTransactions,
@@ -336,6 +338,54 @@ export async function adminRecentWithdrawals() {
     .order("created_at", { ascending: false })
     .limit(5);
   return data ?? [];
+}
+
+/* ---- Refund claims --------------------------------------------- */
+
+export async function clientRefundClaims(userId: string) {
+  if (await isDemoMode()) return demoClientRefundClaims;
+  if (!supabaseConfigured()) return [];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("refund_claims")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  return data ?? [];
+}
+
+export async function adminRefundQueue(statusFilter?: string) {
+  if (await isDemoMode()) {
+    if (statusFilter && statusFilter !== "all") {
+      return demoAdminRefundQueue.filter((r) => r.status === statusFilter);
+    }
+    return demoAdminRefundQueue;
+  }
+  if (!supabaseConfigured()) return [];
+  const s = createServiceClient();
+  let q = s
+    .from("refund_claims")
+    .select(
+      "*, profiles:profiles!refund_claims_user_id_fkey(id, full_name, email, account_number)",
+    )
+    .order("created_at", { ascending: false });
+  if (statusFilter && statusFilter !== "all") q = q.eq("status", statusFilter);
+  const { data } = await q.limit(200);
+  return data ?? [];
+}
+
+export async function adminPendingRefundCount() {
+  if (await isDemoMode()) {
+    return demoAdminRefundQueue.filter((r) => r.status === "pending" || r.status === "under_review").length;
+  }
+  if (!supabaseConfigured()) return 0;
+  const s = createServiceClient();
+  const { count } = await s
+    .from("refund_claims")
+    .select("id", { count: "exact", head: true })
+    .in("status", ["pending", "under_review"]);
+  return count ?? 0;
 }
 
 export async function adminRecentActivity() {

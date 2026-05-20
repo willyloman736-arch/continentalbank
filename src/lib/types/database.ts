@@ -177,6 +177,33 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["login_history"]["Row"]>;
       };
+      refund_claims: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          claim_type: "transaction_dispute" | "public_claim";
+          claimant_name: string;
+          claimant_email: string;
+          claimant_phone: string | null;
+          account_reference: string | null;
+          transaction_reference: string | null;
+          related_transaction_id: string | null;
+          currency: "USD" | "EUR" | "GBP" | null;
+          amount: number;
+          description: string;
+          supporting_info: Json;
+          status: "pending" | "under_review" | "approved" | "rejected" | "completed";
+          admin_note: string | null;
+          processed_by_admin_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["refund_claims"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & { id?: string; created_at?: string; updated_at?: string };
+        Update: Partial<Database["public"]["Tables"]["refund_claims"]["Row"]>;
+      };
     };
     Functions: Record<string, never>;
     Enums: Record<string, never>;
@@ -192,3 +219,4 @@ export type SupportTicket = Database["public"]["Tables"]["support_tickets"]["Row
 export type AuditLog = Database["public"]["Tables"]["audit_logs"]["Row"];
 export type AdminNote = Database["public"]["Tables"]["admin_notes"]["Row"];
 export type LoginHistoryEntry = Database["public"]["Tables"]["login_history"]["Row"];
+export type RefundClaim = Database["public"]["Tables"]["refund_claims"]["Row"];

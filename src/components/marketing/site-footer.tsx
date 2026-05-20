@@ -27,7 +27,7 @@ const columns = [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Engagement", href: "/terms" },
       { label: "About the House", href: "/about" },
-      { label: "Confidentiality charter", href: "/privacy" },
+      { label: "File a refund claim", href: "/refund" },
     ],
   },
 ];

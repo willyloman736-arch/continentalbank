@@ -10,6 +10,7 @@ import type {
   LedgerEntry,
   LoginHistoryEntry,
   Profile,
+  RefundClaim,
   SupportTicket,
   Transaction,
   Wallet,
@@ -586,4 +587,146 @@ export const demoAnalytics = {
     completed: 41,
     rejected: 1,
   },
+  pendingRefunds: 4,
 };
+
+/* ------------------------------------------------------------------ *
+ *  Refund claims — demo seed
+ * ------------------------------------------------------------------ */
+
+export const demoClientRefundClaims: RefundClaim[] = [
+  {
+    id: "demo-rc-1",
+    user_id: demoClientProfile.id,
+    claim_type: "transaction_dispute",
+    claimant_name: demoClientProfile.full_name,
+    claimant_email: demoClientProfile.email,
+    claimant_phone: demoClientProfile.phone,
+    account_reference: demoClientProfile.account_number,
+    transaction_reference: "TX-2026-04-26-8821",
+    related_transaction_id: null,
+    currency: "USD",
+    amount: 350,
+    description:
+      "The Q1 administration fee of $350 was applied twice — once on 01 April and again on 01 May. Please reverse the duplicate.",
+    supporting_info: { reason: "duplicate_charge" },
+    status: "approved",
+    admin_note:
+      "Duplicate confirmed. Reversal scheduled for next settlement window.",
+    processed_by_admin_id: demoAdminProfile.id,
+    created_at: ISO("2026-05-15T09:24:00Z"),
+    updated_at: ISO("2026-05-16T11:02:00Z"),
+  },
+  {
+    id: "demo-rc-2",
+    user_id: demoClientProfile.id,
+    claim_type: "transaction_dispute",
+    claimant_name: demoClientProfile.full_name,
+    claimant_email: demoClientProfile.email,
+    claimant_phone: demoClientProfile.phone,
+    account_reference: demoClientProfile.account_number,
+    transaction_reference: "WD-2026-05-10",
+    related_transaction_id: null,
+    currency: "GBP",
+    amount: 12500,
+    description:
+      "My UK Faster Payments transfer of GBP 12,500 on 10 May has not arrived at Coutts. Could you confirm settlement and, if needed, arrange a recall?",
+    supporting_info: { reason: "failed_settlement" },
+    status: "under_review",
+    admin_note: null,
+    processed_by_admin_id: demoAdminProfile.id,
+    created_at: ISO("2026-05-18T10:42:00Z"),
+    updated_at: ISO("2026-05-19T08:14:00Z"),
+  },
+];
+
+export const demoAdminRefundQueue: (RefundClaim & {
+  profiles: Pick<Profile, "id" | "full_name" | "account_number" | "email"> | null;
+})[] = [
+  {
+    ...demoClientRefundClaims[1],
+    profiles: {
+      id: demoClientProfile.id,
+      full_name: demoClientProfile.full_name,
+      email: demoClientProfile.email,
+      account_number: demoClientProfile.account_number,
+    },
+  },
+  {
+    id: "demo-rc-q-3",
+    user_id: "demo-client-0003",
+    claim_type: "transaction_dispute",
+    claimant_name: "Yusuf Al-Hashimi",
+    claimant_email: "y.alhashimi@example.com",
+    claimant_phone: "+971 4 555 0942",
+    account_reference: "CB551142390877",
+    transaction_reference: "TX-2026-05-09-4421",
+    related_transaction_id: null,
+    currency: "USD",
+    amount: 4800,
+    description:
+      "An FX spread charge of USD 4,800 applied to the EUR conversion on 9 May appears to exceed the rate negotiated in our March mandate update. Requesting review and partial reversal.",
+    supporting_info: { reason: "incorrect_amount" },
+    status: "pending",
+    admin_note: null,
+    processed_by_admin_id: null,
+    created_at: ISO("2026-05-19T07:20:00Z"),
+    updated_at: ISO("2026-05-19T07:20:00Z"),
+    profiles: {
+      id: "demo-client-0003",
+      full_name: "Yusuf Al-Hashimi",
+      email: "y.alhashimi@example.com",
+      account_number: "CB551142390877",
+    },
+  },
+  // ---- Anonymous public claim (no linked client) -------------------------
+  {
+    id: "demo-rc-q-4",
+    user_id: null,
+    claim_type: "public_claim",
+    claimant_name: "John A. Reilly",
+    claimant_email: "j.reilly@example.com",
+    claimant_phone: "+1 415 555 0188",
+    account_reference: null,
+    transaction_reference: "Reference unknown",
+    related_transaction_id: null,
+    currency: "USD",
+    amount: 18400,
+    description:
+      "My late father, William Reilly, had a relationship with Continental Bank's New York office in the 1980s. As executor of his estate I am trying to determine whether any historical deposit remains in his name. Documentation can be provided on request.",
+    supporting_info: { reason: "other" },
+    status: "pending",
+    admin_note: null,
+    processed_by_admin_id: null,
+    created_at: ISO("2026-05-18T22:55:00Z"),
+    updated_at: ISO("2026-05-18T22:55:00Z"),
+    profiles: null,
+  },
+  {
+    id: "demo-rc-q-5",
+    user_id: "demo-client-0002",
+    claim_type: "transaction_dispute",
+    claimant_name: "Marcus Ainsworth",
+    claimant_email: "m.ainsworth@example.com",
+    claimant_phone: "+44 20 7946 0034",
+    account_reference: "CB662014950011",
+    transaction_reference: "WD-2026-05-19",
+    related_transaction_id: null,
+    currency: "GBP",
+    amount: 48200,
+    description:
+      "Withdrawal of GBP 48,200 lodged this morning was rejected at the counterparty. Please reverse the pending balance and confirm.",
+    supporting_info: { reason: "failed_settlement" },
+    status: "pending",
+    admin_note: null,
+    processed_by_admin_id: null,
+    created_at: ISO("2026-05-20T06:18:00Z"),
+    updated_at: ISO("2026-05-20T06:18:00Z"),
+    profiles: {
+      id: "demo-client-0002",
+      full_name: "Marcus Ainsworth",
+      email: "m.ainsworth@example.com",
+      account_number: "CB662014950011",
+    },
+  },
+];

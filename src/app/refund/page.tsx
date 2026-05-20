@@ -1,0 +1,113 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft, ShieldCheck, ScrollText, Clock } from "lucide-react";
+import { SiteHeader } from "@/components/marketing/site-header";
+import { SiteFooter } from "@/components/marketing/site-footer";
+import { MarketingBackdrop } from "@/components/marketing/marketing-backdrop";
+import { PublicRefundForm } from "@/components/marketing/refund-form";
+
+export const metadata: Metadata = {
+  title: "File a Refund Claim",
+  description:
+    "File a refund claim with Continental Bank — for disputed charges, failed settlements, or recovery of dormant deposits. All claims are reviewed manually by a relationship officer.",
+};
+
+export default function RefundPage() {
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <SiteHeader />
+
+      <section className="relative overflow-hidden bg-paper">
+        <div className="absolute inset-0 bg-noise pointer-events-none" aria-hidden />
+        <MarketingBackdrop />
+
+        <div className="container relative pt-16 pb-12 lg:pt-24 lg:pb-16">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors duration-200"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Return home
+          </Link>
+
+          <div className="mt-7 max-w-3xl">
+            <div className="eyebrow flex items-center gap-3 mb-6">
+              <span className="inline-block h-px w-8 bg-champagne-500/70" />
+              <span>Refund &amp; Recovery</span>
+            </div>
+            <h1 className="font-display text-display-xl text-foreground text-balance">
+              File a claim. We will respond.
+            </h1>
+            <p className="mt-6 text-[15px] leading-relaxed text-muted-foreground text-pretty">
+              The form below is for disputed charges, failed settlements, recovery of dormant
+              deposits, and any other matter requiring restitution. Each claim is reviewed by
+              hand by a relationship officer of the Bank — there is no automated outcome.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Information row — what to expect */}
+      <section className="relative bg-background">
+        <div className="container py-10 lg:py-12">
+          <div className="grid gap-4 md:grid-cols-3">
+            <InfoCard
+              icon={Clock}
+              eyebrow="01"
+              title="One business day"
+              body="A relationship officer will acknowledge your claim by email within one business day. Substantive review follows."
+            />
+            <InfoCard
+              icon={ScrollText}
+              eyebrow="02"
+              title="Recorded and audited"
+              body="Every claim is logged against the audit register. The disposition of your claim is written, signed, and traceable to the responsible officer."
+            />
+            <InfoCard
+              icon={ShieldCheck}
+              eyebrow="03"
+              title="Discreet by default"
+              body="Claim details are discussed by email and on a recorded telephone line. Continental Bank never solicits passwords, OTPs, or full card credentials."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Form */}
+      <section className="relative bg-background">
+        <div className="container pb-20 lg:pb-28">
+          <div className="mx-auto max-w-3xl">
+            <PublicRefundForm />
+          </div>
+        </div>
+      </section>
+
+      <SiteFooter />
+    </div>
+  );
+}
+
+function InfoCard({
+  icon: Icon,
+  eyebrow,
+  title,
+  body,
+}: {
+  icon: any;
+  eyebrow: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <article className="glass-light p-6">
+      <div className="flex items-start justify-between">
+        <div className="eyebrow text-champagne-700 dark:text-champagne-400">{eyebrow}</div>
+        <Icon className="h-4 w-4 text-champagne-600" strokeWidth={1.5} />
+      </div>
+      <h3 className="mt-3 font-display text-lg font-semibold text-foreground">{title}</h3>
+      <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground text-pretty">
+        {body}
+      </p>
+    </article>
+  );
+}
