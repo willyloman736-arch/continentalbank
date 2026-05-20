@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { getDemoAuthedUser, getDemoRole, supabaseConfigured } from "@/lib/demo";
+import { getDemoAuthedUser, getDemoRole } from "@/lib/demo";
+import { localAuthEnabled, supabaseConfigured } from "@/lib/auth-mode";
+import { decodeLocalAuthSession, LOCAL_AUTH_COOKIE } from "@/lib/local-auth";
 import type { Profile } from "@/lib/types/database";
 
 export type AuthedUser = {
@@ -16,8 +19,11 @@ export async function getAuthedUser(): Promise<AuthedUser | null> {
   const demoRole = await getDemoRole();
   if (demoRole) return getDemoAuthedUser(demoRole);
 
-  // 2. Supabase not configured? — anonymous.
-  if (!supabaseConfigured()) return null;
+  // 2. Local build-mode auth while Supabase Auth is not connected.
+  if (localAuthEnabled()) {
+    const cookieStore = await cookies();
+    return decodeLocalAuthSession(cookieStore.get(LOCAL_AUTH_COOKIE)?.value);
+  }
 
   const supabase = await createClient();
   const {
@@ -43,6 +49,7 @@ export async function requireUser(): Promise<AuthedUser> {
 
 export async function requireApprovedClient(): Promise<AuthedUser> {
   const user = await requireUser();
+  if (isAdmin(user.profile.role)) redirect("/admin");
   if (user.profile.account_status !== "approved") redirect("/pending");
   return user;
 }

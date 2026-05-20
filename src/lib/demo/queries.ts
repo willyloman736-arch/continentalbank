@@ -7,6 +7,8 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isDemoMode, supabaseConfigured } from "./index";
+import { localWallets } from "@/lib/local-auth";
+import { localAuthEnabled } from "@/lib/auth-mode";
 import {
   demoAdminRecentLedger,
   demoAdminRefundQueue,
@@ -29,7 +31,7 @@ import {
 
 export async function clientWallets(userId: string) {
   if (await isDemoMode()) return demoClientWallets;
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return localWallets(userId);
   const supabase = await createClient();
   const { data } = await supabase
     .from("wallets")
@@ -41,7 +43,7 @@ export async function clientWallets(userId: string) {
 
 export async function clientTransactions(userId: string, limit = 200) {
   if (await isDemoMode()) return demoClientTransactions.slice(0, limit);
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const supabase = await createClient();
   const { data } = await supabase
     .from("transactions")
@@ -54,7 +56,7 @@ export async function clientTransactions(userId: string, limit = 200) {
 
 export async function clientWithdrawals(userId: string, limit = 50) {
   if (await isDemoMode()) return demoClientWithdrawals.slice(0, limit);
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const supabase = await createClient();
   const { data } = await supabase
     .from("withdrawal_requests")
@@ -71,7 +73,7 @@ export async function clientPendingWithdrawals(userId: string) {
       (w) => w.status === "pending" || w.status === "approved",
     );
   }
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const supabase = await createClient();
   const { data } = await supabase
     .from("withdrawal_requests")
@@ -85,7 +87,7 @@ export async function clientPendingWithdrawals(userId: string) {
 
 export async function clientTickets(userId: string) {
   if (await isDemoMode()) return demoClientTickets;
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const supabase = await createClient();
   const { data } = await supabase
     .from("support_tickets")
@@ -98,7 +100,7 @@ export async function clientTickets(userId: string) {
 
 export async function clientLoginHistory(userId: string) {
   if (await isDemoMode()) return demoClientLoginHistory;
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const supabase = await createClient();
   const { data } = await supabase
     .from("login_history")
@@ -120,7 +122,7 @@ export async function adminCounts() {
       totalClients: demoAnalytics.totalClients,
     };
   }
-  if (!supabaseConfigured()) {
+  if (localAuthEnabled() || !supabaseConfigured()) {
     return { pendingClients: 0, pendingWithdrawals: 0, openTickets: 0, totalClients: 0 };
   }
   const s = createServiceClient();
@@ -145,7 +147,7 @@ export async function adminWithdrawalQueue(statusFilter?: string) {
     }
     return demoAdminWithdrawalQueue;
   }
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const s = createServiceClient();
   let q = s
     .from("withdrawal_requests")
@@ -175,7 +177,7 @@ export async function adminClientRoster(statusFilter?: string, q?: string) {
     }
     return list;
   }
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const s = createServiceClient();
   let query = s.from("profiles").select("*").order("created_at", { ascending: false });
   if (statusFilter && statusFilter !== "all") query = query.eq("account_status", statusFilter);
@@ -197,7 +199,7 @@ export async function adminClientDetail(userId: string) {
       withdrawals: demoClientWithdrawals,
     };
   }
-  if (!supabaseConfigured()) {
+  if (localAuthEnabled() || !supabaseConfigured()) {
     return { profile: null, wallets: [], ledger: [], withdrawals: [] };
   }
   const s = createServiceClient();
@@ -226,7 +228,7 @@ export async function adminAllTransactions() {
       })(),
     }));
   }
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const s = createServiceClient();
   const { data } = await s
     .from("transactions")
@@ -243,7 +245,7 @@ export async function adminTickets(statusFilter?: string) {
     }
     return demoAdminTicketQueue;
   }
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const s = createServiceClient();
   let q = s
     .from("support_tickets")
@@ -258,7 +260,7 @@ export async function adminTickets(statusFilter?: string) {
 
 export async function adminAuditLogs() {
   if (await isDemoMode()) return demoAuditLog;
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const s = createServiceClient();
   const { data } = await s
     .from("audit_logs")
@@ -274,7 +276,7 @@ export async function adminAnalytics() {
   if (await isDemoMode()) {
     return demoAnalytics;
   }
-  if (!supabaseConfigured()) {
+  if (localAuthEnabled() || !supabaseConfigured()) {
     return demoAnalytics; // fall back to seeded numbers so the page renders
   }
 
@@ -327,7 +329,7 @@ export async function adminAnalytics() {
 
 export async function adminRecentWithdrawals() {
   if (await isDemoMode()) return demoAdminWithdrawalQueue.slice(0, 5);
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const s = createServiceClient();
   const { data } = await s
     .from("withdrawal_requests")
@@ -344,7 +346,7 @@ export async function adminRecentWithdrawals() {
 
 export async function clientRefundClaims(userId: string) {
   if (await isDemoMode()) return demoClientRefundClaims;
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const supabase = await createClient();
   const { data } = await supabase
     .from("refund_claims")
@@ -362,7 +364,7 @@ export async function adminRefundQueue(statusFilter?: string) {
     }
     return demoAdminRefundQueue;
   }
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const s = createServiceClient();
   let q = s
     .from("refund_claims")
@@ -379,7 +381,7 @@ export async function adminPendingRefundCount() {
   if (await isDemoMode()) {
     return demoAdminRefundQueue.filter((r) => r.status === "pending" || r.status === "under_review").length;
   }
-  if (!supabaseConfigured()) return 0;
+  if (localAuthEnabled() || !supabaseConfigured()) return 0;
   const s = createServiceClient();
   const { count } = await s
     .from("refund_claims")
@@ -397,7 +399,7 @@ export async function adminRecentActivity() {
       profiles: { full_name: a.admin.full_name },
     }));
   }
-  if (!supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
   const s = createServiceClient();
   const { data } = await s
     .from("audit_logs")

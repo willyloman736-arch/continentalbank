@@ -38,8 +38,8 @@ export function RegisterForm() {
         toast.error(res.error);
         return;
       }
-      toast.success("Application submitted. Welcome to Continental.");
-      router.replace("/pending");
+      toast.success("Account created. Welcome to Continental.");
+      router.replace(res.redirectTo ?? "/pending");
       router.refresh();
     });
   }

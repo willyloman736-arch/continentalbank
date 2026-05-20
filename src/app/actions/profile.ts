@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { isDemoMode } from "@/lib/demo";
+import { isDemoMode, supabaseConfigured } from "@/lib/demo";
+import { localAuthEnabled } from "@/lib/auth-mode";
 import { PasswordChangeSchema, ProfileUpdateSchema } from "@/lib/validation";
 import type { ActionResult } from "./withdrawals";
 
@@ -16,7 +17,9 @@ export async function updateProfile(input: unknown): Promise<ActionResult> {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
 
-  if (await isDemoMode()) return { ok: true, message: DEMO_MSG };
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: DEMO_MSG };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -43,7 +46,9 @@ export async function changePassword(input: unknown): Promise<ActionResult> {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
 
-  if (await isDemoMode()) return { ok: true, message: DEMO_MSG };
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: DEMO_MSG };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password: parsed.data.newPassword });

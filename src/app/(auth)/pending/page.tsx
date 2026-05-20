@@ -10,6 +10,10 @@ import { formatAccountNumber } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Application under review",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function PendingPage() {

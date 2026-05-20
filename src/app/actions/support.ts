@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { requireApprovedClient } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { isDemoMode } from "@/lib/demo";
+import { isDemoMode, supabaseConfigured } from "@/lib/demo";
+import { localAuthEnabled } from "@/lib/auth-mode";
 import { SupportTicketSchema } from "@/lib/validation";
 import type { ActionResult } from "./withdrawals";
 
@@ -14,8 +15,8 @@ export async function openTicket(input: unknown): Promise<ActionResult> {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid ticket" };
   }
 
-  if (await isDemoMode()) {
-    return { ok: true, message: "Demo mode — ticket simulated, nothing saved." };
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: "Build mode — ticket simulated, nothing saved." };
   }
 
   const supabase = await createClient();

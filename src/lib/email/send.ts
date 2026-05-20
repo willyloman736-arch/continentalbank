@@ -18,7 +18,6 @@ type SendOpts = { to: string; subject: string; html: string };
 
 export async function sendEmail({ to, subject, html }: SendOpts) {
   if (process.env.NODE_ENV !== "production") {
-    // eslint-disable-next-line no-console
     console.info("[email]", { to, subject, htmlPreview: html.slice(0, 120) + "…" });
     return { ok: true as const };
   }

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { SUPPORTED_LOCALES, type Locale } from "@/lib/i18n/dictionaries";
 import { LOCALE_COOKIE } from "@/lib/i18n/detect";
 import { createClient } from "@/lib/supabase/server";
-import { supabaseConfigured } from "@/lib/demo";
+import { supabaseAuthEnabled } from "@/lib/auth-mode";
 
 export async function setLocale(locale: Locale) {
   if (!SUPPORTED_LOCALES.includes(locale)) return { ok: false };
@@ -19,7 +19,7 @@ export async function setLocale(locale: Locale) {
   });
 
   // Persist on the profile for signed-in users (only when Supabase is wired up).
-  if (supabaseConfigured()) {
+  if (supabaseAuthEnabled()) {
     try {
       const supabase = await createClient();
       const {

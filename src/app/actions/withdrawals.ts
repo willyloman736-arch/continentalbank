@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { requireApprovedClient, requireAdmin } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
-import { isDemoMode } from "@/lib/demo";
+import { isDemoMode, supabaseConfigured } from "@/lib/demo";
+import { localAuthEnabled } from "@/lib/auth-mode";
 import { WithdrawalRequestSchema, WithdrawalDecisionSchema } from "@/lib/validation";
 
 export type ActionResult =
@@ -25,7 +26,7 @@ export async function submitWithdrawal(input: unknown): Promise<ActionResult> {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid request" };
   }
 
-  if (await isDemoMode()) {
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
     return { ok: true, message: DEMO_MSG };
   }
 
@@ -112,7 +113,7 @@ export async function processWithdrawal(input: unknown): Promise<ActionResult> {
   const parsed = WithdrawalDecisionSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Invalid decision" };
 
-  if (await isDemoMode()) {
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
     return { ok: true, message: DEMO_MSG };
   }
 

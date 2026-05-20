@@ -4,7 +4,15 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { supabaseConfigured } from "@/lib/demo";
+import { localAuthEnabled, supabaseAuthEnabled } from "@/lib/auth-mode";
+import {
+  createLocalAdminSession,
+  createLocalClientSession,
+  encodeLocalAuthSession,
+  isLocalAdminCredential,
+  localNameFromEmail,
+  LOCAL_AUTH_COOKIE,
+} from "@/lib/local-auth";
 import { CURRENCIES, SUPPORTED_LOCALES_VALUES } from "@/lib/validation";
 
 const SignUpSchema = z.object({
@@ -23,7 +31,7 @@ const SignInSchema = z.object({
 });
 
 export type SignUpResult =
-  | { ok: true }
+  | { ok: true; redirectTo?: string }
   | { ok: false; error: string; fieldErrors?: Partial<Record<keyof z.infer<typeof SignUpSchema>, string>> };
 
 export async function signUpAction(formData: FormData): Promise<SignUpResult> {
@@ -45,12 +53,18 @@ export async function signUpAction(formData: FormData): Promise<SignUpResult> {
     return { ok: false, error: "Please review the highlighted fields.", fieldErrors };
   }
 
-  if (!supabaseConfigured()) {
-    return {
-      ok: false,
-      error:
-        "Account registration is not yet available. The bank's onboarding system is being provisioned — please try again shortly.",
-    };
+  if (localAuthEnabled()) {
+    await setLocalAuthCookie(
+      createLocalClientSession({
+        fullName: parsed.data.fullName,
+        email: parsed.data.email,
+        phone: parsed.data.phone || null,
+        country: parsed.data.country,
+        preferredLanguage: parsed.data.preferredLanguage,
+        preferredCurrency: parsed.data.preferredCurrency as "USD" | "EUR" | "GBP",
+      }),
+    );
+    return { ok: true, redirectTo: "/dashboard" };
   }
 
   const supabase = await createClient();
@@ -87,12 +101,18 @@ export async function signInAction(formData: FormData): Promise<SignInResult> {
   });
   if (!parsed.success) return { ok: false, error: "Enter your email and password." };
 
-  if (!supabaseConfigured()) {
-    return {
-      ok: false,
-      error:
-        "Authentication is not yet available. The bank's identity system is being provisioned — please try again shortly.",
-    };
+  if (localAuthEnabled()) {
+    const email = parsed.data.email.trim().toLowerCase();
+    const password = parsed.data.password;
+    const session = isLocalAdminCredential(email, password)
+      ? createLocalAdminSession()
+      : createLocalClientSession({
+          fullName: localNameFromEmail(email),
+          email,
+        });
+
+    await setLocalAuthCookie(session);
+    return { ok: true, redirectTo: session.profile.role === "client" ? "/dashboard" : "/admin" };
   }
 
   const supabase = await createClient();
@@ -140,9 +160,10 @@ export async function signOutAction() {
   // Clear demo session if present
   const cookieStore = await cookies();
   cookieStore.delete("cb_demo");
+  cookieStore.delete(LOCAL_AUTH_COOKIE);
 
   // Real session (best effort — fine if Supabase isn't configured)
-  if (supabaseConfigured()) {
+  if (supabaseAuthEnabled()) {
     try {
       const supabase = await createClient();
       await supabase.auth.signOut();
@@ -151,6 +172,17 @@ export async function signOutAction() {
     }
   }
   redirect("/login");
+}
+
+async function setLocalAuthCookie(session: ReturnType<typeof createLocalClientSession>) {
+  const cookieStore = await cookies();
+  cookieStore.set(LOCAL_AUTH_COOKIE, encodeLocalAuthSession(session), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
 }
 
 /**

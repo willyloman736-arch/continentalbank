@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { getAuthedUser, requireAdmin, requireApprovedClient } from "@/lib/auth";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isDemoMode, supabaseConfigured } from "@/lib/demo";
+import { localAuthEnabled } from "@/lib/auth-mode";
 import {
   ClientRefundDisputeSchema,
   PublicRefundClaimSchema,
@@ -28,14 +29,8 @@ export async function submitPublicRefundClaim(input: unknown): Promise<ActionRes
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid claim" };
   }
 
-  if (await isDemoMode()) return { ok: true, message: DEMO_MSG };
-
-  if (!supabaseConfigured()) {
-    return {
-      ok: true,
-      message:
-        "Claim received. A relationship officer will contact you within one business day.",
-    };
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: DEMO_MSG };
   }
 
   // If the visitor happens to be signed-in, link the claim to their profile.
@@ -79,7 +74,9 @@ export async function submitClientRefundDispute(input: unknown): Promise<ActionR
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid claim" };
   }
 
-  if (await isDemoMode()) return { ok: true, message: DEMO_MSG };
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: DEMO_MSG };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.from("refund_claims").insert({
@@ -112,7 +109,9 @@ export async function decideRefundClaim(input: unknown): Promise<ActionResult> {
   const parsed = RefundDecisionSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Invalid decision" };
 
-  if (await isDemoMode()) return { ok: true, message: DEMO_MSG };
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: DEMO_MSG };
+  }
 
   const { id, decision, adminNote } = parsed.data;
   const service = createServiceClient();

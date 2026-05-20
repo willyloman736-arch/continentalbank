@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { requireAdmin, requireSuperAdmin } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
-import { isDemoMode } from "@/lib/demo";
+import { isDemoMode, supabaseConfigured } from "@/lib/demo";
+import { localAuthEnabled } from "@/lib/auth-mode";
 import {
   AdminBalanceAdjustmentSchema,
   AdminCreateUserSchema,
@@ -30,7 +31,9 @@ export async function decideUser(input: unknown): Promise<ActionResult> {
   const parsed = UserDecisionSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Invalid decision" };
 
-  if (await isDemoMode()) return { ok: true, message: DEMO_MSG };
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: DEMO_MSG };
+  }
 
   const service = createServiceClient();
   const { data: profile } = await service
@@ -83,7 +86,9 @@ export async function adjustBalance(input: unknown): Promise<ActionResult> {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
 
-  if (await isDemoMode()) return { ok: true, message: DEMO_MSG };
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: DEMO_MSG };
+  }
 
   const { userId, currency, type, amount, description } = parsed.data;
   const service = createServiceClient();
@@ -161,7 +166,9 @@ export async function replyTicket(input: unknown): Promise<ActionResult> {
   const parsed = TicketReplySchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Invalid ticket reply" };
 
-  if (await isDemoMode()) return { ok: true, message: DEMO_MSG };
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: DEMO_MSG };
+  }
 
   const service = createServiceClient();
   const { data: ticket } = await service
@@ -206,7 +213,9 @@ export async function createUserAsAdmin(input: unknown): Promise<ActionResult> {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
 
-  if (await isDemoMode()) return { ok: true, message: DEMO_MSG };
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: DEMO_MSG };
+  }
 
   const data = parsed.data;
   const service = createServiceClient();

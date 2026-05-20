@@ -12,15 +12,10 @@
 import { cookies } from "next/headers";
 import { demoAdminProfile, demoClientProfile } from "./data";
 import type { AuthedUser } from "@/lib/auth";
+export { supabaseConfigured } from "@/lib/auth-mode";
 
 export const DEMO_COOKIE = "cb_demo";
 export type DemoRole = "client" | "officer";
-
-export function supabaseConfigured() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  return Boolean(url && key && !url.includes("placeholder") && !key.includes("placeholder"));
-}
 
 /**
  * Server-only. Reads the demo cookie if present and returns the active role.
