@@ -7,7 +7,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isDemoMode, supabaseConfigured } from "./index";
-import { localWallets } from "@/lib/local-auth";
+import { localTransactions, localWallets, localWithdrawals } from "@/lib/local-auth";
 import { localAuthEnabled } from "@/lib/auth-mode";
 import {
   demoAdminRecentLedger,
@@ -43,7 +43,7 @@ export async function clientWallets(userId: string) {
 
 export async function clientTransactions(userId: string, limit = 200) {
   if (await isDemoMode()) return demoClientTransactions.slice(0, limit);
-  if (localAuthEnabled() || !supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return localTransactions(userId).slice(0, limit);
   const supabase = await createClient();
   const { data } = await supabase
     .from("transactions")
@@ -56,7 +56,7 @@ export async function clientTransactions(userId: string, limit = 200) {
 
 export async function clientWithdrawals(userId: string, limit = 50) {
   if (await isDemoMode()) return demoClientWithdrawals.slice(0, limit);
-  if (localAuthEnabled() || !supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) return localWithdrawals(userId).slice(0, limit);
   const supabase = await createClient();
   const { data } = await supabase
     .from("withdrawal_requests")
@@ -73,7 +73,9 @@ export async function clientPendingWithdrawals(userId: string) {
       (w) => w.status === "pending" || w.status === "approved",
     );
   }
-  if (localAuthEnabled() || !supabaseConfigured()) return [];
+  if (localAuthEnabled() || !supabaseConfigured()) {
+    return localWithdrawals(userId).filter((w) => w.status === "pending" || w.status === "approved");
+  }
   const supabase = await createClient();
   const { data } = await supabase
     .from("withdrawal_requests")

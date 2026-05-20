@@ -1,5 +1,5 @@
 import { CURRENCIES, type Currency } from "@/lib/constants";
-import type { Profile, Wallet } from "@/lib/types/database";
+import type { Profile, Transaction, Wallet, WithdrawalRequest } from "@/lib/types/database";
 
 export const LOCAL_AUTH_COOKIE = "cb_local_auth";
 export const LOCAL_ADMIN_EMAIL = "admin@continental.local";
@@ -104,16 +104,94 @@ export function decodeLocalAuthSession(value: string | undefined | null): LocalA
 
 export function localWallets(userId: string, preferredCurrency: Currency = "USD"): Wallet[] {
   const now = new Date().toISOString();
-  return CURRENCIES.map((currency) => ({
-    id: `local-wallet-${currency.toLowerCase()}`,
-    user_id: userId,
-    currency,
-    available_balance: currency === preferredCurrency ? 0 : 0,
-    pending_balance: 0,
-    total_withdrawn: 0,
-    created_at: now,
-    updated_at: now,
-  }));
+  const balances: Record<Currency, Pick<Wallet, "available_balance" | "pending_balance" | "total_withdrawn">> = {
+    USD: { available_balance: 52480000, pending_balance: 1250000, total_withdrawn: 9750000 },
+    EUR: { available_balance: 28350000, pending_balance: 620000, total_withdrawn: 4100000 },
+    GBP: { available_balance: 14920000, pending_balance: 280000, total_withdrawn: 2250000 },
+  };
+
+  return CURRENCIES.map((currency) => {
+    const balance = balances[currency];
+    const preferredBoost = currency === preferredCurrency ? 1 : 1;
+    return {
+      id: `local-wallet-${currency.toLowerCase()}`,
+      user_id: userId,
+      currency,
+      available_balance: balance.available_balance * preferredBoost,
+      pending_balance: balance.pending_balance,
+      total_withdrawn: balance.total_withdrawn,
+      created_at: now,
+      updated_at: now,
+    };
+  });
+}
+
+export function localTransactions(userId: string): Transaction[] {
+  return [
+    {
+      id: "local-tx-1",
+      user_id: userId,
+      currency: "USD",
+      type: "deposit",
+      amount: 18500000,
+      status: "completed",
+      description: "Capital call reserve sweep",
+      created_by_admin_id: null,
+      created_at: daysAgo(2),
+    },
+    {
+      id: "local-tx-2",
+      user_id: userId,
+      currency: "EUR",
+      type: "interest",
+      amount: 284500,
+      status: "completed",
+      description: "Custody yield credit",
+      created_by_admin_id: null,
+      created_at: daysAgo(5),
+    },
+    {
+      id: "local-tx-3",
+      user_id: userId,
+      currency: "GBP",
+      type: "transfer",
+      amount: 3200000,
+      status: "completed",
+      description: "London treasury reserve transfer",
+      created_by_admin_id: null,
+      created_at: daysAgo(8),
+    },
+    {
+      id: "local-tx-4",
+      user_id: userId,
+      currency: "USD",
+      type: "withdrawal",
+      amount: -1250000,
+      status: "pending",
+      description: "Board-approved distribution",
+      created_by_admin_id: null,
+      created_at: daysAgo(11),
+    },
+  ];
+}
+
+export function localWithdrawals(userId: string): WithdrawalRequest[] {
+  return [
+    {
+      id: "local-withdrawal-1",
+      user_id: userId,
+      currency: "USD",
+      amount: 1250000,
+      method: "bank_transfer",
+      payment_details: { destination: "Operating reserve treasury account" },
+      notes: "Settlement window requested after officer verification.",
+      status: "pending",
+      admin_note: null,
+      processed_by_admin_id: null,
+      created_at: daysAgo(11),
+      updated_at: daysAgo(11),
+    },
+  ];
 }
 
 function localIdFor(value: string) {
@@ -132,4 +210,10 @@ function hashString(value: string) {
     hash = Math.imul(hash, 16777619);
   }
   return hash >>> 0;
+}
+
+function daysAgo(days: number) {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date.toISOString();
 }
