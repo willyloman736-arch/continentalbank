@@ -11,10 +11,10 @@ export async function SiteHeader() {
   const t = getT(locale);
 
   const nav = [
-    { href: "#private-clients", label: t("nav.private_clients") },
-    { href: "#services", label: t("nav.services") },
-    { href: "#global", label: t("nav.global_reach") },
-    { href: "#contact", label: t("nav.contact") },
+    { href: "/services", label: t("nav.services") },
+    { href: "/leadership", label: "Leadership" },
+    { href: "/offices", label: t("nav.global_reach") },
+    { href: "/insights", label: "Insights" },
   ];
 
   return (

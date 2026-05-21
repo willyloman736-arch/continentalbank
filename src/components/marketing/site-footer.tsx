@@ -6,28 +6,29 @@ const columns = [
   {
     title: "Continental",
     links: [
-      { label: "Our standard", href: "/about" },
-      { label: "Global desks", href: "/#global" },
-      { label: "Frequently asked", href: "/faq" },
-      { label: "Private client office", href: "/#contact" },
+      { label: "About the House", href: "/about" },
+      { label: "Leadership", href: "/leadership" },
+      { label: "Global offices", href: "/offices" },
+      { label: "Market insights", href: "/insights" },
     ],
   },
   {
     title: "Services",
     links: [
-      { label: "Multi-currency portfolios", href: "/#services" },
-      { label: "Discreet withdrawals", href: "/#services" },
-      { label: "Custody & oversight", href: "/#services" },
-      { label: "Family office support", href: "/#services" },
+      { label: "Private banking services", href: "/services" },
+      { label: "Frequently asked", href: "/faq" },
+      { label: "Help Center", href: "/help" },
+      { label: "File a refund claim", href: "/refund" },
     ],
   },
   {
-    title: "Governance",
+    title: "Trust & Governance",
     links: [
+      { label: "Security", href: "/security" },
+      { label: "Compliance", href: "/compliance" },
+      { label: "Fraud Protection", href: "/fraud-protection" },
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Engagement", href: "/terms" },
-      { label: "About the House", href: "/about" },
-      { label: "File a refund claim", href: "/refund" },
     ],
   },
 ];
