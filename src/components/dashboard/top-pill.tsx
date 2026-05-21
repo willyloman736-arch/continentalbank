@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Calendar, LayoutGrid, LogOut, Search, Settings, UserRound } from "lucide-react";
+import { Calendar, LayoutGrid, LogOut, Search, Settings, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -12,8 +12,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { signOutAction } from "@/app/actions/auth";
 import { cn, initials } from "@/lib/utils";
+import { demoClientNotifications } from "@/lib/demo/notifications";
 import type { Locale } from "@/lib/i18n/dictionaries";
 
 type Props = {
@@ -44,10 +46,7 @@ export function TopPill({ fullName, email, accountNumber, locale, variant = "cli
           <PillButton aria-label="Calendar" className="hidden sm:inline-flex">
             <Calendar className="h-4 w-4" />
           </PillButton>
-          <PillButton aria-label="Notifications">
-            <Bell className="h-4 w-4" />
-            <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-champagne-500" />
-          </PillButton>
+          <NotificationBell notifications={demoClientNotifications} />
           <div className="mx-1 h-5 w-px bg-foreground/10 hidden sm:block" />
           <div className="px-1 hidden sm:block">
             <LanguageSwitcher currentLocale={locale} />

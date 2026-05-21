@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import {
   ArrowDownLeft,
   ArrowLeftRight,
+  Banknote,
   FileText,
   LayoutDashboard,
   MessageSquare,
@@ -25,6 +26,7 @@ const clientItems = [
   { href: "/dashboard/wallets", label: "Accounts", icon: Wallet },
   { href: "/dashboard/transactions", label: "Ledger", icon: ArrowLeftRight },
   { href: "/dashboard/withdrawals", label: "Withdrawals", icon: ArrowDownLeft },
+  { href: "/dashboard/beneficiaries", label: "Beneficiaries", icon: Banknote },
   { href: "/dashboard/refunds", label: "Refunds", icon: Undo2 },
   { href: "/dashboard/documents", label: "Documents", icon: FileText },
   { href: "/dashboard/messages", label: "Messages", icon: MessageSquare },
@@ -36,6 +38,7 @@ const adminItems = [
   { href: "/admin", label: "Operations", icon: LayoutDashboard },
   { href: "/admin/users", label: "Clients", icon: Users },
   { href: "/admin/withdrawals", label: "Withdrawals", icon: ArrowDownLeft },
+  { href: "/admin/beneficiaries", label: "Beneficiaries", icon: Banknote },
   { href: "/admin/refunds", label: "Refunds", icon: Undo2 },
   { href: "/admin/transactions", label: "Ledger", icon: ArrowLeftRight },
   { href: "/admin/messages", label: "Messages", icon: MessageSquare },
