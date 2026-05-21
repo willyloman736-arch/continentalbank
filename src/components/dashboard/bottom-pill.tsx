@@ -6,8 +6,9 @@ import { motion } from "framer-motion";
 import {
   ArrowDownLeft,
   ArrowLeftRight,
+  FileText,
   LayoutDashboard,
-  LifeBuoy,
+  MessageSquare,
   ShieldCheck,
   Undo2,
   UserRound,
@@ -25,7 +26,8 @@ const clientItems = [
   { href: "/dashboard/transactions", label: "Ledger", icon: ArrowLeftRight },
   { href: "/dashboard/withdrawals", label: "Withdrawals", icon: ArrowDownLeft },
   { href: "/dashboard/refunds", label: "Refunds", icon: Undo2 },
-  { href: "/dashboard/support", label: "Support", icon: LifeBuoy },
+  { href: "/dashboard/documents", label: "Documents", icon: FileText },
+  { href: "/dashboard/messages", label: "Messages", icon: MessageSquare },
   { href: "/dashboard/profile", label: "Profile", icon: UserRound },
   { href: "/dashboard/security", label: "Security", icon: ShieldCheck },
 ];
@@ -36,7 +38,7 @@ const adminItems = [
   { href: "/admin/withdrawals", label: "Withdrawals", icon: ArrowDownLeft },
   { href: "/admin/refunds", label: "Refunds", icon: Undo2 },
   { href: "/admin/transactions", label: "Ledger", icon: ArrowLeftRight },
-  { href: "/admin/support", label: "Support", icon: LifeBuoy },
+  { href: "/admin/messages", label: "Messages", icon: MessageSquare },
   { href: "/admin/audit-logs", label: "Audit", icon: ScrollText },
   { href: "/admin/analytics", label: "Analytics", icon: LineChart },
 ];
