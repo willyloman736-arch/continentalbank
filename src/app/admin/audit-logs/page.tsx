@@ -1,5 +1,7 @@
-import { ScrollText } from "lucide-react";
+import Link from "next/link";
+import { Download, ScrollText } from "lucide-react";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { requireAdmin } from "@/lib/auth";
 import { adminAuditLogs } from "@/lib/demo/queries";
@@ -17,6 +19,13 @@ export default async function AdminAuditLogsPage() {
         eyebrow="Audit"
         title="Immutable audit log."
         description="Every officer action against the platform is recorded here with timestamp, actor, and change context."
+        actions={
+          <Button variant="outline" asChild>
+            <Link href="/api/audit-logs/export" download>
+              <Download className="h-4 w-4" /> Export CSV
+            </Link>
+          </Button>
+        }
       />
 
       {rows.length === 0 ? (

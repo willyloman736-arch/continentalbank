@@ -10,6 +10,7 @@ import {
   FileText,
   LayoutDashboard,
   MessageSquare,
+  ShieldAlert,
   ShieldCheck,
   Undo2,
   UserRound,
@@ -37,6 +38,7 @@ const clientItems = [
 const adminItems = [
   { href: "/admin", label: "Operations", icon: LayoutDashboard },
   { href: "/admin/users", label: "Clients", icon: Users },
+  { href: "/admin/compliance", label: "Compliance", icon: ShieldAlert },
   { href: "/admin/withdrawals", label: "Withdrawals", icon: ArrowDownLeft },
   { href: "/admin/beneficiaries", label: "Beneficiaries", icon: Banknote },
   { href: "/admin/refunds", label: "Refunds", icon: Undo2 },
