@@ -77,7 +77,13 @@ export async function updateSession(request: NextRequest) {
       if (pathname.startsWith("/dashboard") && isAdminRole(role)) {
         return redirectTo(request, "/admin");
       }
-      if (pathname.startsWith("/dashboard") && status !== "approved") {
+      // Suspended users stay on the dashboard — the layout renders it
+      // in frozen mode. Only pending/rejected are bounced.
+      if (
+        pathname.startsWith("/dashboard") &&
+        status !== "approved" &&
+        status !== "suspended"
+      ) {
         return redirectTo(request, "/pending");
       }
 
@@ -155,7 +161,8 @@ export async function updateSession(request: NextRequest) {
       if (isAdminRole(role)) {
         return redirectTo(request, "/admin");
       }
-      if (status !== "approved") {
+      // Suspended users stay — frozen overlay is rendered by the layout.
+      if (status !== "approved" && status !== "suspended") {
         return redirectTo(request, "/pending");
       }
     }

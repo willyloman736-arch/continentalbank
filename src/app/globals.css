@@ -345,4 +345,42 @@
   .dark .skeleton {
     background-color: hsl(var(--muted) / 0.6);
   }
+
+  /* ----------------------------------------------------------- *
+   *  Frozen account — disables all mutating interactions
+   *
+   *  Applied to the dashboard wrapper via [data-frozen="true"].
+   *  Buttons/inputs/textareas/selects inside forms are
+   *  pointer-events: none and faded out. Anything with
+   *  [data-frost-allow="true"] is exempted (the "Contact
+   *  relationship manager" CTA, sign-out, nav links).
+   * ----------------------------------------------------------- */
+  [data-frozen="true"] form button,
+  [data-frozen="true"] form input,
+  [data-frozen="true"] form textarea,
+  [data-frozen="true"] form select,
+  [data-frozen="true"] [data-frost-disable="true"] {
+    pointer-events: none !important;
+    opacity: 0.45;
+    filter: saturate(0.5) grayscale(0.35);
+    cursor: not-allowed;
+  }
+  [data-frozen="true"] [data-frost-allow="true"] {
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    filter: none !important;
+    cursor: pointer;
+  }
+  /* The frost overlay sits on top of cards, so cards underneath
+     pick up a small extra cool tint that matches the overlay. */
+  [data-frozen="true"] .glass-card,
+  [data-frozen="true"] .glass-strong {
+    box-shadow:
+      inset 0 0 0 1px rgba(187, 222, 251, 0.18),
+      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.25),
+      inset 0 10px 26px -10px rgba(187, 222, 251, 0.12),
+      inset 0 -1px 0 rgba(60, 120, 180, 0.18),
+      0 22px 50px -20px rgba(40, 80, 130, 0.45),
+      0 6px 18px -8px rgba(40, 80, 130, 0.28);
+  }
 }

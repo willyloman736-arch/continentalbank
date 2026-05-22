@@ -17,7 +17,7 @@ const ADMIN_ROLES = ["super_admin", "finance_admin", "support_admin"] as const;
 export async function getAuthedUser(): Promise<AuthedUser | null> {
   // 1. Demo cookie present? — return a seeded user.
   const demoRole = await getDemoRole();
-  if (demoRole) return getDemoAuthedUser(demoRole);
+  if (demoRole) return await getDemoAuthedUser(demoRole);
 
   // 2. Local build-mode auth while Supabase Auth is not connected.
   if (localAuthEnabled()) {
@@ -47,10 +47,20 @@ export async function requireUser(): Promise<AuthedUser> {
   return user;
 }
 
+/**
+ * Requires a signed-in client who can see the dashboard.
+ *
+ * `approved` clients see it as normal.
+ * `suspended` clients are allowed through so the dashboard can render
+ * in its frozen state — the layout reads `account_status` and renders
+ * the FrozenOverlay + locks form interactions.
+ * `pending` / `rejected` clients go to the /pending page.
+ */
 export async function requireApprovedClient(): Promise<AuthedUser> {
   const user = await requireUser();
   if (isAdmin(user.profile.role)) redirect("/admin");
-  if (user.profile.account_status !== "approved") redirect("/pending");
+  const status = user.profile.account_status;
+  if (status !== "approved" && status !== "suspended") redirect("/pending");
   return user;
 }
 

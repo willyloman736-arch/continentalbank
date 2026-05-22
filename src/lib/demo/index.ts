@@ -15,6 +15,8 @@ import type { AuthedUser } from "@/lib/auth";
 export { supabaseConfigured } from "@/lib/auth-mode";
 
 export const DEMO_COOKIE = "cb_demo";
+/** Optional cookie that puts the demo client into the frozen state for previews. */
+export const DEMO_FROZEN_COOKIE = "cb_demo_frozen";
 export type DemoRole = "client" | "officer";
 
 /**
@@ -36,11 +38,33 @@ export async function isDemoMode(): Promise<boolean> {
   return role !== null;
 }
 
-export function getDemoAuthedUser(role: DemoRole): AuthedUser {
-  const profile = role === "officer" ? demoAdminProfile : demoClientProfile;
+/**
+ * Has the visitor opted into the frozen-account preview?
+ * Honoured only when demo mode is active.
+ */
+export async function isDemoFrozenPreview(): Promise<boolean> {
+  const role = await getDemoRole();
+  if (role !== "client") return false;
+  const c = await cookies();
+  return c.get(DEMO_FROZEN_COOKIE)?.value === "1";
+}
+
+export async function getDemoAuthedUser(role: DemoRole): Promise<AuthedUser> {
+  const baseProfile = role === "officer" ? demoAdminProfile : demoClientProfile;
+
+  // If the visitor toggled the frozen preview, present the demo client
+  // as suspended so the dashboard renders in frozen mode.
+  if (role === "client" && (await isDemoFrozenPreview())) {
+    return {
+      id: baseProfile.id,
+      email: baseProfile.email,
+      profile: { ...baseProfile, account_status: "suspended" },
+    };
+  }
+
   return {
-    id: profile.id,
-    email: profile.email,
-    profile,
+    id: baseProfile.id,
+    email: baseProfile.email,
+    profile: baseProfile,
   };
 }

@@ -5,6 +5,7 @@ import { AmbientBackdrop } from "@/components/shared/ambient-backdrop";
 import { TopPill } from "@/components/dashboard/top-pill";
 import { BottomPill } from "@/components/dashboard/bottom-pill";
 import { DemoBanner } from "@/components/shared/demo-banner";
+import { FrozenOverlay } from "@/components/dashboard/frozen-overlay";
 import { PageTransition } from "@/components/motion/page-transition";
 
 export const dynamic = "force-dynamic";
@@ -23,11 +24,25 @@ export const metadata: Metadata = {
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await requireApprovedClient();
   const locale = await detectLocale();
+  const isFrozen = user.profile.account_status === "suspended";
 
   return (
-    <div className="relative min-h-screen text-foreground dark">
+    <div
+      className="relative min-h-screen text-foreground dark"
+      data-frozen={isFrozen ? "true" : undefined}
+    >
       <AmbientBackdrop variant="navy" />
       <DemoBanner />
+
+      {isFrozen && (
+        <FrozenOverlay
+          frozenAt={user.profile.updated_at}
+          reason={
+            "Outbound activity, profile changes, and new instructions are paused pending compliance review."
+          }
+        />
+      )}
+
       <TopPill
         fullName={user.profile.full_name}
         email={user.email ?? ""}
