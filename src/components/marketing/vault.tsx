@@ -5,16 +5,19 @@ import { motion, useReducedMotion } from "framer-motion";
 /**
  * Continental Bank — Vault door.
  *
- * A pure-SVG, code-drawn vault that runs a short choreographed opening
+ * A pure-SVG, code-drawn vault that runs a short choreographed security
  * sequence on mount (plays on every visit):
  *
  *   T=0      enter: opacity + slight scale settling
  *   T=0.8s   spoke wheel begins a deliberate unlock rotation
  *   T=1.6s   12 radial bolts retract inward (staggered ~40ms apart)
  *   T=2.7s   the door eases open and reveals warm interior light
- *   T=3.3s   access indicator switches from idle to champagne
+ *   T=3.5s   reserve stacks appear inside the vault
+ *   T=5.4s   the door closes firmly
+ *   T=6.3s   bolts extend
+ *   T=7.4s   secure indicator switches to champagne
  *
- * Reduced motion: the vault renders in its final open state with no
+ * Reduced motion: the vault renders in its final secured state with no
  * animation. All visuals are hand-drawn — no external assets.
  */
 
@@ -44,9 +47,34 @@ export function Vault({ size }: VaultProps = {}) {
   const tDoorDelay = tBoltsDelay + BOLT_COUNT * 0.04 + tBolt + 0.08;
   const tDoor = 1.15;
   const tLightDelay = tDoorDelay + 0.08;
-  const tIndicatorDelay = tDoorDelay + 0.72;
+  const tCashDelay = tDoorDelay + 0.72;
+  const tHoldOpen = 1.45;
+  const tCloseDelay = tDoorDelay + tDoor + tHoldOpen;
+  const tClose = 0.9;
+  const tWheelLockDelay = tCloseDelay + tClose + 0.02;
+  const boltReturnDelay = tWheelLockDelay + 0.05;
+  const boltMotionDuration = boltReturnDelay - tBoltsDelay + tBolt;
+  const tSecureDelay = boltReturnDelay + BOLT_COUNT * 0.035 + tBolt + 0.12;
 
+  const doorClosedState = { x: 0, scaleX: 1, skewY: 0 };
   const doorOpenState = { x: -12, scaleX: 0.74, skewY: -1.8 };
+  const doorSlamState = { x: 3, scaleX: 1.012, skewY: 0.2 };
+  const doorMotionDuration = tDoor + tHoldOpen + tClose;
+  const doorMotion = reduce
+    ? doorClosedState
+    : {
+        x: [0, doorOpenState.x, doorOpenState.x, doorSlamState.x, 0],
+        scaleX: [1, doorOpenState.scaleX, doorOpenState.scaleX, doorSlamState.scaleX, 1],
+        skewY: [0, doorOpenState.skewY, doorOpenState.skewY, doorSlamState.skewY, 0],
+      };
+  const doorMotionTimes = [0, tDoor / doorMotionDuration, (tDoor + tHoldOpen) / doorMotionDuration, 0.92, 1];
+  const wheelMotionDuration = tWheelLockDelay - tWheelDelay + 0.72;
+  const wheelMotionTimes = [
+    0,
+    tWheel / wheelMotionDuration,
+    (tWheelLockDelay - tWheelDelay) / wheelMotionDuration,
+    1,
+  ];
 
   const sizeStyle = size ? { width: size, height: size } : { width: "100%", height: "100%" };
 
@@ -54,7 +82,7 @@ export function Vault({ size }: VaultProps = {}) {
     <div
       className="relative"
       style={sizeStyle}
-      aria-label="Continental Bank vault — opening"
+      aria-label="Continental Bank vault — opens, reveals secured reserves, and locks"
       role="img"
     >
       {/* Soft champagne halo behind the vault */}
@@ -126,6 +154,23 @@ export function Vault({ size }: VaultProps = {}) {
             <stop offset="0%" stopColor="rgba(229,206,148,0)" />
             <stop offset="40%" stopColor="rgba(229,206,148,0.42)" />
             <stop offset="100%" stopColor="rgba(229,206,148,0)" />
+          </linearGradient>
+
+          <linearGradient id="v-cash-face" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#F5F0D8" />
+            <stop offset="52%" stopColor="#B9D59A" />
+            <stop offset="100%" stopColor="#5C8E56" />
+          </linearGradient>
+
+          <linearGradient id="v-cash-edge" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#D9E7B4" />
+            <stop offset="100%" stopColor="#4C6F48" />
+          </linearGradient>
+
+          <linearGradient id="v-cash-band" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#8C6E3C" />
+            <stop offset="50%" stopColor="#E5CE94" />
+            <stop offset="100%" stopColor="#8C6E3C" />
           </linearGradient>
 
           {/* Body highlight — soft light source from top-left */}
@@ -250,6 +295,89 @@ export function Vault({ size }: VaultProps = {}) {
             transition={{ duration: 1.4, delay: tLightDelay + 0.08, ease: easeOut }}
             style={{ transformOrigin: `${C}px ${C}px` }}
           />
+
+          <motion.g
+            aria-hidden
+            initial={reduce ? false : { opacity: 0, y: 18, scale: 0.92 }}
+            animate={
+              reduce
+                ? { opacity: 0 }
+                : {
+                    opacity: [0, 1, 1, 0.08],
+                    y: [18, 0, 0, 4],
+                    scale: [0.92, 1, 1, 0.98],
+                  }
+            }
+            transition={
+              reduce
+                ? { duration: 0 }
+                : {
+                    duration: tHoldOpen + 1.2,
+                    delay: tCashDelay,
+                    times: [0, 0.22, 0.78, 1],
+                    ease: easeOut,
+                  }
+            }
+            style={{ transformOrigin: `${C + 120}px ${C + 104}px` }}
+          >
+            <ellipse
+              cx={C + 134}
+              cy={C + 153}
+              rx="118"
+              ry="20"
+              fill="rgba(4,8,14,0.48)"
+              style={{ filter: "blur(8px)" }}
+            />
+            {[
+              { x: C + 54, y: C + 60, w: 160, h: 34, rotate: -6 },
+              { x: C + 76, y: C + 91, w: 158, h: 34, rotate: 4 },
+              { x: C + 46, y: C + 122, w: 166, h: 36, rotate: -2 },
+            ].map(({ x, y, w, h, rotate }, index) => (
+              <g key={index} transform={`rotate(${rotate} ${x + w / 2} ${y + h / 2})`}>
+                <rect
+                  x={x + 6}
+                  y={y + 9}
+                  width={w}
+                  height={h}
+                  rx="5"
+                  fill="url(#v-cash-edge)"
+                  opacity="0.9"
+                />
+                <rect
+                  x={x}
+                  y={y}
+                  width={w}
+                  height={h}
+                  rx="6"
+                  fill="url(#v-cash-face)"
+                  stroke="rgba(255,255,255,0.42)"
+                  strokeWidth="0.9"
+                />
+                <rect
+                  x={x + w * 0.45}
+                  y={y - 2}
+                  width={w * 0.16}
+                  height={h + 5}
+                  rx="3"
+                  fill="url(#v-cash-band)"
+                  opacity="0.95"
+                />
+                <rect
+                  x={x + 14}
+                  y={y + 8}
+                  width={w - 28}
+                  height={h - 16}
+                  rx="8"
+                  fill="none"
+                  stroke="rgba(16,61,33,0.35)"
+                  strokeWidth="1"
+                />
+                <circle cx={x + 30} cy={y + h / 2} r="4" fill="rgba(16,61,33,0.32)" />
+                <circle cx={x + w - 30} cy={y + h / 2} r="4" fill="rgba(16,61,33,0.32)" />
+              </g>
+            ))}
+          </motion.g>
+
           {!reduce && (
             <motion.g
               initial={{ rotate: -18, opacity: 0 }}
@@ -273,8 +401,17 @@ export function Vault({ size }: VaultProps = {}) {
 
         <motion.g
           initial={reduce ? false : { x: 0, scaleX: 1, skewY: 0 }}
-          animate={doorOpenState}
-          transition={reduce ? { duration: 0 } : { duration: tDoor, delay: tDoorDelay, ease: easeInOut }}
+          animate={doorMotion}
+          transition={
+            reduce
+              ? { duration: 0 }
+              : {
+                  duration: doorMotionDuration,
+                  delay: tDoorDelay,
+                  times: doorMotionTimes,
+                  ease: easeInOut,
+                }
+          }
           style={{ transformOrigin: `${C - 264}px ${C}px` }}
         >
         {/* Outer door rim - champagne */}
@@ -313,14 +450,14 @@ export function Vault({ size }: VaultProps = {}) {
                 duration: 14,
                 ease: "linear",
                 repeat: Infinity,
-                delay: tIndicatorDelay + 0.5,
+                delay: tSecureDelay + 0.5,
               },
               opacity: {
                 duration: 14,
                 ease: "easeInOut",
                 repeat: Infinity,
                 times: [0, 0.15, 0.85, 1],
-                delay: tIndicatorDelay + 0.5,
+                delay: tSecureDelay + 0.5,
               },
             }}
             style={{ transformOrigin: `${C}px ${C}px` }}
@@ -372,14 +509,35 @@ export function Vault({ size }: VaultProps = {}) {
           const startOffsetX = Math.cos(angleRad) * (BOLT_INNER_R - BOLT_OUTER_R);
           const startOffsetY = Math.sin(angleRad) * (BOLT_INNER_R - BOLT_OUTER_R);
           const delay = tBoltsDelay + i * 0.04;
+          const returnStart = Math.min(
+            Math.max((boltReturnDelay - delay) / boltMotionDuration, 0.62),
+            0.9,
+          );
+          const retractDone = Math.min(tBolt / boltMotionDuration, returnStart - 0.05);
           const highlightX = finalX - Math.cos(angleRad - Math.PI / 4) * 3;
           const highlightY = finalY - Math.sin(angleRad - Math.PI / 4) * 3;
           return (
             <motion.g
               key={i}
               initial={reduce ? false : { x: 0, y: 0 }}
-              animate={{ x: startOffsetX, y: startOffsetY }}
-              transition={reduce ? { duration: 0 } : { duration: tBolt, delay, ease: easeOut }}
+              animate={
+                reduce
+                  ? { x: 0, y: 0 }
+                  : {
+                      x: [0, startOffsetX, startOffsetX, 0],
+                      y: [0, startOffsetY, startOffsetY, 0],
+                    }
+              }
+              transition={
+                reduce
+                  ? { duration: 0 }
+                  : {
+                      duration: boltMotionDuration,
+                      delay,
+                      times: [0, retractDone, returnStart, 1],
+                      ease: easeOut,
+                    }
+              }
             >
               <circle cx={finalX} cy={finalY} r="12" fill="url(#v-bolt)" />
               <circle
@@ -430,8 +588,17 @@ export function Vault({ size }: VaultProps = {}) {
         <g transform={`translate(${C} ${C})`}>
           <motion.g
             initial={reduce ? false : { rotate: 0 }}
-            animate={{ rotate: -540 }}
-            transition={reduce ? { duration: 0 } : { duration: tWheel, delay: tWheelDelay, ease: easeInOut }}
+            animate={reduce ? { rotate: -900 } : { rotate: [0, -540, -540, -900] }}
+            transition={
+              reduce
+                ? { duration: 0 }
+                : {
+                    duration: wheelMotionDuration,
+                    delay: tWheelDelay,
+                    times: wheelMotionTimes,
+                    ease: easeInOut,
+                  }
+            }
             style={{ transformOrigin: "0px 0px" }}
           >
             {/* Outer wheel ring */}
@@ -468,6 +635,33 @@ export function Vault({ size }: VaultProps = {}) {
         </g>
         </motion.g>
 
+        {!reduce && (
+          <motion.g
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: [0, 0.9, 0], scale: [0.98, 1.012, 1.024] }}
+            transition={{ duration: 0.72, delay: tSecureDelay - 0.18, ease: easeOut }}
+            style={{ transformOrigin: `${C}px ${C}px` }}
+          >
+            <circle
+              cx={C}
+              cy={C}
+              r="266"
+              fill="none"
+              stroke="rgba(229,206,148,0.72)"
+              strokeWidth="2"
+              filter="url(#v-soft-glow)"
+            />
+            <circle
+              cx={C}
+              cy={C}
+              r="206"
+              fill="none"
+              stroke="rgba(200,169,106,0.34)"
+              strokeWidth="1"
+            />
+          </motion.g>
+        )}
+
         {/* ============ ACCESS STATUS INDICATOR ============ */}
         {/* Small champagne lamp at the 6-o'clock of the inner ring */}
         <g>
@@ -480,14 +674,14 @@ export function Vault({ size }: VaultProps = {}) {
             stroke="url(#v-gold)"
             strokeWidth="0.8"
           />
-          {/* Lamp — starts dim, turns champagne when open */}
+          {/* Lamp — starts dim, turns champagne after the door locks */}
           <motion.circle
             cx={C}
             cy={C + 138}
             r="5"
             initial={reduce ? false : { fill: "#1A2541", opacity: 0.6 }}
             animate={{ fill: "#C8A96A", opacity: 1 }}
-            transition={{ duration: 0.5, delay: tIndicatorDelay, ease: easeOut }}
+            transition={{ duration: 0.5, delay: tSecureDelay, ease: easeOut }}
           />
           {/* Bloom */}
           <motion.circle
@@ -497,7 +691,7 @@ export function Vault({ size }: VaultProps = {}) {
             fill="rgba(200,169,106,0.4)"
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 0.7 }}
-            transition={{ duration: 0.6, delay: tIndicatorDelay, ease: easeOut }}
+            transition={{ duration: 0.6, delay: tSecureDelay, ease: easeOut }}
             style={{ filter: "blur(6px)" }}
           />
         </g>
@@ -514,7 +708,7 @@ export function Vault({ size }: VaultProps = {}) {
         }}
         initial={reduce ? false : { opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: tIndicatorDelay + 0.1, ease: easeOut }}
+        transition={{ duration: 0.5, delay: tSecureDelay + 0.1, ease: easeOut }}
       >
         <motion.span
           className="h-1.5 w-1.5 rounded-full"
@@ -522,7 +716,7 @@ export function Vault({ size }: VaultProps = {}) {
           animate={reduce ? undefined : { opacity: [1, 0.5, 1] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
         />
-        Access granted
+        Vault secured
       </motion.div>
     </div>
   );
