@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { CURRENCIES as CURRENCY_CONST } from "@/lib/constants";
+import { CURRENCIES as CURRENCY_CONST, KYC_METHODS } from "@/lib/constants";
 import { SUPPORTED_LOCALES } from "@/lib/i18n/dictionaries";
 
 export const CURRENCIES = CURRENCY_CONST as unknown as [string, ...string[]];
 export const SUPPORTED_LOCALES_VALUES = SUPPORTED_LOCALES as unknown as [string, ...string[]];
+export const KYC_METHOD_VALUES = KYC_METHODS.map((m) => m.id) as unknown as [string, ...string[]];
 
 export const WithdrawalRequestSchema = z.object({
   currency: z.enum(CURRENCIES as unknown as [string, ...string[]]),
@@ -35,6 +36,16 @@ export const ProfileUpdateSchema = z.object({
   country: z.string().min(2).max(2),
   preferredLanguage: z.enum(SUPPORTED_LOCALES_VALUES),
   preferredCurrency: z.enum(CURRENCIES as unknown as [string, ...string[]]),
+});
+
+export const KycSubmissionSchema = z.object({
+  method: z.enum(KYC_METHOD_VALUES),
+});
+
+export const KycDecisionSchema = z.object({
+  userId: z.string().min(1),
+  decision: z.enum(["under_review", "approved", "rejected"]),
+  note: z.string().max(2000).optional(),
 });
 
 export const PasswordChangeSchema = z

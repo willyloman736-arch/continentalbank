@@ -1,15 +1,16 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileCheck2 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { KycDecisionActions } from "@/components/admin/kyc-decision-actions";
 import { UserDecisionActions } from "@/components/admin/user-decision-actions";
 import { BalanceAdjustForm } from "@/components/admin/balance-adjust-form";
 import { requireAdmin } from "@/lib/auth";
 import { adminClientDetail } from "@/lib/demo/queries";
 import { formatCurrency, formatDateTime, maskAccountNumber } from "@/lib/utils";
-import { ROLE_LABELS, type Role } from "@/lib/constants";
+import { KYC_METHODS, KYC_STATUS, ROLE_LABELS, type KycStatus, type Role } from "@/lib/constants";
 import type { LedgerEntry, Profile, Wallet, WithdrawalRequest } from "@/lib/types/database";
 
 export const metadata = { title: "Client detail" };
@@ -25,6 +26,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
   const ws = wallets as Wallet[];
   const ledgerRows = ledger as LedgerEntry[];
   const wds = withdrawals as WithdrawalRequest[];
+  const kycStatus = (p.kyc_status ?? "not_submitted") as KycStatus;
 
   const canModifyBalance =
     admin.profile.role === "super_admin" || admin.profile.role === "finance_admin";
@@ -46,30 +48,71 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
       </div>
 
       <section className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
-        <div className="glass-card p-6 space-y-5 h-fit">
-          <div className="eyebrow text-champagne-700 dark:text-champagne-400">Identity</div>
-          <Row label="Account number" value={maskAccountNumber(p.account_number)} />
-          <Row label="Status">
-            <Badge
-              variant={
-                p.account_status === "approved"
-                  ? "success"
-                  : p.account_status === "rejected"
-                    ? "destructive"
-                    : p.account_status === "suspended"
-                      ? "muted"
-                      : "warning"
-              }
-              className="capitalize"
-            >
-              {p.account_status}
-            </Badge>
-          </Row>
-          <Row label="Country" value={p.country ?? "—"} />
-          <Row label="Phone" value={p.phone ?? "—"} />
-          <Row label="Reporting" value={p.preferred_currency} />
-          <Row label="Language" value={p.preferred_language?.toUpperCase()} />
-          <Row label="Registered" value={formatDateTime(p.created_at)} />
+        <div className="space-y-6">
+          <div className="glass-card p-6 space-y-5 h-fit">
+            <div className="eyebrow text-champagne-700 dark:text-champagne-400">Identity</div>
+            <Row label="Account number" value={maskAccountNumber(p.account_number)} />
+            <Row label="Status">
+              <Badge
+                variant={
+                  p.account_status === "approved"
+                    ? "success"
+                    : p.account_status === "rejected"
+                      ? "destructive"
+                      : p.account_status === "suspended"
+                        ? "muted"
+                        : "warning"
+                }
+                className="capitalize"
+              >
+                {p.account_status}
+              </Badge>
+            </Row>
+            <Row label="Country" value={p.country ?? "—"} />
+            <Row label="Phone" value={p.phone ?? "—"} />
+            <Row label="Reporting" value={p.preferred_currency} />
+            <Row label="Language" value={p.preferred_language?.toUpperCase()} />
+            <Row label="Registered" value={formatDateTime(p.created_at)} />
+          </div>
+
+          <div className="glass-card p-6 space-y-5 h-fit">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="eyebrow text-champagne-700 dark:text-champagne-400">
+                  KYC verification
+                </div>
+                <h3 className="mt-2 font-display text-lg font-semibold text-foreground">
+                  Document review
+                </h3>
+              </div>
+              <FileCheck2 className="h-5 w-5 text-champagne-600" strokeWidth={1.5} />
+            </div>
+            <Row label="KYC status">
+              <KycStatusBadge status={kycStatus} />
+            </Row>
+            <Row label="Method" value={labelForKycMethod(p.kyc_method)} />
+            <Row label="Document" value={p.kyc_document_name ?? "—"} />
+            <Row label="Submitted" value={p.kyc_submitted_at ? formatDateTime(p.kyc_submitted_at) : "—"} />
+            <Row label="Reviewed" value={p.kyc_reviewed_at ? formatDateTime(p.kyc_reviewed_at) : "—"} />
+            {p.kyc_review_note && (
+              <div className="rounded-md border border-champagne-500/20 bg-champagne-500/5 px-3.5 py-3">
+                <div className="eyebrow text-champagne-700 dark:text-champagne-400 mb-1">
+                  Last note
+                </div>
+                <p className="text-[12.5px] leading-relaxed text-foreground">
+                  {p.kyc_review_note}
+                </p>
+              </div>
+            )}
+            {p.kyc_document_path && !p.kyc_document_path.startsWith("demo-kyc/") && (
+              <Button variant="outline" size="sm" asChild>
+                <a href={`/api/admin/kyc-document/${p.id}`} target="_blank" rel="noreferrer">
+                  Open document
+                </a>
+              </Button>
+            )}
+            <KycDecisionActions userId={p.id} status={kycStatus} />
+          </div>
         </div>
 
         <div className="glass-card p-6 lg:p-7">
@@ -217,4 +260,23 @@ function Row({
       </span>
     </div>
   );
+}
+
+function KycStatusBadge({ status }: { status: KycStatus }) {
+  const map = {
+    not_submitted: "muted",
+    submitted: "warning",
+    under_review: "gold",
+    approved: "success",
+    rejected: "destructive",
+  } as const;
+  return (
+    <Badge variant={map[status]} className="capitalize">
+      {KYC_STATUS[status]}
+    </Badge>
+  );
+}
+
+function labelForKycMethod(method: Profile["kyc_method"]) {
+  return KYC_METHODS.find((m) => m.id === method)?.label ?? "—";
 }

@@ -7,7 +7,7 @@ import { CreateUserDialog } from "@/components/admin/create-user-dialog";
 import { requireAdmin } from "@/lib/auth";
 import { adminClientRoster } from "@/lib/demo/queries";
 import { formatDate, maskAccountNumber } from "@/lib/utils";
-import { ROLE_LABELS, type Role } from "@/lib/constants";
+import { KYC_STATUS, ROLE_LABELS, type KycStatus, type Role } from "@/lib/constants";
 import type { Profile } from "@/lib/types/database";
 
 export const metadata = { title: "Clients" };
@@ -56,12 +56,13 @@ export default async function AdminUsersPage({
       </div>
 
       <div className="glass-card overflow-hidden">
-        <div className="hidden md:grid grid-cols-[1.4fr_1.2fr_1fr_0.9fr_0.8fr_auto] gap-4 border-b border-foreground/[0.06] bg-foreground/[0.02] px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+        <div className="hidden md:grid grid-cols-[1.35fr_1.1fr_0.8fr_0.9fr_0.8fr_0.9fr_auto] gap-4 border-b border-foreground/[0.06] bg-foreground/[0.02] px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
           <span>Client</span>
           <span>Account</span>
           <span>Country</span>
           <span>Role</span>
           <span>Status</span>
+          <span>KYC</span>
           <span className="text-right">Joined</span>
         </div>
         {profiles.length === 0 ? (
@@ -73,7 +74,7 @@ export default async function AdminUsersPage({
             {profiles.map((p) => (
               <li
                 key={p.id}
-                className="grid grid-cols-[1fr_auto] md:grid-cols-[1.4fr_1.2fr_1fr_0.9fr_0.8fr_auto] items-center gap-4 px-6 py-4"
+                className="grid grid-cols-[1fr_auto] md:grid-cols-[1.35fr_1.1fr_0.8fr_0.9fr_0.8fr_0.9fr_auto] items-center gap-4 px-6 py-4"
               >
                 <div className="min-w-0">
                   <Link
@@ -95,6 +96,9 @@ export default async function AdminUsersPage({
                 </div>
                 <div className="hidden md:block">
                   <StatusBadge status={p.account_status} />
+                </div>
+                <div className="hidden md:block">
+                  <KycBadge status={(p.kyc_status ?? "not_submitted") as KycStatus} />
                 </div>
                 <div className="md:hidden flex items-center gap-2 justify-self-end">
                   <StatusBadge status={p.account_status} />
@@ -128,6 +132,21 @@ function StatusBadge({ status }: { status: Profile["account_status"] }) {
   return (
     <Badge variant={map[status]} className="capitalize">
       {status}
+    </Badge>
+  );
+}
+
+function KycBadge({ status }: { status: KycStatus }) {
+  const map = {
+    not_submitted: "muted",
+    submitted: "warning",
+    under_review: "gold",
+    approved: "success",
+    rejected: "destructive",
+  } as const;
+  return (
+    <Badge variant={map[status]} className="capitalize">
+      {KYC_STATUS[status]}
     </Badge>
   );
 }

@@ -83,6 +83,27 @@ export const ACCOUNT_STATUS = {
 
 export type AccountStatus = keyof typeof ACCOUNT_STATUS;
 
+export const KYC_STATUS = {
+  not_submitted: "Not submitted",
+  submitted: "Submitted",
+  under_review: "Under review",
+  approved: "Approved",
+  rejected: "Needs attention",
+} as const;
+
+export type KycStatus = keyof typeof KYC_STATUS;
+
+export const KYC_METHODS = [
+  { id: "passport", label: "Passport", description: "Government passport identity page." },
+  { id: "national_id", label: "National ID", description: "Front and back in one PDF or image." },
+  { id: "drivers_license", label: "Driver's license", description: "Current licence with visible address." },
+  { id: "proof_of_address", label: "Proof of address", description: "Utility, bank, or tax statement under 90 days." },
+  { id: "source_of_funds", label: "Source of funds", description: "Bank letter, sale agreement, payroll, or audited proof." },
+  { id: "business_registry", label: "Business registry", description: "Certificate of incorporation or company extract." },
+] as const;
+
+export type KycMethod = (typeof KYC_METHODS)[number]["id"];
+
 export const WITHDRAWAL_STATUS = {
   pending: "Pending Review",
   approved: "Approved",

@@ -2,13 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isDemoMode, supabaseConfigured } from "@/lib/demo";
 import { localAuthEnabled } from "@/lib/auth-mode";
-import { PasswordChangeSchema, ProfileUpdateSchema } from "@/lib/validation";
+import { KycSubmissionSchema, PasswordChangeSchema, ProfileUpdateSchema } from "@/lib/validation";
 import type { ActionResult } from "./withdrawals";
 
 const DEMO_MSG = "Demo mode — your changes are simulated, nothing is saved.";
+const KYC_BUCKET = "kyc-documents";
+const MAX_KYC_FILE_SIZE = 10 * 1024 * 1024;
+const ALLOWED_KYC_MIME = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
 
 export async function updateProfile(input: unknown): Promise<ActionResult> {
   const user = await requireUser();
@@ -55,4 +58,84 @@ export async function changePassword(input: unknown): Promise<ActionResult> {
   if (error) return { ok: false, error: error.message };
 
   return { ok: true, message: "Password updated." };
+}
+
+export async function submitKycVerification(formData: FormData): Promise<ActionResult> {
+  const user = await requireUser();
+  const parsed = KycSubmissionSchema.safeParse({
+    method: formData.get("method"),
+  });
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Select a verification method" };
+  }
+
+  const document = formData.get("document");
+  if (!(document instanceof File) || document.size === 0) {
+    return { ok: false, error: "Upload a PDF, JPG, PNG, or WebP document." };
+  }
+  if (document.size > MAX_KYC_FILE_SIZE) {
+    return { ok: false, error: "KYC document must be 10 MB or smaller." };
+  }
+  if (!ALLOWED_KYC_MIME.has(document.type)) {
+    return { ok: false, error: "Use PDF, JPG, PNG, or WebP for verification." };
+  }
+
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    revalidatePath("/dashboard/profile");
+    return {
+      ok: true,
+      message: "Verification package received for admin review.",
+    };
+  }
+
+  const service = createServiceClient();
+  const { error: bucketError } = await service.storage.createBucket(KYC_BUCKET, {
+    public: false,
+    fileSizeLimit: MAX_KYC_FILE_SIZE,
+    allowedMimeTypes: Array.from(ALLOWED_KYC_MIME),
+  });
+  if (bucketError && !/already exists|duplicate|resource already exists/i.test(bucketError.message)) {
+    return { ok: false, error: bucketError.message };
+  }
+
+  const now = new Date().toISOString();
+  const safeName = safeDocumentName(document.name);
+  const path = `${user.id}/${Date.now()}-${safeName}`;
+  const { error: uploadError } = await service.storage.from(KYC_BUCKET).upload(path, document, {
+    cacheControl: "3600",
+    contentType: document.type,
+    upsert: true,
+  });
+  if (uploadError) return { ok: false, error: uploadError.message };
+
+  const { error } = await service
+    .from("profiles")
+    .update({
+      kyc_status: "submitted",
+      kyc_method: parsed.data.method,
+      kyc_document_name: document.name,
+      kyc_document_path: path,
+      kyc_document_mime_type: document.type,
+      kyc_submitted_at: now,
+      kyc_reviewed_at: null,
+      kyc_reviewed_by_admin_id: null,
+      kyc_review_note: null,
+    })
+    .eq("id", user.id);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/dashboard/profile");
+  revalidatePath("/admin/users");
+  revalidatePath(`/admin/users/${user.id}`);
+  return { ok: true, message: "Verification package submitted for admin review." };
+}
+
+function safeDocumentName(name: string) {
+  const cleaned = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return cleaned || "kyc-document";
 }

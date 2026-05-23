@@ -64,7 +64,7 @@ export async function signUpAction(formData: FormData): Promise<SignUpResult> {
         preferredCurrency: parsed.data.preferredCurrency as "USD" | "EUR" | "GBP",
       }),
     );
-    return { ok: true, redirectTo: "/dashboard" };
+    return { ok: true, redirectTo: "/dashboard/onboarding" };
   }
 
   const supabase = await createClient();

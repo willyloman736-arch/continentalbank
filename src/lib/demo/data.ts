@@ -19,6 +19,42 @@ import type {
 
 const ISO = (d: string) => new Date(d).toISOString();
 
+type ProfileKycFields = Pick<
+  Profile,
+  | "kyc_status"
+  | "kyc_method"
+  | "kyc_document_name"
+  | "kyc_document_path"
+  | "kyc_document_mime_type"
+  | "kyc_submitted_at"
+  | "kyc_reviewed_at"
+  | "kyc_reviewed_by_admin_id"
+  | "kyc_review_note"
+>;
+
+function kycFields(
+  status: Profile["kyc_status"],
+  method: Profile["kyc_method"] = null,
+  documentName: string | null = null,
+  submittedAt: string | null = null,
+  reviewNote: string | null = null,
+): ProfileKycFields {
+  const reviewed = status === "approved" || status === "rejected";
+  return {
+    kyc_status: status,
+    kyc_method: method,
+    kyc_document_name: documentName,
+    kyc_document_path: documentName
+      ? `demo-kyc/${documentName.toLowerCase().replace(/[^a-z0-9.]+/g, "-")}`
+      : null,
+    kyc_document_mime_type: documentName?.endsWith(".pdf") ? "application/pdf" : null,
+    kyc_submitted_at: submittedAt,
+    kyc_reviewed_at: reviewed ? ISO("2026-05-18T09:45:00Z") : null,
+    kyc_reviewed_by_admin_id: reviewed ? "demo-officer-0001" : null,
+    kyc_review_note: reviewNote,
+  };
+}
+
 /* ------------------------------------------------------------------ *
  *  Demo client (signed-in)
  * ------------------------------------------------------------------ */
@@ -33,6 +69,13 @@ export const demoClientProfile: Profile = {
   preferred_currency: "USD",
   role: "client",
   account_status: "approved",
+  ...kycFields(
+    "approved",
+    "passport",
+    "passport-verification-confirmation.pdf",
+    ISO("2026-05-17T08:30:00Z"),
+    "Identity and proof of address accepted without exceptions.",
+  ),
   account_number: "CB491072820314",
   avatar_url: null,
   created_at: ISO("2022-03-14T10:21:00Z"),
@@ -258,6 +301,13 @@ export const demoAdminProfile: Profile = {
   preferred_currency: "EUR",
   role: "super_admin",
   account_status: "approved",
+  ...kycFields(
+    "approved",
+    null,
+    null,
+    ISO("2019-01-12T09:00:00Z"),
+    "Internal officer account.",
+  ),
   account_number: null,
   avatar_url: null,
   created_at: ISO("2019-01-12T09:00:00Z"),
@@ -280,6 +330,13 @@ export const demoClientRoster: Profile[] = [
     preferred_currency: "GBP",
     role: "client",
     account_status: "approved",
+    ...kycFields(
+      "approved",
+      "passport",
+      "ainsworth-passport.pdf",
+      ISO("2026-02-03T14:22:00Z"),
+      "Passport accepted.",
+    ),
     account_number: "CB662014950011",
     avatar_url: null,
     created_at: ISO("2021-08-04T13:22:00Z"),
@@ -295,6 +352,13 @@ export const demoClientRoster: Profile[] = [
     preferred_currency: "USD",
     role: "client",
     account_status: "approved",
+    ...kycFields(
+      "under_review",
+      "source_of_funds",
+      "source-of-funds-letter.pdf",
+      ISO("2026-05-20T10:05:00Z"),
+      null,
+    ),
     account_number: "CB551142390877",
     avatar_url: null,
     created_at: ISO("2023-02-19T08:45:00Z"),
@@ -310,6 +374,13 @@ export const demoClientRoster: Profile[] = [
     preferred_currency: "EUR",
     role: "client",
     account_status: "pending",
+    ...kycFields(
+      "submitted",
+      "national_id",
+      "marchetti-national-id.pdf",
+      ISO("2026-05-17T09:22:00Z"),
+      null,
+    ),
     account_number: "CB880204110256",
     avatar_url: null,
     created_at: ISO("2026-05-17T09:14:00Z"),
@@ -325,6 +396,7 @@ export const demoClientRoster: Profile[] = [
     preferred_currency: "USD",
     role: "client",
     account_status: "pending",
+    ...kycFields("not_submitted"),
     account_number: "CB100558740043",
     avatar_url: null,
     created_at: ISO("2026-05-18T22:01:00Z"),
@@ -340,6 +412,13 @@ export const demoClientRoster: Profile[] = [
     preferred_currency: "EUR",
     role: "client",
     account_status: "suspended",
+    ...kycFields(
+      "rejected",
+      "proof_of_address",
+      "lindqvist-address.png",
+      ISO("2026-04-03T11:09:00Z"),
+      "Proof of address expired. Request current document.",
+    ),
     account_number: "CB400118250642",
     avatar_url: null,
     created_at: ISO("2020-11-02T10:00:00Z"),

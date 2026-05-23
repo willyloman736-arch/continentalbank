@@ -7,6 +7,7 @@ import {
   ArrowDownLeft,
   ArrowLeftRight,
   Banknote,
+  ClipboardCheck,
   FileText,
   LayoutDashboard,
   MessageSquare,
@@ -24,6 +25,7 @@ import { cn } from "@/lib/utils";
 
 const clientItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/onboarding", label: "Onboarding", icon: ClipboardCheck },
   { href: "/dashboard/wallets", label: "Accounts", icon: Wallet },
   { href: "/dashboard/transactions", label: "Ledger", icon: ArrowLeftRight },
   { href: "/dashboard/withdrawals", label: "Withdrawals", icon: ArrowDownLeft },

@@ -16,6 +16,22 @@ export interface Database {
           preferred_currency: string;
           role: "super_admin" | "finance_admin" | "support_admin" | "client";
           account_status: "pending" | "approved" | "rejected" | "suspended";
+          kyc_status: "not_submitted" | "submitted" | "under_review" | "approved" | "rejected";
+          kyc_method:
+            | "passport"
+            | "national_id"
+            | "drivers_license"
+            | "proof_of_address"
+            | "source_of_funds"
+            | "business_registry"
+            | null;
+          kyc_document_name: string | null;
+          kyc_document_path: string | null;
+          kyc_document_mime_type: string | null;
+          kyc_submitted_at: string | null;
+          kyc_reviewed_at: string | null;
+          kyc_reviewed_by_admin_id: string | null;
+          kyc_review_note: string | null;
           account_number: string | null;
           avatar_url: string | null;
           created_at: string;

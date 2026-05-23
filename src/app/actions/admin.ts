@@ -9,6 +9,7 @@ import { localAuthEnabled } from "@/lib/auth-mode";
 import {
   AdminBalanceAdjustmentSchema,
   AdminCreateUserSchema,
+  KycDecisionSchema,
   TicketReplySchema,
   UserDecisionSchema,
 } from "@/lib/validation";
@@ -69,6 +70,61 @@ export async function decideUser(input: unknown): Promise<ActionResult> {
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${parsed.data.userId}`);
   return { ok: true, message: `User ${parsed.data.decision}.` };
+}
+
+/* ---------------------------------------------------------- *
+ *  Client KYC verification review
+ * ---------------------------------------------------------- */
+export async function decideKycVerification(input: unknown): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const parsed = KycDecisionSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid KYC decision" };
+  }
+
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: DEMO_MSG };
+  }
+
+  const service = createServiceClient();
+  const { data: profile } = await service
+    .from("profiles")
+    .select("id, kyc_status, kyc_method, kyc_document_name")
+    .eq("id", parsed.data.userId)
+    .maybeSingle();
+  if (!profile) return { ok: false, error: "Client not found" };
+
+  const now = new Date().toISOString();
+  const { error } = await service
+    .from("profiles")
+    .update({
+      kyc_status: parsed.data.decision,
+      kyc_reviewed_at: now,
+      kyc_reviewed_by_admin_id: admin.id,
+      kyc_review_note: parsed.data.note ?? null,
+    })
+    .eq("id", parsed.data.userId);
+  if (error) return { ok: false, error: error.message };
+
+  const { ip } = await getClientMeta();
+  await service.from("audit_logs").insert({
+    admin_id: admin.id,
+    user_id: parsed.data.userId,
+    action_type: `kyc_${parsed.data.decision}`,
+    old_value: { status: profile.kyc_status },
+    new_value: {
+      status: parsed.data.decision,
+      method: profile.kyc_method,
+      document: profile.kyc_document_name,
+    },
+    note: parsed.data.note ?? null,
+    ip_address: ip,
+  });
+
+  revalidatePath("/admin/users");
+  revalidatePath(`/admin/users/${parsed.data.userId}`);
+  revalidatePath("/dashboard/profile");
+  return { ok: true, message: `KYC ${parsed.data.decision.replace("_", " ")}.` };
 }
 
 /* ---------------------------------------------------------- *

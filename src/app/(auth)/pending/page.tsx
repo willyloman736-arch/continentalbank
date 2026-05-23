@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Hourglass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { KycVerificationForm } from "@/components/dashboard/kyc-verification-form";
 import { signOutAction } from "@/app/actions/auth";
 import { isAdmin, requireUser } from "@/lib/auth";
 import { formatAccountNumber } from "@/lib/utils";
@@ -80,6 +81,21 @@ export default async function PendingPage() {
           </div>
         </dl>
       </div>
+
+      {status === "pending" && (
+        <div className="glass-card p-6">
+          <KycVerificationForm
+            initial={{
+              kyc_status: user.profile.kyc_status ?? "not_submitted",
+              kyc_method: user.profile.kyc_method ?? null,
+              kyc_document_name: user.profile.kyc_document_name ?? null,
+              kyc_submitted_at: user.profile.kyc_submitted_at ?? null,
+              kyc_reviewed_at: user.profile.kyc_reviewed_at ?? null,
+              kyc_review_note: user.profile.kyc_review_note ?? null,
+            }}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
         <form action={signOutAction}>

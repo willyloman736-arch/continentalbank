@@ -6,6 +6,7 @@ import { TrustBadgeRail } from "@/components/shared/trust-badges";
 import { requireApprovedClient } from "@/lib/auth";
 import {
   DOCUMENT_TYPE_LABELS,
+  DOCUMENT_SCENARIOS,
   type DocumentType,
   demoClientDocuments,
 } from "@/lib/demo/documents";
@@ -107,10 +108,11 @@ export default async function DocumentsPage({
           About your vault
         </div>
         <p className="text-[13px] leading-relaxed text-muted-foreground max-w-3xl">
-          Continental Bank issues seven types of documents into your vault. Each is
-          generated server-side and signed by a Geneva officer. Documents are
-          retained for the lifetime of your relationship and can be reissued on
-          request through the secure message centre.
+          Continental Bank issues six core document classes covering{" "}
+          {DOCUMENT_SCENARIOS.length} client-facing scenarios, including
+          account letters, KYC confirmations, withdrawal receipts, refund
+          evidence, statements, tax summaries, and service notices. Each record
+          is retained for the lifetime of your relationship.
         </p>
         <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 text-[12.5px] text-foreground">
           {(Object.keys(DOCUMENT_TYPE_LABELS) as DocumentType[]).map((k) => (

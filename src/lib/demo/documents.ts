@@ -1,7 +1,7 @@
 /**
  * Continental Bank — DEMO document vault
  *
- * Six types modelled:
+ * Six document classes modelled:
  *   statement     — monthly portfolio statement
  *   account_letter — welcome / KYC confirmation / mandate changes
  *   kyc            — uploaded ID / proof of address
@@ -53,6 +53,25 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   refund_evidence: "Refund evidence",
   tax: "Tax summary",
 };
+
+export const DOCUMENT_SCENARIOS = [
+  "Account opening letter",
+  "KYC submission receipt",
+  "KYC approval or rejection notice",
+  "Withdrawal submission receipt",
+  "Withdrawal approval notice",
+  "Withdrawal completion receipt",
+  "Withdrawal rejection notice",
+  "Refund claim submission receipt",
+  "Refund approval or completion receipt",
+  "Refund rejection notice",
+  "Beneficiary submission receipt",
+  "Beneficiary approval or rejection notice",
+  "Monthly or quarterly statement",
+  "Annual tax summary",
+  "Security change receipt",
+  "Support case closure receipt",
+] as const;
 
 export const demoClientDocuments: DocumentRecord[] = [
   // ---- Statements (recent months) ------------------------------------

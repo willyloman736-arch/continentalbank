@@ -7,6 +7,7 @@ import {
   ArrowLeftRight,
   Banknote,
   Bell,
+  ClipboardCheck,
   FileText,
   LayoutDashboard,
   LifeBuoy,
@@ -44,6 +45,7 @@ const serviceItems: NavItem[] = [
 ];
 
 const profileItems: NavItem[] = [
+  { href: "/dashboard/onboarding", label: "Onboarding", icon: ClipboardCheck },
   { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
   { href: "/dashboard/profile", label: "Profile", icon: UserRound },
   { href: "/dashboard/security", label: "Security", icon: ShieldCheck },
