@@ -5,23 +5,24 @@ import { motion, useReducedMotion } from "framer-motion";
 /**
  * Continental Bank — Vault door.
  *
- * A pure-SVG, code-drawn vault that runs a short choreographed sequence
- * on mount (plays on every visit):
+ * A pure-SVG, code-drawn vault that runs a short choreographed opening
+ * sequence on mount (plays on every visit):
  *
  *   T=0      enter: opacity + slight scale settling
- *   T=0.9s   spoke wheel begins 270° clockwise rotation
- *   T=1.5s   12 radial bolts engage outward (staggered ~40ms apart)
- *   T=2.0s   lock indicator switches from idle to champagne
+ *   T=0.8s   spoke wheel begins a deliberate unlock rotation
+ *   T=1.6s   12 radial bolts retract inward (staggered ~40ms apart)
+ *   T=2.7s   the door eases open and reveals warm interior light
+ *   T=3.3s   access indicator switches from idle to champagne
  *
- * Reduced motion: the vault renders in its final locked state with no
+ * Reduced motion: the vault renders in its final open state with no
  * animation. All visuals are hand-drawn — no external assets.
  */
 
 const SIZE = 600;          // viewBox dimension
 const C = SIZE / 2;        // centre
 const BOLT_COUNT = 12;
-const BOLT_INNER_R = 226;  // bolt position when retracted (unlocked)
-const BOLT_OUTER_R = 252;  // bolt position when extended (locked)
+const BOLT_INNER_R = 226;  // bolt position when retracted (open)
+const BOLT_OUTER_R = 252;  // bolt position when extended (sealed)
 
 const easeOut = [0.16, 1, 0.3, 1] as [number, number, number, number];
 const easeInOut = [0.65, 0, 0.35, 1] as [number, number, number, number];
@@ -37,10 +38,15 @@ export function Vault({ size }: VaultProps = {}) {
   // Timing — all numbers in seconds.
   const tEnter = 0.7;
   const tWheelDelay = 0.7;
-  const tWheel = 1.5;
+  const tWheel = 1.45;
   const tBoltsDelay = tWheelDelay + 0.95;
-  const tBolt = 0.5;
-  const tIndicatorDelay = tWheelDelay + tWheel + 0.1;
+  const tBolt = 0.55;
+  const tDoorDelay = tBoltsDelay + BOLT_COUNT * 0.04 + tBolt + 0.08;
+  const tDoor = 1.15;
+  const tLightDelay = tDoorDelay + 0.08;
+  const tIndicatorDelay = tDoorDelay + 0.72;
+
+  const doorOpenState = { x: -12, scaleX: 0.74, skewY: -1.8 };
 
   const sizeStyle = size ? { width: size, height: size } : { width: "100%", height: "100%" };
 
@@ -48,7 +54,7 @@ export function Vault({ size }: VaultProps = {}) {
     <div
       className="relative"
       style={sizeStyle}
-      aria-label="Continental Bank vault — sealed"
+      aria-label="Continental Bank vault — opening"
       role="img"
     >
       {/* Soft champagne halo behind the vault */}
@@ -108,6 +114,20 @@ export function Vault({ size }: VaultProps = {}) {
             <stop offset="100%" stopColor="#07111F" />
           </radialGradient>
 
+          {/* Warm interior visible when the door opens */}
+          <radialGradient id="v-interior" cx="56%" cy="45%" r="72%">
+            <stop offset="0%" stopColor="#F7E5B7" />
+            <stop offset="22%" stopColor="#D9B970" />
+            <stop offset="58%" stopColor="#463617" />
+            <stop offset="100%" stopColor="#080D14" />
+          </radialGradient>
+
+          <linearGradient id="v-light-spill" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="rgba(229,206,148,0)" />
+            <stop offset="40%" stopColor="rgba(229,206,148,0.42)" />
+            <stop offset="100%" stopColor="rgba(229,206,148,0)" />
+          </linearGradient>
+
           {/* Body highlight — soft light source from top-left */}
           <radialGradient id="v-body-hi" cx="30%" cy="20%" r="60%">
             <stop offset="0%" stopColor="rgba(255,255,255,0.10)" />
@@ -146,6 +166,14 @@ export function Vault({ size }: VaultProps = {}) {
             <stop offset="50%" stopColor="rgba(255,255,255,0)" />
             <stop offset="100%" stopColor="rgba(0,0,0,0.35)" />
           </linearGradient>
+
+          <filter id="v-soft-glow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="9" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
 
         {/* ============ JAMB / WALL FRAME (fixed) ============ */}
@@ -191,6 +219,64 @@ export function Vault({ size }: VaultProps = {}) {
 
         {/* ============ DOOR BODY ============ */}
 
+        {/* Interior chamber revealed as the door swings open */}
+        <motion.g
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.75, delay: tLightDelay, ease: easeOut }}
+        >
+          <circle cx={C} cy={C} r="248" fill="url(#v-interior)" />
+          <motion.circle
+            cx={C + 36}
+            cy={C}
+            r="162"
+            fill="none"
+            stroke="rgba(255,235,180,0.24)"
+            strokeWidth="1"
+            initial={reduce ? false : { pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 1.1, delay: tLightDelay + 0.18, ease: easeOut }}
+          />
+          <motion.path
+            d={`M ${C + 26} ${C - 218} C ${C + 154} ${C - 155}, ${C + 230} ${C - 60}, ${
+              C + 255
+            } ${C + 12} C ${C + 202} ${C + 72}, ${C + 146} ${C + 152}, ${C + 40} ${
+              C + 226
+            } Z`}
+            fill="url(#v-light-spill)"
+            filter="url(#v-soft-glow)"
+            initial={reduce ? false : { opacity: 0, scale: 0.9 }}
+            animate={{ opacity: [0, 0.75, 0.48], scale: [0.92, 1.03, 1] }}
+            transition={{ duration: 1.4, delay: tLightDelay + 0.08, ease: easeOut }}
+            style={{ transformOrigin: `${C}px ${C}px` }}
+          />
+          {!reduce && (
+            <motion.g
+              initial={{ rotate: -18, opacity: 0 }}
+              animate={{ rotate: 22, opacity: [0, 0.45, 0.28] }}
+              transition={{ duration: 2.4, delay: tLightDelay + 0.35, ease: "easeInOut" }}
+              style={{ transformOrigin: `${C}px ${C}px` }}
+            >
+              <path
+                d={`M ${C + 34} ${C - 190} C ${C + 122} ${C - 72}, ${C + 146} ${
+                  C + 70
+                }, ${C + 42} ${C + 196}`}
+                fill="none"
+                stroke="rgba(255,235,180,0.38)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                filter="url(#v-soft-glow)"
+              />
+            </motion.g>
+          )}
+        </motion.g>
+
+        <motion.g
+          initial={reduce ? false : { x: 0, scaleX: 1, skewY: 0 }}
+          animate={doorOpenState}
+          transition={reduce ? { duration: 0 } : { duration: tDoor, delay: tDoorDelay, ease: easeInOut }}
+          style={{ transformOrigin: `${C - 264}px ${C}px` }}
+        >
         {/* Outer door rim - champagne */}
         <circle
           cx={C}
@@ -291,9 +377,9 @@ export function Vault({ size }: VaultProps = {}) {
           return (
             <motion.g
               key={i}
-              initial={reduce ? false : { x: startOffsetX, y: startOffsetY }}
-              animate={{ x: 0, y: 0 }}
-              transition={{ duration: tBolt, delay, ease: easeOut }}
+              initial={reduce ? false : { x: 0, y: 0 }}
+              animate={{ x: startOffsetX, y: startOffsetY }}
+              transition={reduce ? { duration: 0 } : { duration: tBolt, delay, ease: easeOut }}
             >
               <circle cx={finalX} cy={finalY} r="12" fill="url(#v-bolt)" />
               <circle
@@ -344,8 +430,8 @@ export function Vault({ size }: VaultProps = {}) {
         <g transform={`translate(${C} ${C})`}>
           <motion.g
             initial={reduce ? false : { rotate: 0 }}
-            animate={{ rotate: 405 }}
-            transition={{ duration: tWheel, delay: tWheelDelay, ease: easeInOut }}
+            animate={{ rotate: -540 }}
+            transition={reduce ? { duration: 0 } : { duration: tWheel, delay: tWheelDelay, ease: easeInOut }}
             style={{ transformOrigin: "0px 0px" }}
           >
             {/* Outer wheel ring */}
@@ -380,8 +466,9 @@ export function Vault({ size }: VaultProps = {}) {
             <circle cx="-3" cy="-3" r="4" fill="rgba(255,235,180,0.35)" />
           </motion.g>
         </g>
+        </motion.g>
 
-        {/* ============ LOCK STATUS INDICATOR ============ */}
+        {/* ============ ACCESS STATUS INDICATOR ============ */}
         {/* Small champagne lamp at the 6-o'clock of the inner ring */}
         <g>
           {/* Surround */}
@@ -393,7 +480,7 @@ export function Vault({ size }: VaultProps = {}) {
             stroke="url(#v-gold)"
             strokeWidth="0.8"
           />
-          {/* Lamp — starts dim, turns champagne when locked */}
+          {/* Lamp — starts dim, turns champagne when open */}
           <motion.circle
             cx={C}
             cy={C + 138}
@@ -416,7 +503,7 @@ export function Vault({ size }: VaultProps = {}) {
         </g>
       </motion.svg>
 
-      {/* Sealed indicator (caption beside the vault) */}
+      {/* Access indicator (caption beside the vault) */}
       <motion.div
         className="absolute left-1/2 -translate-x-1/2 -bottom-2 sm:bottom-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10.5px] uppercase tracking-[0.22em]"
         style={{
@@ -435,7 +522,7 @@ export function Vault({ size }: VaultProps = {}) {
           animate={reduce ? undefined : { opacity: [1, 0.5, 1] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
         />
-        Sealed · Continental
+        Access granted
       </motion.div>
     </div>
   );
