@@ -4,6 +4,7 @@ import { Landmark, ShieldCheck } from "lucide-react";
 import { LoginForm } from "@/components/auth/login-form";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ActivityTicker } from "@/components/shared/activity-ticker";
 import { TrustBadgeRail } from "@/components/shared/trust-badges";
 import { enterDemoAction } from "@/app/actions/auth";
 import { localAuthEnabled } from "@/lib/auth-mode";
@@ -45,6 +46,8 @@ export default function LoginPage() {
         compact
         className="sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1"
       />
+
+      <ActivityTicker preset="auth" tone="dark" label="Portal activity" compact />
 
       {showDemoEntry && (
         <section className="rounded-md border border-champagne-400/20 bg-champagne-500/[0.06] p-4">

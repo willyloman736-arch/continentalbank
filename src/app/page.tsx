@@ -5,6 +5,7 @@ import { FeaturesSection } from "@/components/marketing/features-section";
 import { GlobalSection } from "@/components/marketing/global-section";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { ActivityTicker } from "@/components/shared/activity-ticker";
 
 export default function HomePage() {
   return (
@@ -12,6 +13,11 @@ export default function HomePage() {
       <SiteHeader />
       <main>
         <Hero />
+        <section className="border-y border-border/60 bg-background">
+          <div className="container py-4">
+            <ActivityTicker preset="public" label="Client activity" />
+          </div>
+        </section>
         <TrustSection />
         <FeaturesSection />
         <GlobalSection />

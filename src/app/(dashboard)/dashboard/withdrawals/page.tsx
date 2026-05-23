@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Badge } from "@/components/ui/badge";
 import { WithdrawalForm } from "@/components/dashboard/withdrawal-form";
+import { ActivityTicker } from "@/components/shared/activity-ticker";
 import { TrustBadgeRail } from "@/components/shared/trust-badges";
 import { requireApprovedClient } from "@/lib/auth";
 import { clientWallets, clientWithdrawals } from "@/lib/demo/queries";
@@ -33,6 +34,8 @@ export default async function WithdrawalsPage({
       />
 
       <TrustBadgeRail preset="withdrawals" tone="dark" compact className="xl:grid-cols-3" />
+
+      <ActivityTicker preset="withdrawals" tone="dark" label="Settlement activity" compact />
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr] xl:grid-cols-[1.2fr_1fr]">
         <div className="glass-card p-6 lg:p-8">

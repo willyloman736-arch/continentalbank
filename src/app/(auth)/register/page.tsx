@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { RegisterForm } from "@/components/auth/register-form";
+import { ActivityTicker } from "@/components/shared/activity-ticker";
 import { TrustBadgeRail } from "@/components/shared/trust-badges";
 
 export const metadata: Metadata = {
@@ -35,6 +36,8 @@ export default function RegisterPage() {
         compact
         className="sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1"
       />
+
+      <ActivityTicker preset="auth" tone="dark" label="Private office" compact />
     </div>
   );
 }

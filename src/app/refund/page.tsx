@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { MarketingBackdrop } from "@/components/marketing/marketing-backdrop";
 import { PublicRefundForm } from "@/components/marketing/refund-form";
+import { ActivityTicker } from "@/components/shared/activity-ticker";
 import { TrustBadgeRail } from "@/components/shared/trust-badges";
 
 export const metadata: Metadata = {
@@ -45,6 +46,7 @@ export default function RefundPage() {
               hand by a relationship officer of the Bank — there is no automated outcome.
             </p>
             <TrustBadgeRail preset="refund" compact className="mt-8 lg:grid-cols-3 xl:grid-cols-3" />
+            <ActivityTicker preset="refund" label="Recovery activity" compact className="mt-4" />
           </div>
         </div>
       </section>
