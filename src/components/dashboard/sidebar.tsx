@@ -3,68 +3,215 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  Wallet,
-  ArrowLeftRight,
   ArrowDownLeft,
+  ArrowLeftRight,
+  Banknote,
+  Bell,
+  FileText,
+  LayoutDashboard,
   LifeBuoy,
-  UserRound,
+  LogOut,
+  MessageSquare,
   ShieldCheck,
+  Undo2,
+  UserRound,
+  Wallet,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { BrandMark } from "@/components/shared/brand-mark";
-import { NavItem } from "@/components/motion/nav-item";
+import { signOutAction } from "@/app/actions/auth";
+import { cn, formatAccountNumber, initials } from "@/lib/utils";
 
-const items = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+};
+
+const accountItems: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/dashboard/wallets", label: "Currency Accounts", icon: Wallet },
-  { href: "/dashboard/transactions", label: "Transactions", icon: ArrowLeftRight },
+  { href: "/dashboard/wallets", label: "Accounts", icon: Wallet },
+  { href: "/dashboard/transactions", label: "Ledger", icon: ArrowLeftRight },
   { href: "/dashboard/withdrawals", label: "Withdrawals", icon: ArrowDownLeft },
+  { href: "/dashboard/beneficiaries", label: "Beneficiaries", icon: Banknote },
+];
+
+const serviceItems: NavItem[] = [
+  { href: "/dashboard/documents", label: "Documents", icon: FileText },
+  { href: "/dashboard/messages", label: "Messages", icon: MessageSquare },
+  { href: "/dashboard/refunds", label: "Refunds", icon: Undo2 },
   { href: "/dashboard/support", label: "Support", icon: LifeBuoy },
+];
+
+const profileItems: NavItem[] = [
+  { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
   { href: "/dashboard/profile", label: "Profile", icon: UserRound },
   { href: "/dashboard/security", label: "Security", icon: ShieldCheck },
 ];
 
-export function DashboardSidebar() {
+const allItems = [...accountItems, ...serviceItems, ...profileItems];
+
+export function DashboardSidebar({
+  fullName,
+  email,
+  accountNumber,
+}: {
+  fullName: string;
+  email: string;
+  accountNumber: string | null;
+}) {
   const pathname = usePathname();
+
   return (
-    <aside className="hidden lg:flex h-screen sticky top-0 w-[252px] shrink-0 flex-col border-r border-border bg-card">
-      <div className="px-6 py-7 border-b border-border">
-        <Link href="/" className="focus-ring rounded-sm inline-block">
-          <BrandMark />
-        </Link>
-      </div>
+    <>
+      <aside className="hidden h-screen w-[282px] shrink-0 flex-col border-r border-white/[0.08] bg-[#111A22]/95 shadow-[18px_0_50px_-38px_rgba(0,0,0,0.9)] lg:sticky lg:top-0 lg:flex">
+        <div className="border-b border-white/[0.08] px-6 py-7">
+          <Link href="/" className="focus-ring inline-block rounded-sm">
+            <BrandMark variant="light" />
+          </Link>
+          <div className="mt-5 rounded-md border border-champagne-500/18 bg-champagne-500/[0.06] p-3">
+            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-champagne-300">
+              Private Client
+            </div>
+            <div className="mt-1 truncate text-[12px] tabular-figures text-ivory-100/58">
+              {formatAccountNumber(accountNumber)}
+            </div>
+          </div>
+        </div>
 
-      <nav className="flex-1 px-3 py-5 space-y-0.5">
-        <div className="px-3 pb-2 eyebrow text-muted-foreground">Private Portal</div>
-        {items.map((item) => {
-          const active =
-            item.href === "/dashboard"
-              ? pathname === "/dashboard"
-              : pathname.startsWith(item.href);
-          return (
-            <NavItem
-              key={item.href}
-              groupId="client-nav"
-              href={item.href}
-              label={item.label}
-              icon={item.icon}
-              active={active}
-            />
-          );
-        })}
+        <nav className="flex-1 overflow-y-auto px-3 py-5">
+          <NavGroup label="Portfolio">
+            {accountItems.map((item) => (
+              <DashboardNavItem key={item.href} item={item} pathname={pathname} />
+            ))}
+          </NavGroup>
+          <NavGroup label="Private office" className="mt-6">
+            {serviceItems.map((item) => (
+              <DashboardNavItem key={item.href} item={item} pathname={pathname} />
+            ))}
+          </NavGroup>
+          <NavGroup label="Account" className="mt-6">
+            {profileItems.map((item) => (
+              <DashboardNavItem key={item.href} item={item} pathname={pathname} />
+            ))}
+          </NavGroup>
+        </nav>
+
+        <div className="border-t border-white/[0.08] p-4">
+          <div className="rounded-md border border-white/[0.08] bg-white/[0.045] p-3">
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-sm bg-champagne-500 text-[13px] font-semibold text-navy-950">
+                {initials(fullName)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[13px] font-medium text-ivory-100">{fullName}</div>
+                <div className="mt-0.5 truncate text-[12px] text-ivory-100/48">{email}</div>
+              </div>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-white/[0.07] pt-3">
+              <Link
+                href="/dashboard/messages"
+                className="focus-ring inline-flex h-9 items-center justify-center gap-2 rounded-sm border border-white/[0.08] bg-white/[0.045] text-[12px] font-medium text-ivory-100/82 transition-colors hover:bg-white/[0.08]"
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                Message
+              </Link>
+              <form action={signOutAction}>
+                <button
+                  type="submit"
+                  className="focus-ring inline-flex h-9 w-full items-center justify-center gap-2 rounded-sm border border-white/[0.08] bg-white/[0.045] text-[12px] font-medium text-ivory-100/82 transition-colors hover:bg-white/[0.08]"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign out
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <nav className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#111A22]/95 px-3 py-3 shadow-[0_14px_34px_-26px_rgba(0,0,0,0.9)] lg:hidden">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="focus-ring shrink-0 rounded-sm">
+            <BrandMark variant="light" withWordmark={false} />
+          </Link>
+          <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {allItems.map((item) => {
+              const active = isActive(item.href, pathname);
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "focus-ring inline-flex h-10 shrink-0 items-center gap-2 rounded-sm border px-3 text-[12px] font-medium",
+                    active
+                      ? "border-champagne-500/35 bg-champagne-500/16 text-champagne-200"
+                      : "border-white/[0.08] bg-white/[0.035] text-ivory-100/62 hover:text-ivory-100",
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" strokeWidth={1.6} />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </nav>
-
-      <div className="m-3 rounded-md border border-border bg-background/60 p-4">
-        <div className="eyebrow text-champagne-700 dark:text-champagne-400">Relationship</div>
-        <div className="mt-2 text-[13px] font-medium text-foreground">É. Dupont</div>
-        <div className="text-[12px] text-muted-foreground">Private Banker · Geneva</div>
-        <a
-          href="mailto:e.dupont@continental.example"
-          className="mt-3 inline-block text-[12px] uppercase tracking-[0.14em] text-foreground hover:text-champagne-700 dark:hover:text-champagne-400 underline underline-offset-4"
-        >
-          Direct line
-        </a>
-      </div>
-    </aside>
+    </>
   );
+}
+
+function NavGroup({
+  label,
+  className,
+  children,
+}: {
+  label: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={className}>
+      <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-[0.2em] text-ivory-100/38">
+        {label}
+      </div>
+      <div className="space-y-0.5">{children}</div>
+    </div>
+  );
+}
+
+function DashboardNavItem({ item, pathname }: { item: NavItem; pathname: string }) {
+  const active = isActive(item.href, pathname);
+  const Icon = item.icon;
+
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "group relative flex items-center gap-3 rounded-sm px-3 py-2.5 text-[13.5px] font-medium transition-colors duration-200",
+        active
+          ? "bg-white/[0.075] text-ivory-100"
+          : "text-ivory-100/58 hover:bg-white/[0.045] hover:text-ivory-100",
+      )}
+    >
+      {active && (
+        <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-sm bg-champagne-400" />
+      )}
+      <Icon
+        className={cn(
+          "h-4 w-4 transition-colors",
+          active ? "text-champagne-300" : "text-ivory-100/42 group-hover:text-champagne-300",
+        )}
+        strokeWidth={1.6}
+      />
+      <span className="truncate">{item.label}</span>
+    </Link>
+  );
+}
+
+function isActive(href: string, pathname: string) {
+  return href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
 }
