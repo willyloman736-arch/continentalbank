@@ -33,7 +33,7 @@ type Props = {
  */
 export function TopPill({ fullName, email, accountNumber, locale, variant = "client" }: Props) {
   return (
-    <div className="px-3 lg:px-10 pt-3 lg:pt-6 z-30 sticky top-0">
+    <div className="sticky top-0 z-30 px-3 pt-3 lg:px-10 lg:pt-6">
       <div className="mx-auto max-w-7xl flex items-center gap-2 sm:gap-3">
         {/* Tools pill (left) */}
         <div className="glass-pill flex items-center gap-1 px-1.5 py-1 shrink-0">
@@ -63,7 +63,7 @@ export function TopPill({ fullName, email, accountNumber, locale, variant = "cli
                 </Avatar>
                 <div className="hidden text-left sm:block">
                   <div className="text-[12.5px] font-medium leading-tight">{fullName}</div>
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground leading-tight mt-0.5 tabular-figures">
+                <div className="mt-0.5 text-[10px] uppercase leading-tight tracking-[0.16em] text-muted-foreground tabular-figures">
                     {variant === "admin" ? "Officer" : accountNumber ?? "—"}
                   </div>
                 </div>
@@ -119,7 +119,7 @@ function PillButton({
         "relative inline-flex h-9 w-9 items-center justify-center rounded-full",
         "text-muted-foreground transition-colors duration-200",
         "hover:text-foreground hover:bg-foreground/[0.06]",
-        "data-[active]:bg-foreground/[0.08] data-[active]:text-foreground",
+        "data-[active]:bg-ivory-100/[0.085] data-[active]:text-foreground",
         "focus:outline-none focus-visible:ring-1 focus-visible:ring-champagne-500",
         className,
       )}

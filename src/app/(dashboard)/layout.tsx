@@ -35,7 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
           background:
-            "linear-gradient(180deg, #121C25 0%, #0E151D 48%, #0A1017 100%)",
+            "linear-gradient(180deg, #1A242E 0%, #151D26 46%, #10161D 100%)",
         }}
       />
 
@@ -62,7 +62,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             accountNumber={user.profile.account_number}
             locale={locale}
           />
-          <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
+          <main className="flex-1 px-4 py-6 pb-12 sm:px-6 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1480px]">
               <PageTransition>{children}</PageTransition>
             </div>

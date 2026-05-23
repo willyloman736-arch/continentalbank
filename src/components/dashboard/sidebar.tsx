@@ -64,16 +64,16 @@ export function DashboardSidebar({
 
   return (
     <>
-      <aside className="hidden h-screen w-[282px] shrink-0 flex-col border-r border-white/[0.08] bg-[#111A22]/95 shadow-[18px_0_50px_-38px_rgba(0,0,0,0.9)] lg:sticky lg:top-0 lg:flex">
-        <div className="border-b border-white/[0.08] px-6 py-7">
+      <aside className="hidden h-screen w-[282px] shrink-0 flex-col border-r border-champagne-200/[0.10] bg-[#17212B]/92 shadow-[18px_0_46px_-40px_rgba(0,0,0,0.82)] backdrop-blur-xl lg:sticky lg:top-0 lg:flex">
+        <div className="border-b border-champagne-200/[0.10] px-6 py-7">
           <Link href="/" className="focus-ring inline-block rounded-sm">
             <BrandMark variant="light" />
           </Link>
-          <div className="mt-5 rounded-md border border-champagne-500/18 bg-champagne-500/[0.06] p-3">
+          <div className="mt-5 rounded-md border border-champagne-300/18 bg-ivory-100/[0.055] p-3">
             <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-champagne-300">
               Private Client
             </div>
-            <div className="mt-1 truncate text-[12px] tabular-figures text-ivory-100/58">
+            <div className="mt-1 truncate text-[12px] tabular-figures text-ivory-100/64">
               {formatAccountNumber(accountNumber)}
             </div>
           </div>
@@ -97,10 +97,10 @@ export function DashboardSidebar({
           </NavGroup>
         </nav>
 
-        <div className="border-t border-white/[0.08] p-4">
-          <div className="rounded-md border border-white/[0.08] bg-white/[0.045] p-3">
+        <div className="border-t border-champagne-200/[0.10] p-4">
+          <div className="rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.055] p-3">
             <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-sm bg-champagne-500 text-[13px] font-semibold text-navy-950">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-champagne-500 text-[13px] font-semibold text-navy-950 shadow-[0_10px_24px_-18px_rgba(200,169,106,0.9)]">
                 {initials(fullName)}
               </div>
               <div className="min-w-0 flex-1">
@@ -108,10 +108,10 @@ export function DashboardSidebar({
                 <div className="mt-0.5 truncate text-[12px] text-ivory-100/48">{email}</div>
               </div>
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-white/[0.07] pt-3">
+            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-ivory-100/[0.08] pt-3">
               <Link
                 href="/dashboard/messages"
-                className="focus-ring inline-flex h-9 items-center justify-center gap-2 rounded-sm border border-white/[0.08] bg-white/[0.045] text-[12px] font-medium text-ivory-100/82 transition-colors hover:bg-white/[0.08]"
+                className="focus-ring inline-flex h-9 items-center justify-center gap-2 rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.055] text-[12px] font-medium text-ivory-100/82 transition-colors hover:bg-ivory-100/[0.09]"
               >
                 <MessageSquare className="h-3.5 w-3.5" />
                 Message
@@ -119,7 +119,7 @@ export function DashboardSidebar({
               <form action={signOutAction}>
                 <button
                   type="submit"
-                  className="focus-ring inline-flex h-9 w-full items-center justify-center gap-2 rounded-sm border border-white/[0.08] bg-white/[0.045] text-[12px] font-medium text-ivory-100/82 transition-colors hover:bg-white/[0.08]"
+                  className="focus-ring inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.055] text-[12px] font-medium text-ivory-100/82 transition-colors hover:bg-ivory-100/[0.09]"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                   Sign out
@@ -130,7 +130,7 @@ export function DashboardSidebar({
         </div>
       </aside>
 
-      <nav className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#111A22]/95 px-3 py-3 shadow-[0_14px_34px_-26px_rgba(0,0,0,0.9)] lg:hidden">
+      <nav className="sticky top-0 z-40 border-b border-champagne-200/[0.10] bg-[#17212B]/94 px-3 py-3 shadow-[0_14px_34px_-28px_rgba(0,0,0,0.78)] backdrop-blur-xl lg:hidden">
         <div className="flex items-center gap-3">
           <Link href="/" className="focus-ring shrink-0 rounded-sm">
             <BrandMark variant="light" withWordmark={false} />
@@ -145,10 +145,10 @@ export function DashboardSidebar({
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "focus-ring inline-flex h-10 shrink-0 items-center gap-2 rounded-sm border px-3 text-[12px] font-medium",
+                    "focus-ring inline-flex h-10 shrink-0 items-center gap-2 rounded-md border px-3 text-[12px] font-medium",
                     active
-                      ? "border-champagne-500/35 bg-champagne-500/16 text-champagne-200"
-                      : "border-white/[0.08] bg-white/[0.035] text-ivory-100/62 hover:text-ivory-100",
+                      ? "border-champagne-400/32 bg-champagne-500/14 text-champagne-100"
+                      : "border-ivory-100/[0.08] bg-ivory-100/[0.045] text-ivory-100/66 hover:bg-ivory-100/[0.07] hover:text-ivory-100",
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" strokeWidth={1.6} />
@@ -174,7 +174,7 @@ function NavGroup({
 }) {
   return (
     <div className={className}>
-      <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-[0.2em] text-ivory-100/38">
+      <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-ivory-100/44">
         {label}
       </div>
       <div className="space-y-0.5">{children}</div>
@@ -191,14 +191,14 @@ function DashboardNavItem({ item, pathname }: { item: NavItem; pathname: string 
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "group relative flex items-center gap-3 rounded-sm px-3 py-2.5 text-[13.5px] font-medium transition-colors duration-200",
+        "group relative flex items-center gap-3 rounded-md px-3 py-2.5 text-[13.5px] font-medium transition-colors duration-200",
         active
-          ? "bg-white/[0.075] text-ivory-100"
-          : "text-ivory-100/58 hover:bg-white/[0.045] hover:text-ivory-100",
+          ? "bg-ivory-100/[0.085] text-ivory-100 shadow-[inset_0_0_0_1px_rgba(250,247,240,0.055)]"
+          : "text-ivory-100/62 hover:bg-ivory-100/[0.055] hover:text-ivory-100",
       )}
     >
       {active && (
-        <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-sm bg-champagne-400" />
+        <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-sm bg-champagne-400/90" />
       )}
       <Icon
         className={cn(

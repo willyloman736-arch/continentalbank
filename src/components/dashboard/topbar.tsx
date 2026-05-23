@@ -26,7 +26,7 @@ type Props = {
 
 export function DashboardTopbar({ fullName, email, accountNumber, locale }: Props) {
   return (
-    <header className="sticky top-[65px] z-30 border-b border-white/[0.08] bg-[#111A22]/88 shadow-[0_16px_40px_-34px_rgba(0,0,0,0.9)] backdrop-blur-xl lg:top-0">
+    <header className="sticky top-[65px] z-30 border-b border-champagne-200/[0.10] bg-[#17212B]/74 shadow-[0_16px_36px_-34px_rgba(0,0,0,0.78)] backdrop-blur-xl lg:top-0">
       <div className="flex min-h-16 items-center justify-between gap-4 px-4 py-3 lg:px-8">
         <div className="hidden min-w-[220px] md:block">
           <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-champagne-300">
@@ -37,12 +37,12 @@ export function DashboardTopbar({ fullName, email, accountNumber, locale }: Prop
           </div>
         </div>
 
-        <label className="relative hidden h-10 max-w-xl flex-1 items-center rounded-sm border border-white/[0.08] bg-white/[0.045] px-3 text-ivory-100/76 transition focus-within:ring-2 focus-within:ring-ring/60 md:flex">
-          <Search className="mr-2 h-4 w-4 text-ivory-100/42" strokeWidth={1.6} />
+        <label className="relative hidden h-10 max-w-xl flex-1 items-center rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.055] px-3 text-ivory-100/78 transition focus-within:border-champagne-400/35 focus-within:ring-2 focus-within:ring-ring/35 md:flex">
+          <Search className="mr-2 h-4 w-4 text-ivory-100/46" strokeWidth={1.6} />
           <input
             type="search"
             placeholder="Search accounts, documents, messages"
-            className="h-full min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-ivory-100/34"
+            className="h-full min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-ivory-100/40"
           />
         </label>
 
@@ -63,7 +63,7 @@ export function DashboardTopbar({ fullName, email, accountNumber, locale }: Prop
             variant="outline"
             size="icon"
             aria-label="Notifications"
-            className="border-white/[0.08] bg-white/[0.045] text-ivory-100/82 hover:bg-white/[0.08]"
+            className="border-ivory-100/[0.08] bg-ivory-100/[0.055] text-ivory-100/82 hover:bg-ivory-100/[0.09]"
           >
             <Link href="/dashboard/notifications">
               <Bell className="h-4 w-4" />
@@ -72,7 +72,7 @@ export function DashboardTopbar({ fullName, email, accountNumber, locale }: Prop
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="focus-ring flex items-center gap-3 rounded-sm border border-white/[0.08] bg-white/[0.045] py-1 pl-1 pr-3 transition-colors hover:bg-white/[0.08]">
+              <button className="focus-ring flex items-center gap-3 rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.055] py-1 pl-1 pr-3 transition-colors hover:bg-ivory-100/[0.09]">
                 <Avatar>
                   <AvatarFallback>{initials(fullName)}</AvatarFallback>
                 </Avatar>

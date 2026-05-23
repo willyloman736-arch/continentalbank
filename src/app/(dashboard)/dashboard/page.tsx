@@ -64,8 +64,8 @@ export default async function DashboardOverviewPage() {
     <div className="space-y-7">
       <PageHeader
         eyebrow={`Private office · ${user.profile.full_name.split(" ")[0]}`}
-        title="Portfolio command center."
-        description="Institutional view of liquidity, custody exposure, pending instructions, and account activity across your Continental relationship."
+        title="Portfolio overview."
+        description="A calm view of liquidity, custody exposure, pending instructions, and account activity across your Continental relationship."
         actions={
           <>
             <Button variant="outline" asChild>
@@ -82,8 +82,12 @@ export default async function DashboardOverviewPage() {
       />
 
       <section className="grid gap-5 xl:grid-cols-[1.45fr_0.75fr]">
-        <MotionCard index={0} intensity="strong" className="overflow-hidden">
-          <div className="border-b border-ivory-100/10 px-6 py-5 sm:px-8">
+        <MotionCard
+          index={0}
+          intensity="strong"
+          className="overflow-hidden border border-champagne-200/[0.10]"
+        >
+          <div className="border-b border-champagne-200/[0.10] px-6 py-5 sm:px-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="eyebrow text-champagne-300">Consolidated relationship</div>
@@ -99,7 +103,7 @@ export default async function DashboardOverviewPage() {
                   {formatAccountNumber(user.profile.account_number)}
                 </div>
               </div>
-              <div className="rounded-md border border-ivory-100/10 bg-ivory-100/[0.04] px-4 py-3">
+              <div className="rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.055] px-4 py-3">
                 <div className="text-[10px] uppercase tracking-[0.2em] text-ivory-100/50">Mandate</div>
                 <div className="mt-1 text-[13px] font-medium text-ivory-100">Global treasury reserve</div>
               </div>
@@ -118,13 +122,13 @@ export default async function DashboardOverviewPage() {
                 })}
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <HeroMetric label="Available liquidity" value={formatBase(totalAvailable)} />
+                <HeroMetric label="Available liquidity" value={formatBase(totalAvailable)} tone="positive" />
                 <HeroMetric label="Pending settlement" value={formatBase(totalPending)} />
                 <HeroMetric label="Lifetime outflow" value={formatBase(totalWithdrawn)} />
               </div>
             </div>
 
-            <div className="rounded-md border border-ivory-100/10 bg-ivory-100/[0.03] p-4">
+            <div className="rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.055] p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="eyebrow text-champagne-300">Currency allocation</div>
@@ -213,7 +217,7 @@ export default async function DashboardOverviewPage() {
           </div>
           <div className="mt-5 space-y-4">
             {allocations.map((w) => (
-              <Link key={w.currency} href="/dashboard/wallets" className="block rounded-md border border-foreground/[0.06] bg-foreground/[0.025] p-4 transition-colors hover:bg-foreground/[0.04]">
+              <Link key={w.currency} href="/dashboard/wallets" className="block rounded-md border border-foreground/[0.07] bg-foreground/[0.03] p-4 transition-colors hover:border-champagne-500/20 hover:bg-foreground/[0.045]">
                 <div className="flex items-baseline justify-between gap-4">
                   <div>
                     <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -230,7 +234,7 @@ export default async function DashboardOverviewPage() {
                     {formatPercent(w.percent)}
                   </div>
                 </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-foreground/[0.08]">
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-foreground/[0.09]">
                   <div
                     className="h-full rounded-full bg-champagne-500"
                     style={{ width: `${Math.max(4, Math.min(100, w.percent))}%` }}
@@ -365,11 +369,21 @@ export default async function DashboardOverviewPage() {
   );
 }
 
-function HeroMetric({ label, value }: { label: string; value: string }) {
+function HeroMetric({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "positive";
+}) {
   return (
-    <div className="rounded-md border border-ivory-100/10 bg-ivory-100/[0.035] p-3">
+    <div className="rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.05] p-3">
       <div className="text-[10px] uppercase tracking-[0.18em] text-ivory-100/45">{label}</div>
-      <div className="mt-1.5 text-[14px] font-semibold tabular-figures text-ivory-100">{value}</div>
+      <div className={tone === "positive" ? "mt-1.5 text-[14px] font-semibold tabular-figures text-champagne-100" : "mt-1.5 text-[14px] font-semibold tabular-figures text-ivory-100"}>
+        {value}
+      </div>
     </div>
   );
 }

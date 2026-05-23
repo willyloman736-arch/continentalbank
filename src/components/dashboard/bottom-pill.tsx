@@ -58,8 +58,8 @@ export function BottomPill({ variant = "client" }: { variant?: "client" | "admin
   const items = variant === "admin" ? adminItems : clientItems;
 
   return (
-    <div className="pointer-events-none fixed bottom-4 left-0 right-0 z-30 px-3">
-      <div className="pointer-events-auto mx-auto w-fit max-w-[calc(100vw-1.5rem)] overflow-x-auto glass-pill flex items-center gap-0.5 p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="pointer-events-none fixed bottom-3 left-0 right-0 z-30 px-3">
+      <div className="pointer-events-auto mx-auto flex w-fit max-w-[min(1040px,calc(100vw-1.5rem))] items-center gap-0.5 overflow-x-auto rounded-full border border-ivory-100/[0.10] bg-[#17212B]/88 p-1.5 shadow-[0_18px_46px_-34px_rgba(0,0,0,0.86)] backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {items.map((item) => {
           const Icon = item.icon as LucideIcon;
           const active =
@@ -74,13 +74,13 @@ export function BottomPill({ variant = "client" }: { variant?: "client" | "admin
               className={cn(
                 "relative inline-flex items-center gap-2 rounded-full px-2.5 sm:px-3.5 py-2 text-[12.5px] font-medium shrink-0",
                 "transition-colors duration-200",
-                active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                active ? "text-ivory-100" : "text-ivory-100/62 hover:text-ivory-100",
               )}
             >
               {active && (
                 <motion.span
                   layoutId={`pill-${variant}`}
-                  className="absolute inset-0 rounded-full bg-foreground/[0.08] border border-champagne-500/30"
+                  className="absolute inset-0 rounded-full border border-champagne-400/30 bg-ivory-100/[0.085]"
                   transition={{ type: "tween", duration: 0.32, ease: [0.65, 0, 0.35, 1] }}
                 />
               )}
