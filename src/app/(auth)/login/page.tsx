@@ -4,6 +4,7 @@ import { Landmark, ShieldCheck } from "lucide-react";
 import { LoginForm } from "@/components/auth/login-form";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 import { enterDemoAction } from "@/app/actions/auth";
 import { localAuthEnabled } from "@/lib/auth-mode";
 import { LOCAL_ADMIN_EMAIL, LOCAL_ADMIN_PASSWORD } from "@/lib/local-auth";
@@ -37,6 +38,13 @@ export default function LoginPage() {
       <Suspense fallback={<LoginFormSkeleton />}>
         <LoginForm />
       </Suspense>
+
+      <TrustBadgeRail
+        preset="auth"
+        tone="dark"
+        compact
+        className="sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1"
+      />
 
       {showDemoEntry && (
         <section className="rounded-md border border-champagne-400/20 bg-champagne-500/[0.06] p-4">

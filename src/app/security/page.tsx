@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/marketing/legal-page";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 
 export const metadata: Metadata = {
   title: "Security",
@@ -13,6 +14,7 @@ export default function SecurityPage() {
       eyebrow="Trust"
       title="Security at Continental"
       lead="Security at Continental is part of the relationship, not a feature. Every layer — encryption, access, settlement, audit — is engineered, witnessed, and reviewed."
+      afterLead={<TrustBadgeRail preset="security" compact />}
       sections={[
         {
           title: "1. Data security",

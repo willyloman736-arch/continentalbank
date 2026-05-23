@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 import { MotionCard } from "@/components/motion/motion-card";
 import { MotionList, MotionRow } from "@/components/motion/motion-list";
 import { requireApprovedClient } from "@/lib/auth";
@@ -80,6 +81,8 @@ export default async function DashboardOverviewPage() {
           </>
         }
       />
+
+      <TrustBadgeRail preset="dashboard" tone="dark" compact />
 
       <section className="grid gap-5 xl:grid-cols-[1.45fr_0.75fr]">
         <MotionCard

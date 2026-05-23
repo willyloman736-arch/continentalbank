@@ -1,5 +1,6 @@
 import { ScrollText, Landmark, Compass, Crown } from "lucide-react";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/primitives";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 import { MarketingBackdrop } from "./marketing-backdrop";
 
 const pillars = [
@@ -45,6 +46,12 @@ export function TrustSection() {
               tradition of restraint, accuracy, and personal continuity. We do not publish names.
               We do not advertise. We are introduced.
             </p>
+
+            <TrustBadgeRail
+              preset="marketing"
+              compact
+              className="mt-8 max-w-xl lg:grid-cols-2 xl:grid-cols-2"
+            />
 
             <dl className="mt-12 space-y-6 border-l border-border pl-6">
               <Number title="ø 11 years" body="Average client tenure" />

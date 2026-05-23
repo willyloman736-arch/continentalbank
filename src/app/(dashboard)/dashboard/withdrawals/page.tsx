@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Badge } from "@/components/ui/badge";
 import { WithdrawalForm } from "@/components/dashboard/withdrawal-form";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 import { requireApprovedClient } from "@/lib/auth";
 import { clientWallets, clientWithdrawals } from "@/lib/demo/queries";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
@@ -30,6 +31,8 @@ export default async function WithdrawalsPage({
         title="Discreet outbound instructions."
         description="Submit a withdrawal request. Your banker will review and confirm settlement personally."
       />
+
+      <TrustBadgeRail preset="withdrawals" tone="dark" compact className="xl:grid-cols-3" />
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr] xl:grid-cols-[1.2fr_1fr]">
         <div className="glass-card p-6 lg:p-8">

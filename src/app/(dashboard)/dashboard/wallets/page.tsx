@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 import { MotionCard } from "@/components/motion/motion-card";
 import { requireApprovedClient } from "@/lib/auth";
 import { clientWallets } from "@/lib/demo/queries";
@@ -60,6 +61,8 @@ export default async function WalletsPage() {
           </>
         }
       />
+
+      <TrustBadgeRail preset="dashboard" tone="dark" compact />
 
       <section className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
         <MotionCard index={0} intensity="strong" className="overflow-hidden">

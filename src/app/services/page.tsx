@@ -17,6 +17,7 @@ import { SiteFooter } from "@/components/marketing/site-footer";
 import { MarketingBackdrop } from "@/components/marketing/marketing-backdrop";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/primitives";
 import { Button } from "@/components/ui/button";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 
 export const metadata: Metadata = {
   title: "Private banking services",
@@ -127,6 +128,7 @@ export default function ServicesPage() {
               wealth quietly: custody, treasury, multi-currency accounts, discretionary and
               advisory mandates, and the coordination that makes them work together.
             </p>
+            <TrustBadgeRail preset="marketing" compact className="mt-8 lg:grid-cols-4" />
           </Reveal>
         </div>
       </section>

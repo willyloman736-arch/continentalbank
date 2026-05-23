@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowUpRight, Lock, Scale, ShieldCheck } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 import { getT } from "@/lib/i18n/dictionaries";
 import { detectLocale } from "@/lib/i18n/detect";
 import { SITE } from "@/lib/constants";
@@ -83,10 +84,12 @@ export async function Hero() {
               </Button>
             </StaggerItem>
 
-            <StaggerItem className="mt-5 flex flex-wrap items-center gap-2.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-              <Pill icon={<ShieldCheck className="h-3 w-3" />}>Encrypted at rest</Pill>
-              <Pill icon={<Scale className="h-3 w-3" />}>Audited ledger</Pill>
-              <Pill icon={<Lock className="h-3 w-3" />}>Approved access only</Pill>
+            <StaggerItem className="mt-6">
+              <TrustBadgeRail
+                preset="marketing"
+                compact
+                className="sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4"
+              />
             </StaggerItem>
           </Stagger>
         </div>
@@ -132,14 +135,5 @@ function Stat({
         {value}
       </div>
     </div>
-  );
-}
-
-function Pill({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 border border-border bg-card/50 px-2.5 py-1 rounded-full">
-      <span className="text-champagne-700 dark:text-champagne-400">{icon}</span>
-      {children}
-    </span>
   );
 }

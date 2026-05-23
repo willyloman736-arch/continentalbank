@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { RegisterForm } from "@/components/auth/register-form";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 
 export const metadata: Metadata = {
   title: "Open a private account",
@@ -27,6 +28,13 @@ export default function RegisterPage() {
       </header>
 
       <RegisterForm />
+
+      <TrustBadgeRail
+        preset="auth"
+        tone="dark"
+        compact
+        className="sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1"
+      />
     </div>
   );
 }

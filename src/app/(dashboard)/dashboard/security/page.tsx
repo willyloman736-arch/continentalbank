@@ -1,6 +1,7 @@
 import { Monitor, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 import { PasswordChangeForm } from "@/components/dashboard/password-change-form";
 import { requireApprovedClient } from "@/lib/auth";
 import { clientLoginHistory } from "@/lib/demo/queries";
@@ -20,6 +21,8 @@ export default async function SecurityPage() {
         title="Account safeguards."
         description="Manage your password and review recent access to your private portal."
       />
+
+      <TrustBadgeRail preset="security" tone="dark" compact />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
         <div className="glass-card p-6 lg:p-8 h-fit">

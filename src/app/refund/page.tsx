@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { MarketingBackdrop } from "@/components/marketing/marketing-backdrop";
 import { PublicRefundForm } from "@/components/marketing/refund-form";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 
 export const metadata: Metadata = {
   title: "File a Refund Claim",
@@ -43,6 +44,7 @@ export default function RefundPage() {
               deposits, and any other matter requiring restitution. Each claim is reviewed by
               hand by a relationship officer of the Bank — there is no automated outcome.
             </p>
+            <TrustBadgeRail preset="refund" compact className="mt-8 lg:grid-cols-3 xl:grid-cols-3" />
           </div>
         </div>
       </section>

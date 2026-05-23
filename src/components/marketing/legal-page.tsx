@@ -13,6 +13,7 @@ type Props = {
   eyebrow: string;
   title: string;
   lead?: string;
+  afterLead?: React.ReactNode;
   effective?: string;
   sections: Section[];
 };
@@ -22,7 +23,7 @@ type Props = {
  * FAQ). Centred narrow column, premium typography, glass-light card per
  * section. Header + footer kept from the marketing site.
  */
-export function LegalPage({ eyebrow, title, lead, effective, sections }: Props) {
+export function LegalPage({ eyebrow, title, lead, afterLead, effective, sections }: Props) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
@@ -51,6 +52,7 @@ export function LegalPage({ eyebrow, title, lead, effective, sections }: Props) 
                 {lead}
               </p>
             )}
+            {afterLead && <div className="mt-8">{afterLead}</div>}
             {effective && (
               <p className="mt-6 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
                 Effective {effective}

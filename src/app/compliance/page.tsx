@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/marketing/legal-page";
+import { TrustBadgeRail } from "@/components/shared/trust-badges";
 
 export const metadata: Metadata = {
   title: "Compliance",
@@ -13,6 +14,7 @@ export default function CompliancePage() {
       eyebrow="Governance"
       title="Compliance & regulatory framework"
       lead="Continental Bank operates under the supervision of the Swiss Financial Market Supervisory Authority and the standards of the Wolfsberg principles for private banking. This page summarises our framework."
+      afterLead={<TrustBadgeRail preset="security" compact />}
       sections={[
         {
           title: "1. Supervisory oversight",
