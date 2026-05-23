@@ -7,9 +7,9 @@ import { requireAdmin } from "@/lib/auth";
 import {
   BENEFICIARY_RAIL_LABEL,
   BENEFICIARY_STATUS_LABEL,
-  demoAdminBeneficiaryQueue,
   type Beneficiary,
 } from "@/lib/demo/beneficiaries";
+import { adminBeneficiaryQueue } from "@/lib/demo/queries";
 import { formatDate, maskAccountNumber } from "@/lib/utils";
 
 export const metadata = { title: "Beneficiaries — Admin" };
@@ -28,7 +28,10 @@ export default async function AdminBeneficiariesPage({
 }) {
   const admin = await requireAdmin();
   const { status } = await searchParams;
-  const all = demoAdminBeneficiaryQueue;
+  const all = (await adminBeneficiaryQueue()) as (Beneficiary & {
+    client_name: string;
+    client_account: string | null;
+  })[];
   const rows = status && status !== "all" ? all.filter((b) => b.status === status) : all;
   const canDecide = admin.profile.role !== "support_admin";
 

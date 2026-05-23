@@ -1,10 +1,22 @@
 import { z } from "zod";
 import { CURRENCIES as CURRENCY_CONST, KYC_METHODS } from "@/lib/constants";
+import { DOCUMENT_TYPE_LABELS } from "@/lib/demo/documents";
 import { SUPPORTED_LOCALES } from "@/lib/i18n/dictionaries";
 
 export const CURRENCIES = CURRENCY_CONST as unknown as [string, ...string[]];
 export const SUPPORTED_LOCALES_VALUES = SUPPORTED_LOCALES as unknown as [string, ...string[]];
 export const KYC_METHOD_VALUES = KYC_METHODS.map((m) => m.id) as unknown as [string, ...string[]];
+export const DOCUMENT_TYPE_VALUES = Object.keys(DOCUMENT_TYPE_LABELS) as [string, ...string[]];
+export const BENEFICIARY_RAIL_VALUES = [
+  "bank_wire",
+  "sepa",
+  "uk_faster",
+  "paypal",
+  "wise",
+  "revolut",
+  "zelle",
+  "cashapp",
+] as [string, ...string[]];
 
 export const WithdrawalRequestSchema = z.object({
   currency: z.enum(CURRENCIES as unknown as [string, ...string[]]),
@@ -112,6 +124,31 @@ export const RefundDecisionSchema = z.object({
   id: z.string().uuid(),
   decision: z.enum(["under_review", "approved", "rejected", "completed"]),
   adminNote: z.string().max(2000).optional(),
+});
+
+export const BeneficiarySubmissionSchema = z.object({
+  nickname: z.string().min(2).max(120),
+  holder: z.string().min(2).max(160),
+  currency: z.enum(CURRENCIES as unknown as [string, ...string[]]),
+  rail: z.enum(BENEFICIARY_RAIL_VALUES),
+  country: z.string().min(2).max(2),
+  bank: z.string().max(160).optional().or(z.literal("")),
+  destination: z.string().min(3).max(180),
+  notes: z.string().max(1000).optional().or(z.literal("")),
+});
+
+export const BeneficiaryDecisionSchema = z.object({
+  id: z.string().uuid(),
+  decision: z.enum(["approve", "reject"]),
+  note: z.string().max(2000).optional(),
+});
+
+export const AdminIssueDocumentSchema = z.object({
+  userId: z.string().min(1),
+  type: z.enum(DOCUMENT_TYPE_VALUES),
+  title: z.string().min(3).max(160),
+  description: z.string().min(6).max(260),
+  paragraph: z.string().min(20).max(3000),
 });
 
 export const AdminCreateUserSchema = z.object({

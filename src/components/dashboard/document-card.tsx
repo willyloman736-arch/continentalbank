@@ -10,6 +10,9 @@ import {
   Receipt,
   ScrollText,
   Undo2,
+  ShieldCheck,
+  LifeBuoy,
+  Landmark,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { DocumentRecord, DocumentType } from "@/lib/demo/documents";
@@ -21,6 +24,9 @@ const ICON_MAP: Record<DocumentType, LucideIcon> = {
   kyc: IdCard,
   withdrawal_receipt: Receipt,
   refund_evidence: Undo2,
+  beneficiary_receipt: Landmark,
+  security_receipt: ShieldCheck,
+  support_receipt: LifeBuoy,
   tax: ScrollText,
 };
 
@@ -30,6 +36,9 @@ const TONE_MAP: Record<DocumentType, string> = {
   kyc: "text-emerald-600 dark:text-emerald-400",
   withdrawal_receipt: "text-amber-700 dark:text-amber-300",
   refund_evidence: "text-sky-700 dark:text-sky-300",
+  beneficiary_receipt: "text-emerald-700 dark:text-emerald-300",
+  security_receipt: "text-rose-700 dark:text-rose-300",
+  support_receipt: "text-indigo-700 dark:text-indigo-300",
   tax: "text-violet-700 dark:text-violet-300",
 };
 

@@ -7,6 +7,13 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { isDemoMode, supabaseConfigured } from "@/lib/demo";
 import { localAuthEnabled } from "@/lib/auth-mode";
 import {
+  issueKycDecisionReceipt,
+  issueManualClientDocument,
+  issueSupportReceipt,
+} from "@/lib/receipts";
+import type { DocumentType } from "@/lib/demo/documents";
+import {
+  AdminIssueDocumentSchema,
   AdminBalanceAdjustmentSchema,
   AdminCreateUserSchema,
   KycDecisionSchema,
@@ -89,7 +96,7 @@ export async function decideKycVerification(input: unknown): Promise<ActionResul
   const service = createServiceClient();
   const { data: profile } = await service
     .from("profiles")
-    .select("id, kyc_status, kyc_method, kyc_document_name")
+    .select("*")
     .eq("id", parsed.data.userId)
     .maybeSingle();
   if (!profile) return { ok: false, error: "Client not found" };
@@ -105,6 +112,14 @@ export async function decideKycVerification(input: unknown): Promise<ActionResul
     })
     .eq("id", parsed.data.userId);
   if (error) return { ok: false, error: error.message };
+
+  await issueKycDecisionReceipt(
+    service,
+    profile,
+    parsed.data.decision,
+    admin.id,
+    parsed.data.note,
+  );
 
   const { ip } = await getClientMeta();
   await service.from("audit_logs").insert({
@@ -124,6 +139,8 @@ export async function decideKycVerification(input: unknown): Promise<ActionResul
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${parsed.data.userId}`);
   revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard/documents");
+  revalidatePath("/dashboard/notifications");
   return { ok: true, message: `KYC ${parsed.data.decision.replace("_", " ")}.` };
 }
 
@@ -254,8 +271,20 @@ export async function replyTicket(input: unknown): Promise<ActionResult> {
     ip_address: ip,
   });
 
+  if (parsed.data.status === "resolved" || parsed.data.status === "closed") {
+    await issueSupportReceipt(service, {
+      userId: ticket.user_id,
+      subject: ticket.subject,
+      status: parsed.data.status,
+      reply: parsed.data.reply,
+      adminId: admin.id,
+    });
+  }
+
   revalidatePath("/admin/support");
   revalidatePath("/dashboard/support");
+  revalidatePath("/dashboard/documents");
+  revalidatePath("/dashboard/notifications");
   return { ok: true, message: "Reply sent." };
 }
 
@@ -308,4 +337,51 @@ export async function createUserAsAdmin(input: unknown): Promise<ActionResult> {
 
   revalidatePath("/admin/users");
   return { ok: true, message: "Account created." };
+}
+
+/* ---------------------------------------------------------- *
+ *  Manual document issue / reissue
+ * ---------------------------------------------------------- */
+export async function issueClientDocument(input: unknown): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const parsed = AdminIssueDocumentSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid document" };
+  }
+
+  if ((await isDemoMode()) || localAuthEnabled() || !supabaseConfigured()) {
+    return { ok: true, message: DEMO_MSG };
+  }
+
+  const service = createServiceClient();
+  const { data: profile } = await service
+    .from("profiles")
+    .select("*")
+    .eq("id", parsed.data.userId)
+    .maybeSingle();
+  if (!profile) return { ok: false, error: "Client not found" };
+
+  await issueManualClientDocument(service, {
+    profile,
+    type: parsed.data.type as DocumentType,
+    title: parsed.data.title,
+    description: parsed.data.description,
+    paragraph: parsed.data.paragraph,
+    adminId: admin.id,
+  });
+
+  const { ip } = await getClientMeta();
+  await service.from("audit_logs").insert({
+    admin_id: admin.id,
+    user_id: parsed.data.userId,
+    action_type: "document_issued",
+    new_value: { type: parsed.data.type, title: parsed.data.title },
+    note: parsed.data.description,
+    ip_address: ip,
+  });
+
+  revalidatePath(`/admin/users/${parsed.data.userId}`);
+  revalidatePath("/dashboard/documents");
+  revalidatePath("/dashboard/notifications");
+  return { ok: true, message: "Document issued to client vault." };
 }

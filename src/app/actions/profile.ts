@@ -6,6 +6,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isDemoMode, supabaseConfigured } from "@/lib/demo";
 import { localAuthEnabled } from "@/lib/auth-mode";
 import { KycSubmissionSchema, PasswordChangeSchema, ProfileUpdateSchema } from "@/lib/validation";
+import { issueKycSubmissionReceipt, issueSecurityReceipt } from "@/lib/receipts";
 import type { ActionResult } from "./withdrawals";
 
 const DEMO_MSG = "Demo mode — your changes are simulated, nothing is saved.";
@@ -43,7 +44,7 @@ export async function updateProfile(input: unknown): Promise<ActionResult> {
 }
 
 export async function changePassword(input: unknown): Promise<ActionResult> {
-  await requireUser();
+  const user = await requireUser();
   const parsed = PasswordChangeSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
@@ -57,6 +58,16 @@ export async function changePassword(input: unknown): Promise<ActionResult> {
   const { error } = await supabase.auth.updateUser({ password: parsed.data.newPassword });
   if (error) return { ok: false, error: error.message };
 
+  const service = createServiceClient();
+  await issueSecurityReceipt(
+    service,
+    user.profile,
+    "Password changed",
+    "Your portal password was changed successfully. If you did not request this change, contact the Private Office immediately.",
+  );
+
+  revalidatePath("/dashboard/documents");
+  revalidatePath("/dashboard/notifications");
   return { ok: true, message: "Password updated." };
 }
 
@@ -125,7 +136,16 @@ export async function submitKycVerification(formData: FormData): Promise<ActionR
 
   if (error) return { ok: false, error: error.message };
 
+  await issueKycSubmissionReceipt(
+    service,
+    user.profile,
+    parsed.data.method,
+    document.name,
+  );
+
   revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard/documents");
+  revalidatePath("/dashboard/notifications");
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${user.id}`);
   return { ok: true, message: "Verification package submitted for admin review." };

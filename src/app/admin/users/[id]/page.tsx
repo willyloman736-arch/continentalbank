@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { KycDecisionActions } from "@/components/admin/kyc-decision-actions";
+import { DocumentIssueForm } from "@/components/admin/document-issue-form";
 import { UserDecisionActions } from "@/components/admin/user-decision-actions";
 import { BalanceAdjustForm } from "@/components/admin/balance-adjust-form";
 import { requireAdmin } from "@/lib/auth";
@@ -148,6 +149,10 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
             </>
           )}
         </div>
+      </section>
+
+      <section className="glass-card p-6 lg:p-7">
+        <DocumentIssueForm userId={p.id} />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">

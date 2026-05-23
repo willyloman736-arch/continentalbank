@@ -17,8 +17,8 @@ import {
   NOTIFICATION_KIND_LABELS,
   type Notification,
   type NotificationKind,
-  demoClientNotifications,
 } from "@/lib/demo/notifications";
+import { clientNotifications } from "@/lib/demo/queries";
 import { formatDateTime } from "@/lib/utils";
 
 export const metadata = { title: "Notifications" };
@@ -57,7 +57,7 @@ export default async function NotificationsPage({
   const user = await requireApprovedClient();
   const { kind } = await searchParams;
 
-  const all = demoClientNotifications.filter((n) => n.user_id === user.id);
+  const all = (await clientNotifications(user.id)) as Notification[];
   const list = kind && kind !== "all" ? all.filter((n) => n.kind === kind) : all;
 
   const unread = all.filter((n) => !n.read).length;

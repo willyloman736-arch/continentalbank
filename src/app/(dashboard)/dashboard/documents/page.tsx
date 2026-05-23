@@ -8,8 +8,8 @@ import {
   DOCUMENT_TYPE_LABELS,
   DOCUMENT_SCENARIOS,
   type DocumentType,
-  demoClientDocuments,
 } from "@/lib/demo/documents";
+import { clientDocuments } from "@/lib/demo/queries";
 
 export const metadata = { title: "Document Vault" };
 
@@ -20,6 +20,7 @@ const FILTERS: { value: DocumentType | "all"; label: string }[] = [
   { value: "kyc", label: "KYC" },
   { value: "withdrawal_receipt", label: "Withdrawal receipts" },
   { value: "refund_evidence", label: "Refund evidence" },
+  { value: "beneficiary_receipt", label: "Beneficiary receipts" },
   { value: "tax", label: "Tax summaries" },
 ];
 
@@ -31,8 +32,7 @@ export default async function DocumentsPage({
   const user = await requireApprovedClient();
   const { type } = await searchParams;
 
-  // For now demo data is shared. Filter by owner so the page is correct.
-  const allDocs = demoClientDocuments.filter((d) => d.user_id === user.id);
+  const allDocs = await clientDocuments(user.id);
   const docs =
     type && type !== "all" ? allDocs.filter((d) => d.type === type) : allDocs;
 

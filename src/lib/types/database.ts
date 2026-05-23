@@ -220,6 +220,92 @@ export interface Database {
         > & { id?: string; created_at?: string; updated_at?: string };
         Update: Partial<Database["public"]["Tables"]["refund_claims"]["Row"]>;
       };
+      generated_documents: {
+        Row: {
+          id: string;
+          user_id: string;
+          type:
+            | "statement"
+            | "account_letter"
+            | "kyc"
+            | "withdrawal_receipt"
+            | "refund_evidence"
+            | "beneficiary_receipt"
+            | "security_receipt"
+            | "support_receipt"
+            | "tax";
+          title: string;
+          description: string;
+          size_label: string;
+          currency: "USD" | "EUR" | "GBP" | null;
+          reference: string | null;
+          source_type: string | null;
+          source_id: string | null;
+          body: Json;
+          issued_by_admin_id: string | null;
+          created_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["generated_documents"]["Row"],
+          "id" | "created_at"
+        > & { id?: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["generated_documents"]["Row"]>;
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          kind: "account" | "withdrawal" | "refund" | "message" | "security" | "document";
+          severity: "info" | "success" | "warning" | "danger";
+          title: string;
+          body: string;
+          href: string | null;
+          currency: "USD" | "EUR" | "GBP" | null;
+          amount_label: string | null;
+          read: boolean;
+          created_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["notifications"]["Row"],
+          "id" | "created_at"
+        > & { id?: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["notifications"]["Row"]>;
+      };
+      beneficiaries: {
+        Row: {
+          id: string;
+          user_id: string;
+          nickname: string;
+          account_holder: string;
+          rail:
+            | "bank_wire"
+            | "sepa"
+            | "uk_faster"
+            | "paypal"
+            | "wise"
+            | "revolut"
+            | "zelle"
+            | "cashapp";
+          currency: "USD" | "EUR" | "GBP";
+          country: string;
+          destination_masked: string;
+          bank: string | null;
+          notes: string | null;
+          status: "pending" | "approved" | "rejected" | "expired";
+          is_default: boolean;
+          submitted_by_full_name: string;
+          reviewed_by_admin_id: string | null;
+          review_note: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["beneficiaries"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & { id?: string; created_at?: string; updated_at?: string };
+        Update: Partial<Database["public"]["Tables"]["beneficiaries"]["Row"]>;
+      };
     };
     Functions: Record<string, never>;
     Enums: Record<string, never>;
@@ -236,3 +322,6 @@ export type AuditLog = Database["public"]["Tables"]["audit_logs"]["Row"];
 export type AdminNote = Database["public"]["Tables"]["admin_notes"]["Row"];
 export type LoginHistoryEntry = Database["public"]["Tables"]["login_history"]["Row"];
 export type RefundClaim = Database["public"]["Tables"]["refund_claims"]["Row"];
+export type GeneratedDocument = Database["public"]["Tables"]["generated_documents"]["Row"];
+export type NotificationRow = Database["public"]["Tables"]["notifications"]["Row"];
+export type BeneficiaryRow = Database["public"]["Tables"]["beneficiaries"]["Row"];

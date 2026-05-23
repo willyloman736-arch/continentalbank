@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { demoClientDocuments, type DocumentRecord, DOCUMENT_TYPE_LABELS } from "@/lib/demo/documents";
+import { getAuthedUser, isAdmin } from "@/lib/auth";
+import { createServiceClient } from "@/lib/supabase/server";
+import { localAuthEnabled } from "@/lib/auth-mode";
+import { supabaseConfigured } from "@/lib/demo";
 
 /**
  * Serves a printable A4-styled HTML page for a document. The browser's
@@ -11,7 +15,38 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const doc = demoClientDocuments.find((d) => d.id === id);
+  const user = await getAuthedUser();
+  let doc = demoClientDocuments.find((d) => d.id === id) ?? null;
+
+  if (!doc && user && !localAuthEnabled() && supabaseConfigured()) {
+    const service = createServiceClient();
+    const { data } = await service
+      .from("generated_documents")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    if (data && (data.user_id === user.id || isAdmin(user.profile.role))) {
+      doc = {
+        id: data.id,
+        user_id: data.user_id,
+        type: data.type,
+        title: data.title,
+        description: data.description,
+        size: data.size_label,
+        currency: data.currency ?? undefined,
+        reference: data.reference ?? undefined,
+        created_at: data.created_at,
+        body: isDocumentBody(data.body)
+          ? data.body
+          : {
+              heading: data.title,
+              rows: [{ label: "Reference", value: data.reference ?? data.id }],
+              paragraph: data.description,
+            },
+      };
+    }
+  }
+
   if (!doc) {
     return NextResponse.json({ error: "Document not found" }, { status: 404 });
   }
@@ -294,4 +329,14 @@ function escape(s: string) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function isDocumentBody(value: unknown): value is DocumentRecord["body"] {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      "heading" in value &&
+      "rows" in value &&
+      Array.isArray((value as { rows?: unknown }).rows),
+  );
 }

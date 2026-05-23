@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, LogOut, MessageSquare, Search, Settings, UserRound } from "lucide-react";
+import { LogOut, MessageSquare, Search, Settings, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +13,10 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { signOutAction } from "@/app/actions/auth";
 import type { Locale } from "@/lib/i18n/dictionaries";
+import type { Notification } from "@/lib/demo/notifications";
 import { formatAccountNumber, initials } from "@/lib/utils";
 
 type Props = {
@@ -22,9 +24,10 @@ type Props = {
   email: string;
   accountNumber: string | null;
   locale: Locale;
+  notifications: Notification[];
 };
 
-export function DashboardTopbar({ fullName, email, accountNumber, locale }: Props) {
+export function DashboardTopbar({ fullName, email, accountNumber, locale, notifications }: Props) {
   return (
     <header className="sticky top-[65px] z-30 border-b border-champagne-200/[0.10] bg-[#17212B]/74 shadow-[0_16px_36px_-34px_rgba(0,0,0,0.78)] backdrop-blur-xl lg:top-0">
       <div className="flex min-h-16 items-center justify-between gap-4 px-4 py-3 lg:px-8">
@@ -58,17 +61,7 @@ export function DashboardTopbar({ fullName, email, accountNumber, locale }: Prop
             <LanguageSwitcher currentLocale={locale} />
           </div>
 
-          <Button
-            asChild
-            variant="outline"
-            size="icon"
-            aria-label="Notifications"
-            className="border-ivory-100/[0.08] bg-ivory-100/[0.055] text-ivory-100/82 hover:bg-ivory-100/[0.09]"
-          >
-            <Link href="/dashboard/notifications">
-              <Bell className="h-4 w-4" />
-            </Link>
-          </Button>
+          <NotificationBell notifications={notifications} />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

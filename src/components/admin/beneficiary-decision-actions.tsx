@@ -8,6 +8,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { decideBeneficiary } from "@/app/actions/beneficiaries";
 import { cn } from "@/lib/utils";
 
 type Decision = "approve" | "reject";
@@ -27,13 +28,21 @@ export function BeneficiaryDecisionActions({ id }: { id: string }) {
 
   function act() {
     if (!open) return;
+    if (open === "reject" && !note.trim()) {
+      toast.error("Add a reason before rejecting this beneficiary.");
+      return;
+    }
     startTransition(async () => {
-      await new Promise((r) => setTimeout(r, 300));
-      toast.success(
-        open === "approve"
-          ? "Beneficiary approved. Client notified."
-          : "Beneficiary rejected. Client notified.",
-      );
+      const res = await decideBeneficiary({
+        id,
+        decision: open,
+        note: note.trim() || undefined,
+      });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      toast.success(res.message ?? "Beneficiary updated. Client notified.");
       setOpen(null);
       setNote("");
     });

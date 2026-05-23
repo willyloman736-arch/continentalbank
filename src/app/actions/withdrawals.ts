@@ -7,6 +7,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { isDemoMode, supabaseConfigured } from "@/lib/demo";
 import { localAuthEnabled } from "@/lib/auth-mode";
 import { WithdrawalRequestSchema, WithdrawalDecisionSchema } from "@/lib/validation";
+import { issueWithdrawalReceipt } from "@/lib/receipts";
 
 export type ActionResult =
   | { ok: true; message?: string }
@@ -71,16 +72,20 @@ export async function submitWithdrawal(input: unknown): Promise<ActionResult> {
   });
 
   // Insert the withdrawal request
-  const { error: wrErr } = await service.from("withdrawal_requests").insert({
-    user_id: user.id,
-    currency,
-    amount,
-    method,
-    payment_details: paymentDetails,
-    notes: notes ?? null,
-    status: "pending",
-  });
-  if (wrErr) return { ok: false, error: wrErr.message };
+  const { data: withdrawal, error: wrErr } = await service
+    .from("withdrawal_requests")
+    .insert({
+      user_id: user.id,
+      currency,
+      amount,
+      method,
+      payment_details: paymentDetails,
+      notes: notes ?? null,
+      status: "pending",
+    })
+    .select()
+    .maybeSingle();
+  if (wrErr || !withdrawal) return { ok: false, error: wrErr?.message ?? "Could not file withdrawal" };
 
   // Client-visible transaction record
   await service.from("transactions").insert({
@@ -94,7 +99,10 @@ export async function submitWithdrawal(input: unknown): Promise<ActionResult> {
 
   revalidatePath("/dashboard/withdrawals");
   revalidatePath("/dashboard/wallets");
+  revalidatePath("/dashboard/documents");
+  revalidatePath("/dashboard/notifications");
   revalidatePath("/dashboard");
+  await issueWithdrawalReceipt(service, user.profile, withdrawal, "pending");
   return { ok: true, message: "Withdrawal request submitted." };
 }
 
@@ -137,6 +145,11 @@ export async function processWithdrawal(input: unknown): Promise<ActionResult> {
     .eq("currency", req.currency)
     .maybeSingle();
   if (!wallet) return { ok: false, error: "Wallet missing" };
+  const { data: profile } = await service
+    .from("profiles")
+    .select("id, full_name, account_number")
+    .eq("id", req.user_id)
+    .maybeSingle();
 
   const h = await headers();
   const ip =
@@ -225,8 +238,20 @@ export async function processWithdrawal(input: unknown): Promise<ActionResult> {
     ip_address: ip,
   });
 
+  if (profile) {
+    await issueWithdrawalReceipt(
+      service,
+      profile,
+      { ...req, status: decision, admin_note: adminNote ?? null },
+      decision,
+      admin.id,
+    );
+  }
+
   revalidatePath("/admin/withdrawals");
   revalidatePath("/admin");
   revalidatePath("/dashboard/withdrawals");
+  revalidatePath("/dashboard/documents");
+  revalidatePath("/dashboard/notifications");
   return { ok: true, message: `Request ${decision}.` };
 }

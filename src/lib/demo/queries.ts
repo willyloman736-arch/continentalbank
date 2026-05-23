@@ -9,6 +9,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isDemoMode, supabaseConfigured } from "./index";
 import { localTransactions, localWallets, localWithdrawals } from "@/lib/local-auth";
 import { localAuthEnabled } from "@/lib/auth-mode";
+import { demoClientBeneficiaries, demoAdminBeneficiaryQueue } from "./beneficiaries";
 import {
   demoAdminRecentLedger,
   demoAdminRefundQueue,
@@ -26,6 +27,8 @@ import {
   demoClientWithdrawals,
   demoLedgerForClient,
 } from "./data";
+import { demoClientDocuments, type DocumentRecord } from "./documents";
+import { demoClientNotifications, type Notification } from "./notifications";
 
 /* ---- Client-side fetchers --------------------------------------- */
 
@@ -113,6 +116,68 @@ export async function clientLoginHistory(userId: string) {
   return data ?? [];
 }
 
+export async function clientDocuments(userId: string) {
+  if (await isDemoMode()) return demoClientDocuments;
+  if (localAuthEnabled() || !supabaseConfigured()) {
+    return demoClientDocuments.map((d) => ({ ...d, user_id: userId }));
+  }
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("generated_documents")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(200);
+  return (data ?? []).map(generatedDocumentToRecord);
+}
+
+export async function clientNotifications(userId: string, limit = 100) {
+  if (await isDemoMode()) return demoClientNotifications;
+  if (localAuthEnabled() || !supabaseConfigured()) {
+    return demoClientNotifications.map((n) => ({ ...n, user_id: userId }));
+  }
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("notifications")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []).map((n) => ({
+    id: n.id,
+    user_id: n.user_id,
+    kind: n.kind,
+    severity: n.severity,
+    title: n.title,
+    body: n.body,
+    href: n.href ?? undefined,
+    currency: n.currency ?? undefined,
+    amount: n.amount_label ?? undefined,
+    read: n.read,
+    created_at: n.created_at,
+  })) satisfies Notification[];
+}
+
+export async function clientBeneficiaries(userId: string) {
+  if (await isDemoMode()) return demoClientBeneficiaries;
+  if (localAuthEnabled() || !supabaseConfigured()) return demoClientBeneficiaries.map((b) => ({ ...b, user_id: userId }));
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("beneficiaries")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  return (data ?? []).map((b) => ({
+    ...b,
+    bank: b.bank ?? undefined,
+    notes: b.notes ?? undefined,
+    reviewed_by_full_name: undefined,
+    review_note: b.review_note ?? undefined,
+    reviewed_at: b.reviewed_at ?? undefined,
+  }));
+}
+
 /* ---- Admin-side fetchers ---------------------------------------- */
 
 export async function adminCounts() {
@@ -188,6 +253,33 @@ export async function adminClientRoster(statusFilter?: string, q?: string) {
   }
   const { data } = await query.limit(200);
   return data ?? [];
+}
+
+export async function adminBeneficiaryQueue(statusFilter?: string) {
+  if (await isDemoMode()) {
+    if (statusFilter && statusFilter !== "all") {
+      return demoAdminBeneficiaryQueue.filter((b) => b.status === statusFilter);
+    }
+    return demoAdminBeneficiaryQueue;
+  }
+  if (localAuthEnabled() || !supabaseConfigured()) return [];
+  const s = createServiceClient();
+  let q = s
+    .from("beneficiaries")
+    .select("*, profiles:profiles!beneficiaries_user_id_fkey(full_name, account_number)")
+    .order("created_at", { ascending: false });
+  if (statusFilter && statusFilter !== "all") q = q.eq("status", statusFilter);
+  const { data } = await q.limit(200);
+  return (data ?? []).map((b: any) => ({
+    ...b,
+    bank: b.bank ?? undefined,
+    notes: b.notes ?? undefined,
+    reviewed_by_full_name: undefined,
+    review_note: b.review_note ?? undefined,
+    reviewed_at: b.reviewed_at ?? undefined,
+    client_name: b.profiles?.full_name ?? "Client",
+    client_account: b.profiles?.account_number ?? null,
+  }));
 }
 
 export async function adminClientDetail(userId: string) {
@@ -409,4 +501,37 @@ export async function adminRecentActivity() {
     .order("created_at", { ascending: false })
     .limit(8);
   return data ?? [];
+}
+
+function generatedDocumentToRecord(row: any): DocumentRecord {
+  const body = isDocumentBody(row.body)
+    ? row.body
+    : {
+        heading: row.title,
+        rows: [{ label: "Reference", value: row.reference ?? row.id }],
+        paragraph: row.description,
+      };
+
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    type: row.type,
+    title: row.title,
+    description: row.description,
+    size: row.size_label ?? "72 KB",
+    currency: row.currency ?? undefined,
+    reference: row.reference ?? undefined,
+    created_at: row.created_at,
+    body,
+  };
+}
+
+function isDocumentBody(value: unknown): value is DocumentRecord["body"] {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      "heading" in value &&
+      "rows" in value &&
+      Array.isArray((value as { rows?: unknown }).rows),
+  );
 }

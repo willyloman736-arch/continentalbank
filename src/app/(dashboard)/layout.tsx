@@ -6,6 +6,7 @@ import { DashboardTopbar } from "@/components/dashboard/topbar";
 import { DemoBanner } from "@/components/shared/demo-banner";
 import { FrozenOverlay } from "@/components/dashboard/frozen-overlay";
 import { PageTransition } from "@/components/motion/page-transition";
+import { clientNotifications } from "@/lib/demo/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const user = await requireApprovedClient();
   const locale = await detectLocale();
   const isFrozen = user.profile.account_status === "suspended";
+  const notifications = await clientNotifications(user.id, 8);
 
   return (
     <div
@@ -61,6 +63,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             email={user.email ?? ""}
             accountNumber={user.profile.account_number}
             locale={locale}
+            notifications={notifications}
           />
           <main className="flex-1 px-4 py-6 pb-12 sm:px-6 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1480px]">

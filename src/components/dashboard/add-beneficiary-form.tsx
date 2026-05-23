@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MotionCard } from "@/components/motion/motion-card";
+import { submitBeneficiary } from "@/app/actions/beneficiaries";
 import {
   BENEFICIARY_RAIL_BY_CURRENCY,
   BENEFICIARY_RAIL_LABEL,
@@ -60,8 +61,12 @@ export function AddBeneficiaryForm() {
       return;
     }
     startTransition(async () => {
-      await new Promise((r) => setTimeout(r, 300));
-      toast.success("Beneficiary submitted for officer review.");
+      const res = await submitBeneficiary(state);
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      toast.success(res.message ?? "Beneficiary submitted for officer review.");
       setState({
         nickname: "",
         holder: "",

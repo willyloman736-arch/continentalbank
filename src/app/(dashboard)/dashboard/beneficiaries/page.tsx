@@ -5,7 +5,7 @@ import { BeneficiaryCard } from "@/components/dashboard/beneficiary-card";
 import { AddBeneficiaryForm } from "@/components/dashboard/add-beneficiary-form";
 import { MotionCard } from "@/components/motion/motion-card";
 import { requireApprovedClient } from "@/lib/auth";
-import { demoClientBeneficiaries } from "@/lib/demo/beneficiaries";
+import { clientBeneficiaries } from "@/lib/demo/queries";
 
 export const metadata = { title: "Beneficiaries" };
 
@@ -23,7 +23,7 @@ export default async function BeneficiariesPage({
 }) {
   const user = await requireApprovedClient();
   const { status } = await searchParams;
-  const all = demoClientBeneficiaries.filter((b) => b.user_id === user.id);
+  const all = await clientBeneficiaries(user.id);
   const list = status && status !== "all" ? all.filter((b) => b.status === status) : all;
 
   const approved = all.filter((b) => b.status === "approved").length;

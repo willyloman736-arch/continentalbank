@@ -3,9 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { getAuthedUser, requireAdmin, requireApprovedClient } from "@/lib/auth";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { isDemoMode, supabaseConfigured } from "@/lib/demo";
 import { localAuthEnabled } from "@/lib/auth-mode";
+import { issueRefundReceipt } from "@/lib/receipts";
 import {
   ClientRefundDisputeSchema,
   PublicRefundClaimSchema,
@@ -38,25 +39,34 @@ export async function submitPublicRefundClaim(input: unknown): Promise<ActionRes
   const me = await getAuthedUser();
   const service = createServiceClient();
 
-  const { error } = await service.from("refund_claims").insert({
-    user_id: me?.id ?? null,
-    claim_type: "public_claim",
-    claimant_name: parsed.data.claimantName,
-    claimant_email: parsed.data.claimantEmail,
-    claimant_phone: parsed.data.claimantPhone || null,
-    account_reference: parsed.data.accountReference || null,
-    transaction_reference: parsed.data.transactionReference || null,
-    currency: (parsed.data.currency as "USD" | "EUR" | "GBP" | undefined) ?? null,
-    amount: parsed.data.amount,
-    description: parsed.data.description,
-    supporting_info: { reason: parsed.data.reason },
-    status: "pending",
-  });
+  const { data: claim, error } = await service
+    .from("refund_claims")
+    .insert({
+      user_id: me?.id ?? null,
+      claim_type: "public_claim",
+      claimant_name: parsed.data.claimantName,
+      claimant_email: parsed.data.claimantEmail,
+      claimant_phone: parsed.data.claimantPhone || null,
+      account_reference: parsed.data.accountReference || null,
+      transaction_reference: parsed.data.transactionReference || null,
+      currency: (parsed.data.currency as "USD" | "EUR" | "GBP" | undefined) ?? null,
+      amount: parsed.data.amount,
+      description: parsed.data.description,
+      supporting_info: { reason: parsed.data.reason },
+      status: "pending",
+    })
+    .select()
+    .maybeSingle();
 
   if (error) return { ok: false, error: error.message };
+  if (claim?.user_id) await issueRefundReceipt(service, claim, "pending");
 
   revalidatePath("/refund");
   revalidatePath("/admin/refunds");
+  if (claim?.user_id) {
+    revalidatePath("/dashboard/documents");
+    revalidatePath("/dashboard/notifications");
+  }
   return {
     ok: true,
     message:
@@ -78,26 +88,33 @@ export async function submitClientRefundDispute(input: unknown): Promise<ActionR
     return { ok: true, message: DEMO_MSG };
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.from("refund_claims").insert({
-    user_id: user.id,
-    claim_type: "transaction_dispute",
-    claimant_name: user.profile.full_name,
-    claimant_email: user.email ?? user.profile.email,
-    claimant_phone: user.profile.phone,
-    account_reference: user.profile.account_number,
-    related_transaction_id: parsed.data.relatedTransactionId || null,
-    transaction_reference: parsed.data.transactionReference || null,
-    currency: parsed.data.currency as "USD" | "EUR" | "GBP",
-    amount: parsed.data.amount,
-    description: parsed.data.description,
-    supporting_info: { reason: parsed.data.reason },
-    status: "pending",
-  });
+  const service = createServiceClient();
+  const { data: claim, error } = await service
+    .from("refund_claims")
+    .insert({
+      user_id: user.id,
+      claim_type: "transaction_dispute",
+      claimant_name: user.profile.full_name,
+      claimant_email: user.email ?? user.profile.email,
+      claimant_phone: user.profile.phone,
+      account_reference: user.profile.account_number,
+      related_transaction_id: parsed.data.relatedTransactionId || null,
+      transaction_reference: parsed.data.transactionReference || null,
+      currency: parsed.data.currency as "USD" | "EUR" | "GBP",
+      amount: parsed.data.amount,
+      description: parsed.data.description,
+      supporting_info: { reason: parsed.data.reason },
+      status: "pending",
+    })
+    .select()
+    .maybeSingle();
 
   if (error) return { ok: false, error: error.message };
+  if (claim) await issueRefundReceipt(service, claim, "pending");
 
   revalidatePath("/dashboard/refunds");
+  revalidatePath("/dashboard/documents");
+  revalidatePath("/dashboard/notifications");
   return { ok: true, message: "Dispute filed. Your banker will respond shortly." };
 }
 
@@ -147,7 +164,22 @@ export async function decideRefundClaim(input: unknown): Promise<ActionResult> {
     ip_address: await clientIp(),
   });
 
+  await issueRefundReceipt(
+    service,
+    {
+      ...claim,
+      status: decision,
+      admin_note: adminNote ?? (claim as { admin_note: string | null }).admin_note,
+      processed_by_admin_id: admin.id,
+    },
+    decision,
+    admin.id,
+    adminNote,
+  );
+
   revalidatePath("/admin/refunds");
   revalidatePath("/dashboard/refunds");
+  revalidatePath("/dashboard/documents");
+  revalidatePath("/dashboard/notifications");
   return { ok: true, message: `Claim ${decision.replace("_", " ")}.` };
 }

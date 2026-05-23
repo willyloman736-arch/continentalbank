@@ -7,6 +7,9 @@
  *   kyc            — uploaded ID / proof of address
  *   withdrawal_receipt — per completed withdrawal
  *   refund_evidence    — per approved refund claim
+ *   beneficiary_receipt — per beneficiary submission / review
+ *   security_receipt    — password / security setting receipts
+ *   support_receipt     — support case closure notices
  *   tax           — annual tax summary
  */
 
@@ -18,6 +21,9 @@ export type DocumentType =
   | "kyc"
   | "withdrawal_receipt"
   | "refund_evidence"
+  | "beneficiary_receipt"
+  | "security_receipt"
+  | "support_receipt"
   | "tax";
 
 export type DocumentRecord = {
@@ -51,6 +57,9 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   kyc: "KYC document",
   withdrawal_receipt: "Withdrawal receipt",
   refund_evidence: "Refund evidence",
+  beneficiary_receipt: "Beneficiary receipt",
+  security_receipt: "Security receipt",
+  support_receipt: "Support receipt",
   tax: "Tax summary",
 };
 
@@ -353,6 +362,9 @@ export function docsByType(docs: DocumentRecord[]): Record<DocumentType, Documen
       kyc: [],
       withdrawal_receipt: [],
       refund_evidence: [],
+      beneficiary_receipt: [],
+      security_receipt: [],
+      support_receipt: [],
       tax: [],
     } as Record<DocumentType, DocumentRecord[]>,
   );
