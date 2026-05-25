@@ -3,15 +3,23 @@ import type { LucideIcon } from "lucide-react";
 import {
   ArrowDownLeft,
   ArrowRight,
-  BarChart3,
+  Banknote,
+  BellRing,
   CheckCircle2,
   Clock3,
+  ExternalLink,
   FileCheck2,
+  FileText,
+  Globe2,
+  Landmark,
   LifeBuoy,
+  LockKeyhole,
   ScrollText,
   ShieldCheck,
   Undo2,
+  UserCheck,
   Users,
+  WalletCards,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,8 +27,19 @@ import { ActivityTicker } from "@/components/shared/activity-ticker";
 import { MotionCard } from "@/components/motion/motion-card";
 import { MotionList, MotionRow } from "@/components/motion/motion-list";
 import { requireAdmin } from "@/lib/auth";
+import { SITE } from "@/lib/constants";
 import {
+  DOCUMENT_TYPE_LABELS,
+  type DocumentRecord,
+} from "@/lib/demo/documents";
+import {
+  BENEFICIARY_RAIL_LABEL,
+  type Beneficiary,
+} from "@/lib/demo/beneficiaries";
+import {
+  adminAnalytics,
   adminCounts,
+  adminDashboardMetrics,
   adminPendingRefundCount,
   adminRecentActivity,
   adminRecentWithdrawals,
@@ -51,32 +70,79 @@ type ActivityRow = {
   } | null;
 };
 
+type RecentDocument = DocumentRecord & {
+  profiles?: {
+    full_name?: string | null;
+    account_number?: string | null;
+  } | null;
+};
+
+type BeneficiaryReviewRow = Beneficiary & {
+  client_name?: string;
+  client_account?: string | null;
+  profiles?: {
+    full_name?: string | null;
+    account_number?: string | null;
+  } | null;
+};
+
+const currencies = ["USD", "EUR", "GBP"] as const;
+
 export default async function AdminOverviewPage() {
   const admin = await requireAdmin();
-  const [counts, refundCount, recentRequests, recentActivity] = await Promise.all([
-    adminCounts(),
-    adminPendingRefundCount(),
-    adminRecentWithdrawals(),
-    adminRecentActivity(),
-  ]);
+  const [counts, refundCount, dashboard, analytics, recentRequests, recentActivity] =
+    await Promise.all([
+      adminCounts(),
+      adminPendingRefundCount(),
+      adminDashboardMetrics(),
+      adminAnalytics(),
+      adminRecentWithdrawals(),
+      adminRecentActivity(),
+    ]);
 
   const reviewTotal =
-    counts.pendingClients + counts.pendingWithdrawals + refundCount + counts.openTickets;
+    counts.pendingClients +
+    counts.pendingWithdrawals +
+    refundCount +
+    counts.openTickets +
+    dashboard.pendingKyc +
+    dashboard.pendingBeneficiaries;
+
+  const liveDomain = SITE.publicDomain;
+  const domainLabel = liveDomain.replace(/^https?:\/\//, "");
+  const recentDocuments = dashboard.recentDocuments as RecentDocument[];
+  const recentBeneficiaries = dashboard.recentBeneficiaries as BeneficiaryReviewRow[];
 
   const stats = [
     {
       icon: Users,
-      label: "Pending applications",
+      label: "Client applications",
       value: String(counts.pendingClients),
-      detail: "Client onboarding",
+      detail: "Pending onboarding approvals",
       href: "/admin/users?status=pending",
       active: counts.pendingClients > 0,
     },
     {
+      icon: FileCheck2,
+      label: "KYC reviews",
+      value: String(dashboard.pendingKyc),
+      detail: "Identity files needing officer review",
+      href: "/admin/compliance",
+      active: dashboard.pendingKyc > 0,
+    },
+    {
+      icon: Banknote,
+      label: "Beneficiary approvals",
+      value: String(dashboard.pendingBeneficiaries),
+      detail: "Outbound destinations to verify",
+      href: "/admin/beneficiaries?status=pending",
+      active: dashboard.pendingBeneficiaries > 0,
+    },
+    {
       icon: ArrowDownLeft,
-      label: "Withdrawals review",
+      label: "Withdrawal queue",
       value: String(counts.pendingWithdrawals),
-      detail: "Payment approvals",
+      detail: "Payment instructions awaiting approval",
       href: "/admin/withdrawals?status=pending",
       active: counts.pendingWithdrawals > 0,
     },
@@ -84,77 +150,143 @@ export default async function AdminOverviewPage() {
       icon: Undo2,
       label: "Refund claims",
       value: String(refundCount),
-      detail: "Dispute desk",
+      detail: "Disputes and reversals desk",
       href: "/admin/refunds?status=pending",
       active: refundCount > 0,
     },
     {
       icon: LifeBuoy,
-      label: "Open tickets",
+      label: "Support cases",
       value: String(counts.openTickets),
-      detail: "Concierge queue",
+      detail: "Concierge messages requiring response",
       href: "/admin/support",
       active: counts.openTickets > 0,
     },
     {
-      icon: BarChart3,
-      label: "Total clients",
-      value: String(counts.totalClients),
-      detail: "Private accounts",
+      icon: FileText,
+      label: "Documents issued",
+      value: String(dashboard.documentsIssued),
+      detail: "Receipts, letters, statements",
       href: "/admin/users",
+    },
+    {
+      icon: BellRing,
+      label: "Unread client notices",
+      value: String(dashboard.unreadNotifications),
+      detail: "Portal notifications still unread",
+      href: "/admin/audit-logs",
+      active: dashboard.unreadNotifications > 0,
+    },
+  ];
+
+  const actionTiles = [
+    {
+      icon: UserCheck,
+      label: "Approve clients",
+      detail: "Review new private office accounts and activate approved clients.",
+      href: "/admin/users?status=pending",
+      metric: counts.pendingClients,
+    },
+    {
+      icon: ShieldCheck,
+      label: "Review KYC",
+      detail: "Inspect submitted identity, address, and source-of-funds records.",
+      href: "/admin/compliance",
+      metric: dashboard.pendingKyc,
+    },
+    {
+      icon: Banknote,
+      label: "Verify beneficiaries",
+      detail: "Approve payout destinations before payment officers can release funds.",
+      href: "/admin/beneficiaries?status=pending",
+      metric: dashboard.pendingBeneficiaries,
+    },
+    {
+      icon: WalletCards,
+      label: "Release payments",
+      detail: "Approve, reject, or complete withdrawals with full audit history.",
+      href: "/admin/withdrawals?status=pending",
+      metric: counts.pendingWithdrawals,
     },
   ];
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
         <MotionCard
           surface="none"
-          className="relative overflow-hidden rounded-md border border-white/[0.09] bg-white/[0.045] p-6 shadow-[0_26px_70px_-42px_rgba(0,0,0,0.95)] backdrop-blur-xl lg:p-8"
+          className="relative overflow-hidden rounded-md border border-white/[0.09] bg-white/[0.045] p-6 shadow-[0_30px_80px_-46px_rgba(0,0,0,0.96)] backdrop-blur-xl lg:p-8"
         >
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-champagne-400/55 to-transparent" />
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-champagne-400/60 to-transparent" />
+          <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full border border-champagne-400/10 bg-champagne-300/[0.03]" />
+          <div className="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <div className="text-[11px] font-medium uppercase tracking-[0.2em] text-champagne-300">
-                Welcome, {admin.profile.full_name.split(" ")[0]}
+              <div className="inline-flex items-center gap-2 rounded-sm border border-champagne-500/24 bg-champagne-500/[0.08] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-champagne-300">
+                <LockKeyhole className="h-3.5 w-3.5" strokeWidth={1.7} />
+                Admin-only command access
               </div>
-              <h1 className="mt-4 font-display text-3xl font-semibold tracking-normal text-ivory-100 sm:text-4xl">
-                Operations control room
+              <h1 className="mt-5 font-display text-3xl font-semibold tracking-normal text-ivory-100 sm:text-4xl">
+                Continental administration dashboard
               </h1>
               <p className="mt-3 max-w-2xl text-[14px] leading-6 text-ivory-100/62 sm:text-[15px]">
-                Monitor client onboarding, approvals, payment instructions, and officer activity
-                from a single command surface.
+                Monitor onboarding, compliance, beneficiaries, documents, payments, and officer
+                actions for the live Continental Bank domain from one operations surface.
               </p>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Button asChild variant="gold" size="sm">
+                  <Link href="/admin/users?status=pending">
+                    Start reviews
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="border-white/[0.1] bg-white/[0.045] text-ivory-100/82"
+                >
+                  <Link href={liveDomain} target="_blank" rel="noreferrer">
+                    Visit {domainLabel}
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+              </div>
             </div>
 
-            <div className="grid min-w-[260px] grid-cols-2 gap-3">
+            <div className="grid min-w-[280px] grid-cols-2 gap-3">
               <HeroMetric label="Review queue" value={reviewTotal} />
-              <HeroMetric label="SLA status" value="Live" />
-              <HeroMetric label="Risk mode" value="Guarded" />
-              <HeroMetric label="Desk" value="Admin" />
+              <HeroMetric label="Clients" value={counts.totalClients} />
+              <HeroMetric label="Domain" value="Live" />
+              <HeroMetric label="Desk" value={admin.profile.role.replace("_", " ")} />
             </div>
           </div>
         </MotionCard>
 
         <MotionCard
           surface="none"
-          className="rounded-md border border-white/[0.09] bg-navy-950/62 p-5 shadow-[0_26px_70px_-48px_rgba(0,0,0,0.95)] backdrop-blur-xl"
+          className="rounded-md border border-white/[0.09] bg-navy-950/66 p-5 shadow-[0_26px_70px_-48px_rgba(0,0,0,0.95)] backdrop-blur-xl"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between gap-4">
             <div>
               <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-champagne-300">
-                Command health
+                Production command
               </div>
-              <h2 className="mt-2 text-[16px] font-semibold text-ivory-100">Today&apos;s desk</h2>
+              <h2 className="mt-2 text-[17px] font-semibold text-ivory-100">
+                {domainLabel}
+              </h2>
+              <p className="mt-2 text-[12.5px] leading-5 text-ivory-100/52">
+                Public domain is wired into metadata, portal links, and admin quick access.
+              </p>
             </div>
-            <div className="grid h-10 w-10 place-items-center rounded-sm border border-champagne-500/24 bg-champagne-500/[0.09] text-champagne-300">
-              <ShieldCheck className="h-4 w-4" strokeWidth={1.7} />
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-sm border border-champagne-500/24 bg-champagne-500/[0.09] text-champagne-300">
+              <Globe2 className="h-4 w-4" strokeWidth={1.7} />
             </div>
           </div>
           <div className="mt-5 space-y-3">
-            <HealthRow icon={CheckCircle2} label="Admin access" value="Restricted" />
-            <HealthRow icon={Clock3} label="Queue velocity" value="Priority" />
-            <HealthRow icon={FileCheck2} label="Audit trail" value="Recording" />
+            <HealthRow icon={ShieldCheck} label="Admin gate" value="Restricted" />
+            <HealthRow icon={ScrollText} label="Audit trail" value="Recording" />
+            <HealthRow icon={Clock3} label="Queue status" value={reviewTotal > 0 ? "Active" : "Clear"} />
           </div>
           <Button asChild variant="outline" className="mt-5 w-full border-white/[0.1] bg-white/[0.045]">
             <Link href="/admin/audit-logs">
@@ -167,34 +299,86 @@ export default async function AdminOverviewPage() {
 
       <ActivityTicker preset="admin" tone="dark" label="Live approvals" compact />
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, index) => (
           <StatCard key={stat.label} {...stat} index={index} />
         ))}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_410px]">
+        <MotionCard
+          index={3}
+          surface="none"
+          className="rounded-md border border-white/[0.09] bg-white/[0.045] p-5 shadow-[0_24px_70px_-46px_rgba(0,0,0,0.95)] backdrop-blur-xl"
+        >
+          <SectionTitle
+            eyebrow="Officer workflow"
+            title="Priority command board"
+            actionHref="/admin/users"
+            actionLabel="Client roster"
+          />
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {actionTiles.map((tile, index) => (
+              <ActionTile key={tile.label} {...tile} index={index} />
+            ))}
+          </div>
+        </MotionCard>
+
         <MotionCard
           index={4}
           surface="none"
+          className="rounded-md border border-white/[0.09] bg-navy-950/62 p-5 shadow-[0_24px_70px_-46px_rgba(0,0,0,0.95)] backdrop-blur-xl"
+        >
+          <SectionTitle
+            eyebrow="Custody"
+            title="Portfolio exposure"
+            actionHref="/admin/analytics"
+            actionLabel="Analytics"
+          />
+          <div className="mt-5 space-y-4">
+            {currencies.map((currency) => (
+              <CustodyBar
+                key={currency}
+                currency={currency}
+                value={analytics.custody[currency] ?? 0}
+                pending={analytics.pending[currency] ?? 0}
+                max={Math.max(...currencies.map((c) => analytics.custody[c] ?? 0), 1)}
+              />
+            ))}
+          </div>
+          <div className="mt-5 rounded-sm border border-white/[0.08] bg-white/[0.035] p-3">
+            <div className="flex items-center justify-between gap-3 text-[12px] text-ivory-100/58">
+              <span>Total approved clients</span>
+              <span className="font-medium tabular-figures text-ivory-100">
+                {analytics.approvedClients}
+              </span>
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-3 text-[12px] text-ivory-100/58">
+              <span>Lifetime withdrawn</span>
+              <span className="font-medium tabular-figures text-ivory-100">
+                {formatCurrency(
+                  currencies.reduce((sum, c) => sum + (analytics.withdrawnLifetime[c] ?? 0), 0),
+                  "USD",
+                  { notation: "compact", maximumFractionDigits: 1, minimumFractionDigits: 0 },
+                )}
+              </span>
+            </div>
+          </div>
+        </MotionCard>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+        <MotionCard
+          index={5}
+          surface="none"
           className="overflow-hidden rounded-md border border-white/[0.09] bg-white/[0.045] shadow-[0_24px_70px_-46px_rgba(0,0,0,0.95)] backdrop-blur-xl"
         >
-          <div className="flex flex-col gap-4 border-b border-white/[0.08] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-champagne-300">
-                Payment queue
-              </div>
-              <h2 className="mt-1 text-[17px] font-semibold text-ivory-100">
-                Pending withdrawals
-              </h2>
-            </div>
-            <Button variant="ghost" size="sm" asChild className="self-start text-ivory-100/82">
-              <Link href="/admin/withdrawals">
-                Open queue
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </Button>
-          </div>
+          <SectionHeader
+            eyebrow="Payment queue"
+            title="Pending withdrawal instructions"
+            href="/admin/withdrawals"
+            label="Open queue"
+          />
 
           {(recentRequests as WithdrawalRow[]).length === 0 ? (
             <EmptyState message="No payment instructions are awaiting review." />
@@ -242,16 +426,107 @@ export default async function AdminOverviewPage() {
         </MotionCard>
 
         <MotionCard
-          index={5}
+          index={6}
           surface="none"
           className="overflow-hidden rounded-md border border-white/[0.09] bg-navy-950/62 shadow-[0_24px_70px_-46px_rgba(0,0,0,0.95)] backdrop-blur-xl"
         >
-          <div className="border-b border-white/[0.08] px-5 py-4">
-            <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-champagne-300">
-              Officer activity
-            </div>
-            <h2 className="mt-1 text-[17px] font-semibold text-ivory-100">Live audit stream</h2>
-          </div>
+          <SectionHeader
+            eyebrow="Document engine"
+            title="Recent receipts and letters"
+            href="/admin/users"
+            label="Issue document"
+          />
+          {recentDocuments.length === 0 ? (
+            <EmptyState message="No documents have been issued yet." />
+          ) : (
+            <MotionList className="divide-y divide-white/[0.06]">
+              {recentDocuments.map((document) => (
+                <MotionRow key={document.id} className="px-5 py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-sm border border-white/[0.08] bg-white/[0.045] text-champagne-300">
+                      <FileText className="h-4 w-4" strokeWidth={1.6} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[13.5px] font-medium text-ivory-100">
+                        {document.title}
+                      </div>
+                      <div className="mt-1 truncate text-[12px] text-ivory-100/46">
+                        {document.profiles?.full_name ?? "Client"} -{" "}
+                        {DOCUMENT_TYPE_LABELS[document.type]}
+                      </div>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[10.5px] uppercase tracking-[0.14em] text-ivory-100/38">
+                        <span>{formatDateTime(document.created_at)}</span>
+                        <span>{maskAccountNumber(document.profiles?.account_number)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </MotionRow>
+              ))}
+            </MotionList>
+          )}
+        </MotionCard>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[minmax(360px,0.85fr)_minmax(0,1.15fr)]">
+        <MotionCard
+          index={7}
+          surface="none"
+          className="overflow-hidden rounded-md border border-white/[0.09] bg-white/[0.045] shadow-[0_24px_70px_-46px_rgba(0,0,0,0.95)] backdrop-blur-xl"
+        >
+          <SectionHeader
+            eyebrow="Beneficiary control"
+            title="Payout destinations awaiting approval"
+            href="/admin/beneficiaries?status=pending"
+            label="Review"
+          />
+          {recentBeneficiaries.length === 0 ? (
+            <EmptyState message="No beneficiary approvals are pending." />
+          ) : (
+            <MotionList className="divide-y divide-white/[0.06]">
+              {recentBeneficiaries.map((beneficiary) => (
+                <MotionRow key={beneficiary.id} className="px-5 py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-sm border border-white/[0.08] bg-white/[0.045] text-champagne-300">
+                      <Landmark className="h-4 w-4" strokeWidth={1.6} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate text-[13.5px] font-medium text-ivory-100">
+                            {beneficiary.client_name ??
+                              beneficiary.profiles?.full_name ??
+                              beneficiary.submitted_by_full_name}
+                          </div>
+                          <div className="mt-1 truncate text-[12px] text-ivory-100/46">
+                            {beneficiary.nickname} - {BENEFICIARY_RAIL_LABEL[beneficiary.rail]}
+                          </div>
+                        </div>
+                        <Badge variant="warning">{beneficiary.currency}</Badge>
+                      </div>
+                      <div className="mt-2 text-[11.5px] tabular-figures text-ivory-100/42">
+                        {maskAccountNumber(
+                          beneficiary.client_account ?? beneficiary.profiles?.account_number,
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </MotionRow>
+              ))}
+            </MotionList>
+          )}
+        </MotionCard>
+
+        <MotionCard
+          index={8}
+          surface="none"
+          className="overflow-hidden rounded-md border border-white/[0.09] bg-navy-950/62 shadow-[0_24px_70px_-46px_rgba(0,0,0,0.95)] backdrop-blur-xl"
+        >
+          <SectionHeader
+            eyebrow="Officer activity"
+            title="Live audit stream"
+            href="/admin/audit-logs"
+            label="Open log"
+          />
           {(recentActivity as ActivityRow[]).length === 0 ? (
             <EmptyState message="No officer actions have been recorded yet." />
           ) : (
@@ -286,7 +561,9 @@ function HeroMetric({ label, value }: { label: string; value: string | number })
       <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-ivory-100/38">
         {label}
       </div>
-      <div className="mt-2 text-[18px] font-semibold tabular-figures text-ivory-100">{value}</div>
+      <div className="mt-2 truncate text-[18px] font-semibold capitalize tabular-figures text-ivory-100">
+        {value}
+      </div>
     </div>
   );
 }
@@ -309,6 +586,64 @@ function HealthRow({
       <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-ivory-100/48">
         {value}
       </span>
+    </div>
+  );
+}
+
+function SectionTitle({
+  eyebrow,
+  title,
+  actionHref,
+  actionLabel,
+}: {
+  eyebrow: string;
+  title: string;
+  actionHref: string;
+  actionLabel: string;
+}) {
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-champagne-300">
+          {eyebrow}
+        </div>
+        <h2 className="mt-1 text-[17px] font-semibold text-ivory-100">{title}</h2>
+      </div>
+      <Button variant="ghost" size="sm" asChild className="self-start text-ivory-100/82">
+        <Link href={actionHref}>
+          {actionLabel}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
+function SectionHeader({
+  eyebrow,
+  title,
+  href,
+  label,
+}: {
+  eyebrow: string;
+  title: string;
+  href: string;
+  label: string;
+}) {
+  return (
+    <div className="flex flex-col gap-4 border-b border-white/[0.08] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-champagne-300">
+          {eyebrow}
+        </div>
+        <h2 className="mt-1 text-[17px] font-semibold text-ivory-100">{title}</h2>
+      </div>
+      <Button variant="ghost" size="sm" asChild className="self-start text-ivory-100/82">
+        <Link href={href}>
+          {label}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </Button>
     </div>
   );
 }
@@ -352,7 +687,7 @@ function StatCard({
           </div>
         </div>
         <div className="mt-4 flex items-center justify-between gap-3 text-[12px] text-ivory-100/50">
-          <span className="truncate">{detail}</span>
+          <span className="line-clamp-2">{detail}</span>
           <ArrowRight className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" />
         </div>
         {active && (
@@ -363,6 +698,90 @@ function StatCard({
         )}
       </Link>
     </MotionCard>
+  );
+}
+
+function ActionTile({
+  icon: Icon,
+  label,
+  detail,
+  href,
+  metric,
+  index,
+}: {
+  icon: LucideIcon;
+  label: string;
+  detail: string;
+  href: string;
+  metric: number;
+  index: number;
+}) {
+  return (
+    <MotionCard
+      index={index}
+      hover
+      surface="none"
+      className="rounded-sm border border-white/[0.08] bg-navy-950/38 transition-colors hover:bg-navy-900/54"
+    >
+      <Link href={href} className="block p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-sm border border-champagne-500/24 bg-champagne-500/[0.08] text-champagne-300">
+            <Icon className="h-4 w-4" strokeWidth={1.6} />
+          </div>
+          <Badge variant={metric > 0 ? "warning" : "muted"}>{metric}</Badge>
+        </div>
+        <div className="mt-4 text-[14px] font-semibold text-ivory-100">{label}</div>
+        <p className="mt-1 text-[12.5px] leading-5 text-ivory-100/52">{detail}</p>
+      </Link>
+    </MotionCard>
+  );
+}
+
+function CustodyBar({
+  currency,
+  value,
+  pending,
+  max,
+}: {
+  currency: string;
+  value: number;
+  pending: number;
+  max: number;
+}) {
+  const width = `${Math.max(7, Math.round((value / max) * 100))}%`;
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-ivory-100/42">
+            {currency} custody
+          </div>
+          <div className="mt-1 text-[15px] font-semibold tabular-figures text-ivory-100">
+            {formatCurrency(value, currency, {
+              notation: "compact",
+              maximumFractionDigits: 1,
+              minimumFractionDigits: 0,
+            })}
+          </div>
+        </div>
+        <div className="text-right text-[11.5px] text-ivory-100/46">
+          Pending
+          <div className="tabular-figures text-ivory-100/68">
+            {formatCurrency(pending, currency, {
+              notation: "compact",
+              maximumFractionDigits: 1,
+              minimumFractionDigits: 0,
+            })}
+          </div>
+        </div>
+      </div>
+      <div className="mt-3 h-2 rounded-full bg-white/[0.07]">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-champagne-500 to-emerald-300/80"
+          style={{ width }}
+        />
+      </div>
+    </div>
   );
 }
 

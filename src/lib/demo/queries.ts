@@ -207,6 +207,71 @@ export async function adminCounts() {
   };
 }
 
+export async function adminDashboardMetrics() {
+  const demoMetrics = () => ({
+    pendingKyc: demoClientRoster.filter((p) =>
+      ["submitted", "under_review"].includes(p.kyc_status),
+    ).length,
+    pendingBeneficiaries: demoAdminBeneficiaryQueue.filter((b) => b.status === "pending").length,
+    documentsIssued: demoClientDocuments.length,
+    unreadNotifications: demoClientNotifications.filter((n) => !n.read).length,
+    recentDocuments: demoClientDocuments.slice(0, 5).map((document) => ({
+      ...document,
+      profiles: {
+        full_name: demoClientProfile.full_name,
+        account_number: demoClientProfile.account_number,
+      },
+    })),
+    recentBeneficiaries: demoAdminBeneficiaryQueue
+      .filter((b) => b.status === "pending")
+      .slice(0, 4),
+  });
+
+  if (await isDemoMode()) return demoMetrics();
+  if (localAuthEnabled() || !supabaseConfigured()) return demoMetrics();
+
+  const s = createServiceClient();
+  const [
+    { count: pendingKyc },
+    { count: pendingBeneficiaries },
+    { count: documentsIssued },
+    { count: unreadNotifications },
+    { data: recentDocuments },
+    recentBeneficiaries,
+  ] = await Promise.all([
+    s
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .in("kyc_status", ["submitted", "under_review"]),
+    s
+      .from("beneficiaries")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending"),
+    s.from("generated_documents").select("id", { count: "exact", head: true }),
+    s.from("notifications").select("id", { count: "exact", head: true }).eq("read", false),
+    s
+      .from("generated_documents")
+      .select(
+        "*, profiles:profiles!generated_documents_user_id_fkey(full_name, account_number)",
+      )
+      .order("created_at", { ascending: false })
+      .limit(5),
+    adminBeneficiaryQueue("pending"),
+  ]);
+
+  return {
+    pendingKyc: pendingKyc ?? 0,
+    pendingBeneficiaries: pendingBeneficiaries ?? 0,
+    documentsIssued: documentsIssued ?? 0,
+    unreadNotifications: unreadNotifications ?? 0,
+    recentDocuments: (recentDocuments ?? []).map((row: any) => ({
+      ...generatedDocumentToRecord(row),
+      profiles: row.profiles,
+    })),
+    recentBeneficiaries: recentBeneficiaries.slice(0, 4),
+  };
+}
+
 export async function adminWithdrawalQueue(statusFilter?: string) {
   if (await isDemoMode()) {
     if (statusFilter && statusFilter !== "all") {

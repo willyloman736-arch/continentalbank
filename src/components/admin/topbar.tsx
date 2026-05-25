@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, LogOut, Plus, Search, ShieldCheck } from "lucide-react";
+import { BellRing, ExternalLink, Globe2, LogOut, Plus, Search, ShieldCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { signOutAction } from "@/app/actions/auth";
-import { ROLE_LABELS, type Role } from "@/lib/constants";
+import { ROLE_LABELS, SITE, type Role } from "@/lib/constants";
 import { initials } from "@/lib/utils";
 
 export function AdminTopbar({
@@ -33,7 +33,7 @@ export function AdminTopbar({
             Officer desk
           </div>
           <div className="mt-1 text-[12px] text-ivory-100/52">
-            Continental operations command
+            {SITE.publicDomain.replace(/^https?:\/\//, "")} command
           </div>
         </div>
 
@@ -41,12 +41,25 @@ export function AdminTopbar({
           <Search className="mr-2 h-4 w-4 text-ivory-100/42" strokeWidth={1.6} />
           <input
             type="search"
-            placeholder="Search clients, accounts, requests"
+            placeholder="Search clients, accounts, KYC, documents"
             className="h-full min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-ivory-100/34"
           />
         </label>
 
         <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="hidden border-white/[0.08] bg-white/[0.045] text-ivory-100/82 hover:bg-white/[0.08] lg:inline-flex"
+          >
+            <Link href={SITE.publicDomain} target="_blank" rel="noreferrer">
+              <Globe2 className="h-3.5 w-3.5" />
+              Live site
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
+
           <Button variant="gold" size="sm" asChild className="hidden sm:inline-flex">
             <Link href="/admin/users">
               <Plus className="h-3.5 w-3.5" />
@@ -57,10 +70,13 @@ export function AdminTopbar({
           <Button
             variant="outline"
             size="icon"
-            aria-label="Notifications"
+            asChild
+            aria-label="Messages"
             className="border-white/[0.08] bg-white/[0.045] text-ivory-100/82 hover:bg-white/[0.08]"
           >
-            <Bell className="h-4 w-4" />
+            <Link href="/admin/messages">
+              <BellRing className="h-4 w-4" />
+            </Link>
           </Button>
 
           <DropdownMenu>

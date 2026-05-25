@@ -4,7 +4,8 @@ export const SITE = {
   tagline: "Discreet private banking, established standards.",
   description:
     "A premium institutional client portal for multi-currency wealth management, withdrawal oversight, and discreet executive service.",
-  domain: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  publicDomain: "https://continentallbank.com",
+  domain: process.env.NEXT_PUBLIC_SITE_URL ?? "https://continentallbank.com",
   contact: {
     privateClient: "private-clients@continental.example",
     support: "concierge@continental.example",

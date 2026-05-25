@@ -6,9 +6,12 @@ import {
   ArrowLeftRight,
   ArrowDownLeft,
   BarChart3,
+  Banknote,
   LifeBuoy,
   LogOut,
+  MessageSquare,
   ShieldCheck,
+  ShieldAlert,
   Users,
   LayoutDashboard,
   ScrollText,
@@ -23,12 +26,15 @@ import { cn, initials } from "@/lib/utils";
 const primaryItems = [
   { href: "/admin", label: "Operations", icon: LayoutDashboard },
   { href: "/admin/users", label: "Clients", icon: Users },
+  { href: "/admin/compliance", label: "Compliance", icon: ShieldAlert },
   { href: "/admin/withdrawals", label: "Withdrawals", icon: ArrowDownLeft },
+  { href: "/admin/beneficiaries", label: "Beneficiaries", icon: Banknote },
   { href: "/admin/refunds", label: "Refunds", icon: Undo2 },
   { href: "/admin/transactions", label: "Ledger", icon: ArrowLeftRight },
 ];
 
 const secondaryItems = [
+  { href: "/admin/messages", label: "Messages", icon: MessageSquare },
   { href: "/admin/support", label: "Support", icon: LifeBuoy },
   { href: "/admin/audit-logs", label: "Audit logs", icon: ScrollText },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
