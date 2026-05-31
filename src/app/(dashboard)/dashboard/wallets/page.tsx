@@ -62,21 +62,21 @@ export default async function WalletsPage() {
         }
       />
 
-      <TrustBadgeRail preset="dashboard" tone="dark" compact />
+      <TrustBadgeRail preset="dashboard" tone="light" compact />
 
       <section className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
         <MotionCard index={0} intensity="strong" className="overflow-hidden">
-          <div className="border-b border-champagne-200/[0.10] px-6 py-5 sm:px-7">
+          <div className="border-b border-[#E3D8C5] px-6 py-5 sm:px-7">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <div className="eyebrow text-champagne-300">Consolidated accounts</div>
-                <h2 className="mt-3 font-display text-2xl font-semibold text-ivory-100">
+                <div className="eyebrow text-champagne-700">Consolidated accounts</div>
+                <h2 className="mt-3 font-display text-2xl font-semibold text-foreground">
                   {formatCurrency(totalRelationship, BASE_CURRENCY, {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0,
                   })}
                 </h2>
-                <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-ivory-100/62">
+                <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
                   Reporting value across active currency ledgers, using the Continental base
                   conversion view.
                 </p>
@@ -86,7 +86,7 @@ export default async function WalletsPage() {
               </Badge>
             </div>
           </div>
-          <div className="grid gap-0 divide-y divide-ivory-100/[0.08] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <div className="grid gap-0 divide-y divide-[#E3D8C5] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
             <SummaryCell label="Available liquidity" value={formatCompact(totalAvailable)} accent />
             <SummaryCell label="Pending settlement" value={formatCompact(totalPending)} />
             <SummaryCell label="Lifetime outflow" value={formatCompact(totalWithdrawn)} />
@@ -211,12 +211,12 @@ export default async function WalletsPage() {
 function SummaryCell({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div className="px-6 py-4 sm:px-7">
-      <div className="text-[10px] uppercase tracking-[0.18em] text-ivory-100/45">{label}</div>
+      <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
       <div
         className={
           accent
-            ? "mt-2 text-lg font-semibold tabular-figures text-champagne-100"
-            : "mt-2 text-lg font-semibold tabular-figures text-ivory-100"
+            ? "mt-2 text-lg font-semibold tabular-figures text-champagne-700"
+            : "mt-2 text-lg font-semibold tabular-figures text-foreground"
         }
       >
         {value}

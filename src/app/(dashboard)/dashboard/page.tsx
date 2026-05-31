@@ -83,45 +83,45 @@ export default async function DashboardOverviewPage() {
         }
       />
 
-      <TrustBadgeRail preset="dashboard" tone="dark" compact />
+      <TrustBadgeRail preset="dashboard" tone="light" compact />
 
-      <ActivityTicker preset="client" tone="dark" label="Continental activity" compact />
+      <ActivityTicker preset="client" tone="light" label="Continental activity" compact />
 
       <section className="grid gap-5 xl:grid-cols-[1.45fr_0.75fr]">
         <MotionCard
           index={0}
           intensity="strong"
-          className="overflow-hidden border border-champagne-200/[0.10]"
+          className="overflow-hidden border border-[#E3D8C5]"
         >
-          <div className="border-b border-champagne-200/[0.10] px-6 py-5 sm:px-8">
+          <div className="border-b border-[#E3D8C5] px-6 py-5 sm:px-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <div className="eyebrow text-champagne-300">Consolidated relationship</div>
+                <div className="eyebrow text-champagne-700">Consolidated relationship</div>
                 <div className="mt-3 flex flex-wrap items-center gap-3">
-                  <h2 className="font-display text-2xl font-semibold text-ivory-100">
+                  <h2 className="font-display text-2xl font-semibold text-foreground">
                     {user.profile.full_name}
                   </h2>
-                  <Badge variant="gold" className="border-champagne-400/30 bg-champagne-500/10 text-champagne-200">
+                  <Badge variant="gold">
                     {ACCOUNT_STATUS[user.profile.account_status]}
                   </Badge>
                 </div>
-                <div className="mt-1 text-[12px] uppercase tracking-[0.18em] text-ivory-100/55 tabular-figures">
+                <div className="mt-1 text-[12px] uppercase tracking-[0.18em] text-muted-foreground tabular-figures">
                   {formatAccountNumber(user.profile.account_number)}
                 </div>
               </div>
-              <div className="rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.055] px-4 py-3">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-ivory-100/50">Mandate</div>
-                <div className="mt-1 text-[13px] font-medium text-ivory-100">Global treasury reserve</div>
+              <div className="rounded-md border border-[#E3D8C5] bg-ivory-50 px-4 py-3">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Mandate</div>
+                <div className="mt-1 text-[13px] font-medium text-foreground">Global treasury reserve</div>
               </div>
             </div>
           </div>
 
           <div className="grid gap-8 px-6 py-7 sm:px-8 lg:grid-cols-[1fr_0.85fr]">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.22em] text-ivory-100/55">
+              <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
                 Total portfolio value · {BASE_CURRENCY}
               </div>
-              <div className="mt-2 font-display text-[clamp(2.5rem,5vw,4.75rem)] leading-none text-ivory-100 tabular-figures">
+              <div className="mt-2 font-display text-[clamp(2.5rem,5vw,4.75rem)] leading-none text-foreground tabular-figures">
                 {formatCurrency(totalPortfolio, BASE_CURRENCY, {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
@@ -134,15 +134,15 @@ export default async function DashboardOverviewPage() {
               </div>
             </div>
 
-            <div className="rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.055] p-4">
+            <div className="rounded-md border border-[#E3D8C5] bg-ivory-50 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="eyebrow text-champagne-300">Currency allocation</div>
-                  <p className="mt-2 text-[12px] text-ivory-100/55">
+                  <div className="eyebrow text-champagne-700">Currency allocation</div>
+                  <p className="mt-2 text-[12px] text-muted-foreground">
                     Base converted for consolidated reporting.
                   </p>
                 </div>
-                <PieChart className="h-4 w-4 text-champagne-300" />
+                <PieChart className="h-4 w-4 text-champagne-700" />
               </div>
               <div className="mt-5 space-y-4">
                 {allocations.map((item) => (
@@ -385,9 +385,9 @@ function HeroMetric({
   tone?: "neutral" | "positive";
 }) {
   return (
-    <div className="rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.05] p-3">
-      <div className="text-[10px] uppercase tracking-[0.18em] text-ivory-100/45">{label}</div>
-      <div className={tone === "positive" ? "mt-1.5 text-[14px] font-semibold tabular-figures text-champagne-100" : "mt-1.5 text-[14px] font-semibold tabular-figures text-ivory-100"}>
+    <div className="rounded-md border border-[#E3D8C5] bg-white p-3">
+      <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
+      <div className={tone === "positive" ? "mt-1.5 text-[14px] font-semibold tabular-figures text-champagne-700" : "mt-1.5 text-[14px] font-semibold tabular-figures text-foreground"}>
         {value}
       </div>
     </div>
@@ -406,12 +406,12 @@ function AllocationRow({
   return (
     <div>
       <div className="flex items-center justify-between gap-4 text-[12px]">
-        <span className="text-ivory-100/70">{label}</span>
-        <span className="font-medium tabular-figures text-ivory-100">{value}</span>
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-medium tabular-figures text-foreground">{value}</span>
       </div>
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ivory-100/10">
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-foreground/[0.09]">
         <div
-          className="h-full rounded-full bg-champagne-400"
+          className="h-full rounded-full bg-champagne-600"
           style={{ width: `${Math.max(4, Math.min(100, percent))}%` }}
         />
       </div>

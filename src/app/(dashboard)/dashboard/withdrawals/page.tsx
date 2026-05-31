@@ -33,9 +33,9 @@ export default async function WithdrawalsPage({
         description="Submit a withdrawal request. Your banker will review and confirm settlement personally."
       />
 
-      <TrustBadgeRail preset="withdrawals" tone="dark" compact className="xl:grid-cols-3" />
+      <TrustBadgeRail preset="withdrawals" tone="light" compact className="xl:grid-cols-3" />
 
-      <ActivityTicker preset="withdrawals" tone="dark" label="Settlement activity" compact />
+      <ActivityTicker preset="withdrawals" tone="light" label="Settlement activity" compact />
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr] xl:grid-cols-[1.2fr_1fr]">
         <div className="glass-card p-6 lg:p-8">

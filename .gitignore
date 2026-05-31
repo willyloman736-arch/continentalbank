@@ -41,7 +41,10 @@ yarn-error.log*
 # editor
 .vscode/
 .idea/
+.vs/
 
 # local AI tooling
 .claude/
 
+# unrelated local workspaces
+crown-puppy-headless/

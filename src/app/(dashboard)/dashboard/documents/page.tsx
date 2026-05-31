@@ -53,7 +53,7 @@ export default async function DocumentsPage({
         description="Every document the bank has issued in your name. Open to preview; download a print-ready PDF directly from your browser."
       />
 
-      <TrustBadgeRail preset="documents" tone="dark" compact className="xl:grid-cols-3" />
+      <TrustBadgeRail preset="documents" tone="light" compact className="xl:grid-cols-3" />
 
       {/* Filter chips */}
       <div className="flex flex-wrap items-center gap-2">

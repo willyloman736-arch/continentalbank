@@ -68,13 +68,13 @@ export default async function OnboardingPage() {
             <Badge variant="gold" className="mb-4">
               <ShieldCheck className="mr-1.5 h-3 w-3" /> Activation checklist
             </Badge>
-            <h2 className="font-display text-3xl font-semibold text-ivory-100">
+            <h2 className="font-display text-3xl font-semibold text-foreground">
               {user.profile.full_name}
             </h2>
-            <div className="mt-2 text-[12px] uppercase tracking-[0.18em] text-ivory-100/55 tabular-figures">
+            <div className="mt-2 text-[12px] uppercase tracking-[0.18em] text-muted-foreground tabular-figures">
               {formatAccountNumber(user.profile.account_number)}
             </div>
-            <p className="mt-5 max-w-xl text-[13px] leading-relaxed text-ivory-100/62">
+            <p className="mt-5 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
               Your account reference is active for the build environment. The next important step is KYC submission so an admin can approve your profile from the dashboard.
             </p>
           </div>
@@ -120,15 +120,15 @@ function StepCard({
   done: boolean;
 }) {
   return (
-    <div className="rounded-md border border-ivory-100/[0.08] bg-ivory-100/[0.055] p-4">
+    <div className="rounded-md border border-[#E3D8C5] bg-ivory-50 p-4">
       <div className="flex items-center justify-between gap-3">
-        <Icon className={done ? "h-4 w-4 text-success" : "h-4 w-4 text-champagne-300"} />
+        <Icon className={done ? "h-4 w-4 text-success" : "h-4 w-4 text-champagne-700"} />
         <span className={done ? "h-2 w-2 rounded-full bg-success" : "h-2 w-2 rounded-full bg-champagne-400/70"} />
       </div>
-      <div className="mt-4 text-[10.5px] uppercase tracking-[0.18em] text-ivory-100/45">
+      <div className="mt-4 text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground">
         {label}
       </div>
-      <div className="mt-1.5 text-[13px] font-medium text-ivory-100">{value}</div>
+      <div className="mt-1.5 text-[13px] font-medium text-foreground">{value}</div>
     </div>
   );
 }

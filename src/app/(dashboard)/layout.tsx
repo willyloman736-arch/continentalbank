@@ -29,7 +29,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div
-      className="client-comfort relative min-h-screen bg-background text-foreground dark"
+      className="client-comfort relative min-h-screen bg-background text-foreground"
       data-frozen={isFrozen ? "true" : undefined}
     >
       <div
@@ -37,7 +37,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
           background:
-            "linear-gradient(180deg, #1A242E 0%, #151D26 46%, #10161D 100%)",
+            "linear-gradient(180deg, #F6F1E8 0%, #FBF8F1 42%, #F4ECDC 100%)",
         }}
       />
 

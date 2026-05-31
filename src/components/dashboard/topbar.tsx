@@ -29,7 +29,7 @@ type Props = {
 
 export function DashboardTopbar({ fullName, email, accountNumber, locale, notifications }: Props) {
   return (
-    <header className="sticky top-[65px] z-30 border-b border-champagne-200/[0.10] bg-[#17212B]/74 shadow-[0_16px_36px_-34px_rgba(0,0,0,0.78)] backdrop-blur-xl lg:top-0">
+    <header className="sticky top-[65px] z-30 border-b border-champagne-200/[0.12] bg-[#0E1A24]/94 shadow-[0_16px_36px_-34px_rgba(0,0,0,0.78)] backdrop-blur-xl lg:top-0">
       <div className="flex min-h-16 items-center justify-between gap-4 px-4 py-3 lg:px-8">
         <div className="hidden min-w-[220px] md:block">
           <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-champagne-300">

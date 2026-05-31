@@ -61,7 +61,7 @@ export function BottomPill({ variant = "client" }: { variant?: "client" | "admin
 
   return (
     <div className="pointer-events-none fixed bottom-3 left-0 right-0 z-30 px-3">
-      <div className="pointer-events-auto mx-auto flex w-fit max-w-[min(1040px,calc(100vw-1.5rem))] items-center gap-0.5 overflow-x-auto rounded-full border border-ivory-100/[0.10] bg-[#17212B]/88 p-1.5 shadow-[0_18px_46px_-34px_rgba(0,0,0,0.86)] backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="pointer-events-auto mx-auto flex w-fit max-w-[min(1040px,calc(100vw-1.5rem))] items-center gap-0.5 overflow-x-auto rounded-full border border-ivory-100/[0.10] bg-[#0E1A24]/92 p-1.5 shadow-[0_18px_46px_-34px_rgba(0,0,0,0.86)] backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {items.map((item) => {
           const Icon = item.icon as LucideIcon;
           const active =

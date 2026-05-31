@@ -22,7 +22,7 @@ export default async function SecurityPage() {
         description="Manage your password and review recent access to your private portal."
       />
 
-      <TrustBadgeRail preset="security" tone="dark" compact />
+      <TrustBadgeRail preset="security" tone="light" compact />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
         <div className="glass-card p-6 lg:p-8 h-fit">

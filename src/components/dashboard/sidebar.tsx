@@ -66,7 +66,7 @@ export function DashboardSidebar({
 
   return (
     <>
-      <aside className="hidden h-screen w-[282px] shrink-0 flex-col border-r border-champagne-200/[0.10] bg-[#17212B]/92 shadow-[18px_0_46px_-40px_rgba(0,0,0,0.82)] backdrop-blur-xl lg:sticky lg:top-0 lg:flex">
+      <aside className="hidden h-screen w-[282px] shrink-0 flex-col border-r border-champagne-200/[0.10] bg-[#0E1A24]/95 shadow-[18px_0_46px_-40px_rgba(0,0,0,0.82)] backdrop-blur-xl lg:sticky lg:top-0 lg:flex">
         <div className="border-b border-champagne-200/[0.10] px-6 py-7">
           <Link href="/" className="focus-ring inline-block rounded-sm">
             <BrandMark variant="light" />
@@ -132,7 +132,7 @@ export function DashboardSidebar({
         </div>
       </aside>
 
-      <nav className="sticky top-0 z-40 border-b border-champagne-200/[0.10] bg-[#17212B]/94 px-3 py-3 shadow-[0_14px_34px_-28px_rgba(0,0,0,0.78)] backdrop-blur-xl lg:hidden">
+      <nav className="sticky top-0 z-40 border-b border-champagne-200/[0.10] bg-[#0E1A24]/96 px-3 py-3 shadow-[0_14px_34px_-28px_rgba(0,0,0,0.78)] backdrop-blur-xl lg:hidden">
         <div className="flex items-center gap-3">
           <Link href="/" className="focus-ring shrink-0 rounded-sm">
             <BrandMark variant="light" withWordmark={false} />
